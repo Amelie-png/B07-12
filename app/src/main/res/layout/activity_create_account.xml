@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="80dp">
+    android:padding="70dp">
 
     <TextView
         android:id="@+id/header"
@@ -18,23 +18,63 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <Spinner
+        android:id="@+id/spinnerRoles"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/header" />
+
+    <EditText
+        android:id="@+id/signUpFirst"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:autofillHints="name"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:hint="@string/first_name_field"
+        app:layout_constraintEnd_toStartOf="@+id/signUpLast"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintWidth_percent="0.5"
+        app:layout_constraintTop_toBottomOf="@+id/spinnerRoles" />
+
+    <EditText
+        android:id="@+id/signUpLast"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="0dp"
+        android:autofillHints="name"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:hint="@string/last_name_field"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/signUpFirst"
+        app:layout_constraintWidth_percent="0.5"
+        app:layout_constraintTop_toTopOf="@+id/signUpFirst" />
+
     <EditText
         android:id="@+id/signUpEmail"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="16dp"
+        android:autofillHints="emailAddress"
         android:ems="10"
         android:inputType="textEmailAddress"
         android:hint="@string/email_field"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/header" />
+        app:layout_constraintTop_toBottomOf="@+id/signUpFirst" />
 
     <EditText
         android:id="@+id/signUpPassword"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:autofillHints="password"
         android:ems="10"
         android:inputType="textPassword"
         android:hint="@string/password_field"
@@ -47,6 +87,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:importantForAutofill="no"
         android:ems="10"
         android:inputType="textPassword"
         android:hint="@string/confirm_password"
@@ -63,8 +104,8 @@
         android:text="@string/sign_in"
         android:textColor="#550085"
         android:backgroundTint="#CBB4FF"
-        app:layout_constraintEnd_toEndOf="@+id/spinnerRoles"
-        app:layout_constraintTop_toBottomOf="@+id/spinnerRoles" />
+        app:layout_constraintEnd_toEndOf="@+id/signUpConfirmPassword"
+        app:layout_constraintTop_toBottomOf="@+id/signUpConfirmPassword" />
 
     <Button
         android:id="@+id/button2"
@@ -72,15 +113,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:text="@string/sign_up"
-        app:layout_constraintStart_toStartOf="@+id/spinnerRoles"
-        app:layout_constraintTop_toBottomOf="@+id/spinnerRoles" />
-
-    <Spinner
-        android:id="@+id/spinnerRoles"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/signUpConfirmPassword"
         app:layout_constraintTop_toBottomOf="@+id/signUpConfirmPassword" />
 </androidx.constraintlayout.widget.ConstraintLayout>
