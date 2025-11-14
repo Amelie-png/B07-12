@@ -1,3 +1,22 @@
 <resources>
+    <!-- General App -->
     <string name="app_name">Demo App</string>
+    <string name="email_field">Email</string>
+    <string name="password_field">Password</string>
+    <string name="first_name_field">First Name</string>
+    <string name="last_name_field">Last Name</string>
+
+    <!-- Sign in page -->
+    <string name="sign_in">Sign in</string>
+
+    <!-- Create account page -->
+    <string name="create_account_title">Create your account</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="sign_up">Sign up</string>
+    <string name="account_type">Account Type</string>
+    <string-array name="role_items">
+        <item>Select account type…</item>
+        <item>Parent</item>
+        <item>Provider</item>
+    </string-array>
 </resources>
