@@ -29,7 +29,7 @@
         android:id="@+id/email_username"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="Email"
+        android:hint="Email/Username"
         android:inputType="textEmailAddress"
         android:padding="12dp"
         android:textSize="20sp"
