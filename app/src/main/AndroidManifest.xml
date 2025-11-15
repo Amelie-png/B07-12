@@ -12,14 +12,20 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DemoApp">
         <activity
+            android:name=".ProviderPatientScreen"
+            android:exported="false" />
+        <activity
+            android:name=".ProviderHomeScreen"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity android:name=".SignInActivity" />
         <activity android:name=".SelectRoleActivity" />
     </application>
