@@ -1,6 +1,9 @@
 <resources>
     <!-- General App -->
     <string name="app_name">Demo App</string>
+    <string name="navigation_bar_title">Navigation Bar</string>
+    <string name="sign_out">Sign Out</string>
+</resources>
     <string name="email_field">Email</string>
     <string name="password_field">Password</string>
     <string name="first_name_field">First Name</string>
