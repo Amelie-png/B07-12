@@ -19,4 +19,30 @@
         <item>Parent</item>
         <item>Provider</item>
     </string-array>
+  
+  
+      <string name="child_popup_message">
+Smart Air helps you take care of your asthma.\n
+You’ll learn the difference between your two medicines:\n
+- Rescue inhaler – for quick relief when you feel symptoms.\n
+- Controller inhaler – use it every day to keep your lungs calm.\n\n
+Your information is private — only you and your parent can see it.\n
+If your parent chooses, they can share a summary with your doctor.
+</string>
+
+    <string name="parent_popup_message">
+Smart Air helps your child track asthma symptoms, medicine use, and inhaler technique.\n
+You can link all your children and view their progress in one place.\n
+You control what’s shared:\n
+- By default, nothing is shared with a provider.\n
+- You can enable or disable sharing at any time for each data type (rescue logs, symptoms, triggers, etc.).\n
+- To give a provider access, send a one-time invite code or export a report — both can be revoked anytime.
+</string>
+
+    <string name="provider_popup_message">
+Smart Air lets you view parent-approved summaries of a child’s asthma progress.\n
+- You’ll see only the information the parent chooses to share, such as logs, trends, or triage reports.\n
+- You have read-only access — no data can be edited or added.\n
+- Parents can update or revoke your access in real time.
+</string>
 </resources>
