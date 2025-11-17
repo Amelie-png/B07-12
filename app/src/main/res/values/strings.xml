@@ -3,11 +3,11 @@
     <string name="app_name">Demo App</string>
     <string name="navigation_bar_title">Navigation Bar</string>
     <string name="sign_out">Sign Out</string>
-</resources>
     <string name="email_field">Email</string>
     <string name="password_field">Password</string>
     <string name="first_name_field">First Name</string>
     <string name="last_name_field">Last Name</string>
+    <string name="username_field">Username</string>
 
     <!-- Sign in page -->
     <string name="sign_in">Sign in</string>
@@ -17,6 +17,7 @@
     <string name="confirm_password">Confirm password</string>
     <string name="sign_up">Sign up</string>
     <string name="account_type">Account Type</string>
+    <string name="sign_in_link">Already have an account? Sign in</string>
     <string-array name="role_items">
         <item>Select account type…</item>
         <item>Parent</item>
