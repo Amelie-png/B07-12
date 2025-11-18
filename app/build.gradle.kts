@@ -62,4 +62,10 @@ dependencies {
 
     //For CardView Widget
     implementation("androidx.cardview:cardview:1.0.0")
+
+    //For Line graph
+    implementation("com.jjoe64:graphview:4.2.2")
+
+    //For Calendar
+    implementation("com.kizitonwose.calendar:view:2.0.4")
 }
