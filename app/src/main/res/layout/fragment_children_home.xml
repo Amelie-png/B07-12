@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    =
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="top"
+        android:padding="16dp"
+        >
+
+
+        <!-- TITLE 1: Emergency Section   -->
+        <TextView
+            android:id="@+id/titleEmergency"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Emergency Check:"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:paddingBottom="8dp" />
+
+
+        <!-- CARD 1 : Emergency Section    -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardEmergency"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardBackgroundColor="#D32F2F"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="6dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:id="@+id/emergencyText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="6dp"
+                    android:text="Having Trouble Breathing?"
+                    android:textColor="@android:color/white"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+
+                <!-- DATE BELOW TITLE -->
+
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+
+        <!-- CARD 3 : Today's Zone Section   -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardZone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="6dp"
+            android:layout_marginBottom="20dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:gravity="center_horizontal">
+
+                <!-- Title -->
+                <TextView
+                    android:id="@+id/zoneTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Today's Zone"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:paddingBottom="8dp"
+                    android:gravity="start"/>
+
+
+                <!-- BEFORE PEF ENTERED -->
+                <LinearLayout
+                    android:id="@+id/layoutNoPEF"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:visibility="gone"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="No PEF logged today"
+                        android:textSize="16sp"
+                        android:paddingBottom="12dp"/>
+
+                    <Button
+                        android:id="@+id/btnAddPEF"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Add PEF" />
+
+
+                </LinearLayout>
+
+
+                <!-- AFTER PEF ENTERED -->
+                <LinearLayout
+                    android:id="@+id/layoutHasPEF"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical"
+                    android:visibility="visible">
+
+                    <!-- Zone Bar -->
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:id="@+id/pefBar"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/zone_bar"
+                            android:adjustViewBounds="true" />
+
+                        <View
+                            android:id="@+id/pefIndicator"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:background="@drawable/indicator_dot"
+                            android:layout_marginTop="10dp"
+                            android:translationX="150dp" />
+                    </FrameLayout>
+
+                    <!-- PEF % text -->
+
+                    <TextView
+                        android:id="@+id/textZonePercent"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingBottom="10dp"
+                        android:text="65%"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <!-- Edit PEF -->
+                    <Button
+                        android:id="@+id/btnEditPEF"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Edit PEF" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+
+
+
+        <!-- TITLE 3: Medication Log      -->
+        <TextView
+            android:id="@+id/titleMedication"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Your Medications:"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:paddingBottom="8dp"/>
+
+
+        <!-- CARD 3 : Medication Log        -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardMedication"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="6dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+
+                <!-- CASE: No Medications Added -->
+                <LinearLayout
+                    android:id="@+id/layoutNoMeds"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="visible"
+                    android:gravity="center_horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="No Medications Added Yet"
+                        android:textSize="18sp"
+                        android:paddingBottom="10dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/add_medication_message"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/darker_gray"
+
+                        android:paddingBottom="10dp"/>
+
+
+
+                </LinearLayout>
+
+
+                <!-- CASE: Medications Exist -->
+                <LinearLayout
+                    android:id="@+id/layoutMedList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+
+                </LinearLayout>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+
+
+
+    </LinearLayout>
+
+</ScrollView>

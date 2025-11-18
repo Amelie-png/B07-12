@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="24dp">
+
+    <!-- Main container for the popup card -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/checkinPopupRoot"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Card look for the popup -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardCheckin"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="8dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <LinearLayout
+                android:id="@+id/layoutCardContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Title -->
+                <TextView
+                    android:id="@+id/txtTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Medicine Check-In"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="#333333"
+                    android:gravity="center"
+                    android:paddingBottom="12dp" />
+
+                <!-- ================= PRE-CHECK SECTION ================= -->
+                <TextView
+                    android:id="@+id/txtPreHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Before your medicine"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#444444"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp" />
+
+                <!-- Q1: How do you feel (Better / Same / Worse) -->
+                <TextView
+                    android:id="@+id/txtPreFeelQuestion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="How do you feel right now?"
+                    android:textSize="14sp"
+                    android:textColor="#444444"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp" />
+
+                <RadioGroup
+                    android:id="@+id/radioGroupPreFeel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <RadioButton
+                        android:id="@+id/radioPreBetter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Better" />
+
+                    <RadioButton
+                        android:id="@+id/radioPreSame"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Same" />
+
+                    <RadioButton
+                        android:id="@+id/radioPreWorse"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Worse" />
+                </RadioGroup>
+
+                <!-- Q2: Shortness of breath rating (0–3 or 0–5) -->
+                <TextView
+                    android:id="@+id/txtPreBreathQuestion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="How hard is it to breathe?"
+                    android:textSize="14sp"
+                    android:textColor="#444444"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="4dp" />
+
+                <SeekBar
+                    android:id="@+id/seekPreBreath"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:max="5" />
+
+                <TextView
+                    android:id="@+id/txtPreBreathLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="0 = no trouble, 5 = very hard to breathe"
+                    android:textSize="12sp"
+                    android:textColor="#666666"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="8dp" />
+
+                <!-- Divider between pre and post -->
+                <View
+                    android:id="@+id/dividerPrePost"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#DDDDDD"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp" />
+
+                <!-- Button: child presses this after actually taking the medicine -->
+                <Button
+                    android:id="@+id/btnTakenMedicine"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="I have taken my medicine"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp" />
+
+                <!-- ================= POST-CHECK SECTION ================= -->
+                <!-- You can start this as GONE in code and show after they tap the button -->
+
+                <LinearLayout
+                    android:id="@+id/layoutPostSection"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingTop="12dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/txtPostHeader"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="After your medicine"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="#444444"
+                        android:paddingBottom="4dp" />
+
+                    <!-- Post Q1: Feeling now -->
+                    <TextView
+                        android:id="@+id/txtPostFeelQuestion"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="How do you feel now?"
+                        android:textSize="14sp"
+                        android:textColor="#444444"
+                        android:paddingTop="4dp"
+                        android:paddingBottom="4dp" />
+
+                    <RadioGroup
+                        android:id="@+id/radioGroupPostFeel"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <RadioButton
+                            android:id="@+id/radioPostBetter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Better" />
+
+                        <RadioButton
+                            android:id="@+id/radioPostSame"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Same" />
+
+                        <RadioButton
+                            android:id="@+id/radioPostWorse"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Worse" />
+                    </RadioGroup>
+
+                    <!-- Post Q2: Shortness of breath -->
+                    <TextView
+                        android:id="@+id/txtPostBreathQuestion"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="How hard is it to breathe now?"
+                        android:textSize="14sp"
+                        android:textColor="#444444"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="4dp" />
+
+                    <SeekBar
+                        android:id="@+id/seekPostBreath"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:max="5" />
+
+                    <TextView
+                        android:id="@+id/txtPostBreathLabel"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="0 = no trouble, 5 = very hard to breathe"
+                        android:textSize="12sp"
+                        android:textColor="#666666"
+                        android:paddingTop="2dp"
+                        android:paddingBottom="8dp" />
+
+                    <!-- Final save button -->
+                    <Button
+                        android:id="@+id/btnSaveCheckin"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Save Check-In"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>
