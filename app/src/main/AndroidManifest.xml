@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DemoApp">
         <activity
+            android:name=".CardViewHomeScreen"
+            android:exported="false" />
+        <activity
             android:name=".ProviderPatientScreen"
             android:exported="false" />
         <activity
