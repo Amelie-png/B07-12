@@ -10,10 +10,10 @@ import android.view.ViewGroup;
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link fragment_pre_post_check_dialog#newInstance} factory method to
+ * Use the {@link PrePostCheckDialogFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class fragment_pre_post_check_dialog extends Fragment {
+public class PrePostCheckDialogFragment extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -24,7 +24,7 @@ public class fragment_pre_post_check_dialog extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    public fragment_pre_post_check_dialog() {
+    public PrePostCheckDialogFragment() {
         // Required empty public constructor
     }
 
@@ -37,8 +37,8 @@ public class fragment_pre_post_check_dialog extends Fragment {
      * @return A new instance of fragment fragment_pre_post_check_dialog.
      */
     // TODO: Rename and change types and number of parameters
-    public static fragment_pre_post_check_dialog newInstance(String param1, String param2) {
-        fragment_pre_post_check_dialog fragment = new fragment_pre_post_check_dialog();
+    public static PrePostCheckDialogFragment newInstance(String param1, String param2) {
+        PrePostCheckDialogFragment fragment = new PrePostCheckDialogFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
