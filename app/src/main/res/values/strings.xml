@@ -2,4 +2,9 @@
     <string name="app_name">Demo App</string>
     <string name="navigation_bar_title">Navigation Bar</string>
     <string name="sign_out">Sign Out</string>
+    <string name="home">Home</string>
+    <string name="symptom">Symptom</string>
+    <string name="badge">Badge</string>
+    <string name="profile">Profile</string>
+
 </resources>
