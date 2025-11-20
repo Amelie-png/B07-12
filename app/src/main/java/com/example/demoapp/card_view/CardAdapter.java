@@ -18,13 +18,13 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder
     public class CardViewHolder extends RecyclerView.ViewHolder {
         TextView name;
         ImageView profilePic;
-        ImageView profileBackgroud;
+        ImageView profileBackground;
 
         public CardViewHolder(@NonNull View itemView) {
             super(itemView);
             name = itemView.findViewById(R.id.card_view_patient_name);
             profilePic = itemView.findViewById(R.id.card_view_patient_profile_pic);
-            profileBackgroud = itemView.findViewById(R.id.cardview_patient_background);
+            profileBackground = itemView.findViewById(R.id.cardview_patient_background);
         }
     }
     private ArrayList<CardItem> list;
@@ -46,7 +46,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder
         CardItem item = list.get(position);
         holder.name.setText(item.name);
         holder.profilePic.setImageResource(item.profilePic);
-        holder.profileBackgroud.setImageResource(item.profileBackground);
+        holder.profileBackground.setImageResource(item.profileBackground);
 
         // Handle click
         holder.itemView.setOnClickListener(v -> {
