@@ -51,12 +51,11 @@ Smart Air lets you view parent-approved summaries of a child’s asthma progress
 </string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-  
-  <string name="add_medication_message">
+
+    <string name="add_medication_message">
     Please add your medications to track usages\n
     through your parent.
     </string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 </resources>
 
