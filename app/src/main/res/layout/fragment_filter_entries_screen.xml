@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- DATE RANGE -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select Date Range"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/startDateLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Start Date">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/startDateEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:focusable="false"
+                android:clickable="true"
+                android:cursorVisible="false"
+                android:inputType="none"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/endDateLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="End Date">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/endDateEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:focusable="false"
+                android:clickable="true"
+                android:cursorVisible="false"
+                android:inputType="none"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <!-- SYMPTOMS -->
+        <Button
+            android:id="@+id/filter_by_symptoms_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Filter by Symptoms"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            />
+
+        <!--TODO: check if we can use ChipGroup-->
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipGroupSymptoms"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checkable="true"
+            app:checkedIconVisible="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_symptom_cough"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cough"
+                app:chipBackgroundColor="@color/chip_color_selector"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_symptom_wheezing"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Wheezing"
+                app:chipBackgroundColor="@color/chip_color_selector"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_symptom_shortness_of_breath"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Shortness of Breath"
+                app:chipBackgroundColor="@color/chip_color_selector"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_symptom_chest_tightness"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Chest Tightness"
+                app:chipBackgroundColor="@color/chip_color_selector"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_symptom_difficulty_breathing"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Difficulty Breathing"
+                app:chipBackgroundColor="@color/chip_color_selector"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_symptom_rapid_breathing"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Rapid Breathing"
+                app:chipBackgroundColor="@color/chip_color_selector"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_symptom_fatigue"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Fatigue"
+                app:chipBackgroundColor="@color/chip_color_selector"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_symptom_lightheadedness"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Lightheadedness"
+                app:chipBackgroundColor="@color/chip_color_selector"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_symptom_throat_irritation"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Throat Irritation"
+                app:chipBackgroundColor="@color/chip_color_selector"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_symptom_chest_discomfort"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Chest Discomfort"
+                app:chipBackgroundColor="@color/chip_color_selector"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_symptom_nasal_congestion"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nasal Congestion"
+                app:chipBackgroundColor="@color/chip_color_selector"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_symptom_runny_nose"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Runny Nose"
+                app:chipBackgroundColor="@color/chip_color_selector"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_symptom_sneezing"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sneezing"
+                app:chipBackgroundColor="@color/chip_color_selector"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_symptom_itchy_eyes"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Itchy Eyes"
+                app:chipBackgroundColor="@color/chip_color_selector"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_symptom_sore_throat"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sore Throat"
+                app:chipBackgroundColor="@color/chip_color_selector"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_symptom_headache"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Headache"
+                app:chipBackgroundColor="@color/chip_color_selector"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_symptom_trouble_sleeping"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Trouble Sleeping"
+                app:chipBackgroundColor="@color/chip_color_selector"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_symptom_reduced_exercise_tolerance"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Reduced Exercise Tolerance"
+                app:chipBackgroundColor="@color/chip_color_selector"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_symptom_increased_mucus"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Increased Mucus"
+                app:chipBackgroundColor="@color/chip_color_selector"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_symptom_other"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Other"
+                app:chipBackgroundColor="@color/chip_color_selector"/>
+
+        </com.google.android.material.chip.ChipGroup>
+
+        <!-- TRIGGERS -->
+        <Button
+            android:id="@+id/filter_by_trigger_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Filter by Triggers"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"/>
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipGroupTriggers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checkable="true"
+            app:checkedIconVisible="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_trigger_dust_mites"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Dust Mites"
+                app:checkedIconVisible="true"
+                app:chipBackgroundColor="@color/chip_color_selector"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_trigger_pets"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pets"
+                app:chipBackgroundColor="@color/chip_color_selector"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_trigger_smoke"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Smoke"
+                app:chipBackgroundColor="@color/chip_color_selector"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_trigger_perfumes"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Strong Odors / Perfumes"
+                app:chipBackgroundColor="@color/chip_color_selector"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_trigger_cold_air"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cold Air"
+                app:chipBackgroundColor="@color/chip_color_selector"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_trigger_illness"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Illness"
+                app:chipBackgroundColor="@color/chip_color_selector"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_trigger_exercise"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Exercise"
+                app:chipBackgroundColor="@color/chip_color_selector"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_trigger_other"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Other"
+                app:chipBackgroundColor="@color/chip_color_selector"/>
+
+        </com.google.android.material.chip.ChipGroup>
+
+
+        <Button
+            android:id="@+id/btnApplyFilter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Apply Filter"
+            android:layout_marginTop="24dp"/>
+
+        <!--FILTERED ENTRIES-->
+        <LinearLayout
+            android:id="@+id/filtered_entry_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="16dp">
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>
