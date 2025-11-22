@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.demoapp">
-
 
     <application
         android:allowBackup="true"
@@ -10,33 +8,32 @@
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Base.Theme.DemoApp">
         android:theme="@style/Theme.DemoApp">
+
+        <!-- ParentActivity 作为启动页 -->
         <activity
-            android:name=".PasswordRecoveryActivity"
-            android:exported="false" />
-        <activity
-            android:name=".MainActivity"
+            android:name=".ParentActivity"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".NavigationActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+        <!-- 其他 Activity -->
+        <activity android:name=".PasswordRecoveryActivity"
+            android:exported="false"/>
+        <activity android:name=".NavigationActivity"
+            android:exported="true"/>
+        <activity android:name=".CreateAccountActivity"
+            android:exported="false"/>
+        <activity android:name=".SignInActivity"
+            android:exported="false"/>
+        <activity android:name=".SelectRoleActivity"
+            android:exported="false"/>
+        <activity android:name=".HomeScreenActivity"
+            android:exported="false"/>
 
-        <activity android:name=".CreateAccountActivity" />
-        <activity android:name=".SignInActivity" />
-        <activity android:name=".SelectRoleActivity" />
-      <activity android:name=".HomeScreenActivity" />
     </application>
 
 </manifest>
