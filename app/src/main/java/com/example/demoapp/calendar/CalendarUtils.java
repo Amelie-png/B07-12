@@ -32,21 +32,6 @@ public class CalendarUtils {
         return time.format(formatter);
     }
 
-    public static ArrayList<String> daysInWeekArray(LocalDate date) {
-        ArrayList<String> days = new ArrayList<>();
-
-        LocalDate current = sundayForDate(date);
-
-        if (current == null) return days;
-
-        for (int i = 0; i < 7; i++) {
-            days.add(String.valueOf(current.getDayOfMonth())); // Day number only
-            current = current.plusDays(1);
-        }
-
-        return days;
-    }
-
     public static ArrayList<String> daysInMonthArray(LocalDate date) {
         ArrayList<String> daysInMonth = new ArrayList<>();
 
@@ -67,30 +52,8 @@ public class CalendarUtils {
         return daysInMonth;
     }
 
-    public static ArrayList<String> dateArrayWithDayOfWeek(LocalDate date) {
-        ArrayList<String> days = new ArrayList<>();
-        LocalDate weekStart = date.with(DayOfWeek.SUNDAY);
-
-        for (int i = 0; i < 7; i++) {
-            LocalDate current = weekStart.plusDays(i);
-            String dayOfWeek = current.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.getDefault());
-            String dayOfMonth = String.valueOf(current.getDayOfMonth());
-            days.add(dayOfWeek + "\n" + dayOfMonth);
-        }
-
-        return days;
-    }
-
-    private static LocalDate sundayForDate(LocalDate date) {
-        LocalDate current = date;
-        while (current.getDayOfWeek() != DayOfWeek.SUNDAY) {
-            current = current.minusDays(1);
-        }
-        return current;
-    }
-
     public static void setDateHighlight(LocalDate currentDate, @NonNull CalendarViewHolder cell){
-        if (currentDate.equals(selectedDate)) {
+        if (selectedDate != null && currentDate.equals(selectedDate)) {
             cell.dayOfMonth.setBackgroundResource(R.drawable.calendar_today_highlight);
         } else{
             cell.dayOfMonth.setBackgroundResource(0);
