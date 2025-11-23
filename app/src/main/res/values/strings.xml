@@ -50,7 +50,6 @@ Smart Air lets you view parent-approved summaries of a child’s asthma progress
 - Parents can update or revoke your access in real time.
 </string>
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
   
   <string name="add_medication_message">
     Please add your medications to track usages\n
