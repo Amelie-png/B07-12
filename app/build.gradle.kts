@@ -68,26 +68,11 @@ dependencies {
     //for getting local time
     implementation("com.jakewharton.threetenabp:threetenabp:1.2.1")
 
+    //for chip
     implementation("com.google.android.material:material:1.12.0")
-    /*
+
     // For Line graph
     implementation("com.jjoe64:graphview:4.2.2") {
-        exclude group: 'com.android.support'
+        exclude(group = "com.android.support", module = "support-compat")
     }
-
-    // The view calendar library for Android
-    implementation("com.kizitonwose.calendar:view:2.9.0") {
-        exclude group: 'com.android.support'
-    }
-
-    // The compose calendar library for Android
-    implementation("com.kizitonwose.calendar:compose:2.9.0") {
-        exclude group: "com.android.support"
-    }
-
-    //global exclusion (extra safety)
-    configurations.all {
-        exclude group: 'com.android.support'
-    }*/
-
 }
