@@ -23,7 +23,8 @@
     <!-- 名字和生日 -->
     <LinearLayout
         android:orientation="vertical"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
+        android:layout_weight="1"
         android:layout_height="wrap_content">
 
         <TextView
@@ -41,7 +42,22 @@
             android:text="DOB: YYYY-MM-DD"
             android:textSize="14sp"
             android:layout_marginTop="4dp"/>
-
     </LinearLayout>
 
+    <!-- 编辑按钮 -->
+    <ImageView
+        android:id="@+id/iv_edit_child"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@android:drawable/ic_menu_edit"
+        android:contentDescription="Edit Child"
+        android:padding="4dp"/>
+
+    <ImageView
+        android:id="@+id/iv_delete_child"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="8dp"
+        android:contentDescription="Delete Child"
+        android:src="@android:drawable/ic_menu_delete"/>
 </LinearLayout>
