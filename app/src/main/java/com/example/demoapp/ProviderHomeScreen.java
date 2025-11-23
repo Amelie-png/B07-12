@@ -50,10 +50,10 @@ public class ProviderHomeScreen extends Fragment {
 
         // Sample data for testing
         cardList = new ArrayList<>();
-        cardList.add(new CardItem("A", R.drawable.profile_default_img, R.color.white));
-        cardList.add(new CardItem("B", R.drawable.profile_default_img, R.color.white));
-        cardList.add(new CardItem("C", R.drawable.profile_default_img, R.color.white));
-        cardList.add(new CardItem("D", R.drawable.profile_default_img, R.color.white));
+        cardList.add(new CardItem("A", R.drawable.profile_default_img, R.color.white, "", "", new ArrayList<String>()));
+        cardList.add(new CardItem("B", R.drawable.profile_default_img, R.color.white,"", "", new ArrayList<String>()));
+        cardList.add(new CardItem("C", R.drawable.profile_default_img, R.color.white, "", "", new ArrayList<String>()));
+        cardList.add(new CardItem("D", R.drawable.profile_default_img, R.color.white, "", "", new ArrayList<String>()));
 
         // Set adapter
         adapter = new CardAdapter(cardList);
