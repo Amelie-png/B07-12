@@ -1,0 +1,57 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="240dp"
+    android:height="240dp"
+    android:viewportWidth="240"
+    android:viewportHeight="240">
+
+    <!-- Glow Rays -->
+    <path
+        android:strokeColor="#FF0000FF"
+        android:strokeWidth="10"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M120,0 L120,30" />
+    <path
+        android:strokeColor="#FF0000FF"
+        android:strokeWidth="10"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M120,210 L120,240" />
+    <path
+        android:strokeColor="#FF0000FF"
+        android:strokeWidth="10"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M0,120 L30,120" />
+    <path
+        android:strokeColor="#FF0000FF"
+        android:strokeWidth="10"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M210,120 L240,120" />
+
+    <!-- Diagonal Rays -->
+    <path
+        android:strokeColor="#FF0000FF"
+        android:strokeWidth="10"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M40,40 L60,60" />
+    <path
+        android:strokeColor="#FF0000FF"
+        android:strokeWidth="10"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M180,180 L200,200" />
+    <path
+        android:strokeColor="#FF0000FF"
+        android:strokeWidth="10"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M180,60 L200,40" />
+    <path
+        android:strokeColor="#FF0000FF"
+        android:strokeWidth="10"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M40,200 L60,180" />
+
+    <!-- Hexagon -->
+    <path
+        android:strokeColor="#FF0000FF"
+        android:strokeWidth="12"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M120,30 L190,75 L190,160 L120,205 L50,160 L50,75 Z"/>
+</vector>
