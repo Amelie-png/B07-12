@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true">
 
-    =
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -60,112 +59,18 @@
 
         </androidx.cardview.widget.CardView>
 
-
-        <!-- CARD 3 : Today's Zone Section   -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardZone"
+        <FrameLayout
+            android:id="@+id/zoneFragmentContainer"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="6dp"
-            android:layout_marginBottom="20dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp"
-                android:gravity="center_horizontal">
-
-                <!-- Title -->
-                <TextView
-                    android:id="@+id/zoneTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Today's Zone"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:paddingBottom="8dp"
-                    android:gravity="start"/>
+            android:layout_height="200dp" />
 
 
-                <!-- BEFORE PEF ENTERED -->
-                <LinearLayout
-                    android:id="@+id/layoutNoPEF"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:visibility="gone"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="No PEF logged today"
-                        android:textSize="16sp"
-                        android:paddingBottom="12dp"/>
-
-                    <Button
-                        android:id="@+id/btnAddPEF"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Add PEF" />
 
 
-                </LinearLayout>
 
 
-                <!-- AFTER PEF ENTERED -->
-                <LinearLayout
-                    android:id="@+id/layoutHasPEF"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_horizontal"
-                    android:orientation="vertical"
-                    android:visibility="visible">
 
-                    <!-- Zone Bar -->
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
 
-                        <ImageView
-                            android:id="@+id/pefBar"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:src="@drawable/zone_bar"
-                            android:adjustViewBounds="true" />
-
-                        <View
-                            android:id="@+id/pefIndicator"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:background="@drawable/indicator_dot"
-                            android:layout_marginTop="10dp"
-                            android:translationX="150dp" />
-                    </FrameLayout>
-
-                    <!-- PEF % text -->
-
-                    <TextView
-                        android:id="@+id/textZonePercent"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingBottom="10dp"
-                        android:text="65%"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
-
-                    <!-- Edit PEF -->
-                    <Button
-                        android:id="@+id/btnEditPEF"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Edit PEF" />
-                </LinearLayout>
-
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
 
 
 
