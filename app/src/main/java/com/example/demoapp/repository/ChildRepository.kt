@@ -1,6 +1,5 @@
 package com.example.demoapp.repository
 
-import com.example.demoapp.models.Child
 import com.google.firebase.firestore.FirebaseFirestore
 
 class ChildRepository {

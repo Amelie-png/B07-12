@@ -52,4 +52,10 @@ Smart Air lets you view parent-approved summaries of a child’s asthma progress
 - You have read-only access — no data can be edited or added.\n
 - Parents can update or revoke your access in real time.
     </string>
+    <string name="sharing_settings">Sharing Settings</string>
+    <string name="share_symptoms">Share Symptoms</string>
+    <string name="share_medicines">Share Medicines</string>
+    <string name="share_pef">Share PEF</string>
+    <string name="share_triage">Share Triage</string>
+    <string name="save_settings">Save Settings</string>
 </resources>
