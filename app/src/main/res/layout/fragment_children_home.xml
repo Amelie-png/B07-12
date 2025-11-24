@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="top"
+        android:padding="16dp"
+        >
+
+
+        <!-- TITLE 1: Emergency Section   -->
+        <TextView
+            android:id="@+id/titleEmergency"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Emergency Check:"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:paddingBottom="8dp" />
+
+
+        <!-- CARD 1 : Emergency Section    -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardEmergency"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardBackgroundColor="#D32F2F"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="6dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:id="@+id/emergencyText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="6dp"
+                    android:text="Having Trouble Breathing?"
+                    android:textColor="@android:color/white"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+
+                <!-- DATE BELOW TITLE -->
+
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <FrameLayout
+            android:id="@+id/zoneFragmentContainer"
+            android:layout_width="match_parent"
+            android:layout_height="200dp" />
+
+
+
+
+
+
+
+
+
+
+
+
+        <!-- TITLE 3: Medication Log      -->
+        <TextView
+            android:id="@+id/titleMedication"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Your Medications:"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:paddingBottom="8dp"/>
+
+
+        <!-- CARD 3 : Medication Log        -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardMedication"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="6dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+
+                <!-- CASE: No Medications Added -->
+                <LinearLayout
+                    android:id="@+id/layoutNoMeds"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="visible"
+                    android:gravity="center_horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="No Medications Added Yet"
+                        android:textSize="18sp"
+                        android:paddingBottom="10dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/add_medication_message"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/darker_gray"
+
+                        android:paddingBottom="10dp"/>
+
+
+
+                </LinearLayout>
+
+
+                <!-- CASE: Medications Exist -->
+                <LinearLayout
+                    android:id="@+id/layoutMedList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+
+                </LinearLayout>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+
+
+
+    </LinearLayout>
+
+</ScrollView>
