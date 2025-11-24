@@ -1,18 +1,17 @@
 <resources>
     <!-- General App -->
     <string name="app_name">Demo App</string>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
     <string name="navigation_bar_title">Navigation Bar</string>
     <string name="sign_out">Sign Out</string>
-    <string name="home">Home</string>
-    <string name="symptom">Symptom</string>
-    <string name="badge">Badge</string>
-    <string name="profile">Profile</string>
-
 
     <string name="email_field">Email</string>
     <string name="password_field">Password</string>
     <string name="first_name_field">First Name</string>
     <string name="last_name_field">Last Name</string>
+    <string name="username_field">Username</string>
 
     <!-- Sign in page -->
     <string name="sign_in">Sign in</string>
@@ -22,6 +21,8 @@
     <string name="confirm_password">Confirm password</string>
     <string name="sign_up">Sign up</string>
     <string name="account_type">Account Type</string>
+    <string name="sign_in_link">Already have an account? Sign in</string>
+
     <string-array name="role_items">
         <item>Select account type…</item>
         <item>Parent</item>
@@ -47,17 +48,6 @@
     </string>
 
     <string name="provider_popup_message">
-Smart Air lets you view parent-approved summaries of a child’s asthma progress.\n
-- You’ll see only the information the parent chooses to share, such as logs, trends, or triage reports.\n
-- You have read-only access — no data can be edited or added.\n
-- Parents can update or revoke your access in real time.
-    </string>
-    <string name="sharing_settings">Sharing Settings</string>
-    <string name="share_symptoms">Share Symptoms</string>
-    <string name="share_medicines">Share Medicines</string>
-    <string name="share_pef">Share PEF</string>
-    <string name="share_triage">Share Triage</string>
-    <string name="save_settings">Save Settings</string>
         Smart Air lets you view parent-approved summaries of a child’s asthma progress.\n
         - You’ll see only the information the parent chooses to share, such as logs, trends, or triage reports.\n
         - You have read-only access — no data can be edited or added.\n
