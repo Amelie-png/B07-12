@@ -15,6 +15,7 @@ public class ChildAdapter extends RecyclerView.Adapter<ChildAdapter.ViewHolder> 
     public interface OnItemActionListener {
         void onEdit(int position);
         void onDelete(int position);
+        void onGenerateShareCode(int position);
     }
 
     private List<Child> childList;
