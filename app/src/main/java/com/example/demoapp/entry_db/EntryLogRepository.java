@@ -21,7 +21,7 @@ public class EntryLogRepository {
         String[] sections = input.split("\\|");
         ArrayList<String> symptoms = new ArrayList<>();
         ArrayList<String> triggers = new ArrayList<>();
-        ArrayList<String> medications = new ArrayList<>();
+
         String recorder;
         long timestamp;
 
@@ -49,9 +49,6 @@ public class EntryLogRepository {
                     case "triggers":
                         triggers.addAll(valueList);
                         break;
-                    case "medications":
-                        medications.addAll(valueList);
-                        break;
                 }
             }
         }
@@ -59,7 +56,7 @@ public class EntryLogRepository {
         recorder = sections[len-2].trim();
         timestamp = Long.parseLong(sections[len-1]);
 
-        return new EntryLog(symptoms, triggers, medications, timestamp, recorder);
+        return new EntryLog(symptoms, triggers, timestamp, recorder);
     }
 
     public void saveEntry(EntryLog entry, OnSuccessListener onSuccess, OnFailureListener onFailure) {
