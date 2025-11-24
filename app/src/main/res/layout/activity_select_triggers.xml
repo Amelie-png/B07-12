@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+    <!-- Back -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp">
+
+        <TextView
+            android:id="@+id/buttonBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Back"
+            android:textSize="20sp"
+            android:textColor="#0D47A1" />
+    </LinearLayout>
+
+    <!-- RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerTriggers"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+
+        android:clipToPadding="false"
+        android:paddingBottom="120dp"
+
+        android:overScrollMode="always" />
+
+    <!-- Button -->
+    <Button
+        android:id="@+id/buttonAddSelected"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="Add selected (0)"
+        android:textSize="18sp"
+        android:textColor="#FFFFFF"
+        android:background="#8E8E8E"
+        android:layout_margin="16dp" />
+
+</LinearLayout>
