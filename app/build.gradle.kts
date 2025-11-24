@@ -31,22 +31,16 @@ android {
         }
     }
     compileOptions {
-        isCoreLibraryDesugaringEnabled = true
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 }
 
 dependencies {
-    implementation(libs.ui.text)
-    implementation(libs.firebase.storage)
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5");
-
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
-    implementation(libs.recyclerview)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -64,15 +58,4 @@ dependencies {
     // For example, add the dependencies for Firebase Authentication and Cloud Firestore
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
-
-    //for getting local time
-    implementation("com.jakewharton.threetenabp:threetenabp:1.2.1")
-
-    //for chip
-    implementation("com.google.android.material:material:1.12.0")
-
-    // For Line graph
-    implementation("com.jjoe64:graphview:4.2.2") {
-        exclude(group = "com.android.support", module = "support-compat")
-    }
 }

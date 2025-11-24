@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.demoapp">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -15,33 +15,26 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DemoApp">
 
-        <activity
-            android:name=".PasswordRecoveryActivity"
-            android:exported="false" />
-        <activity
-            android:name=".CardViewHomeScreen"
-            android:exported="false" />
+        <!-- ⭐ MAIN SCREEN WHEN APP LAUNCHES ⭐ -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".NavigationActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity android:name=".CreateAccountActivity" />
-        <activity android:name=".SignInActivity" />
-        <activity android:name=".HomeScreenActivity" />
+        <!-- No launcher tag here -->
+        <activity android:name=".SelectSymptomsActivity" android:exported="false" />
+        <activity android:name=".SelectTriggersActivity" android:exported="false" />
+        <activity android:name=".PasswordRecoveryActivity" android:exported="false" />
+        <activity android:name=".CardViewHomeScreen" android:exported="false" />
+        <activity android:name=".NavigationActivity" android:exported="false" />
+        <activity android:name=".CreateAccountActivity" android:exported="false" />
+        <activity android:name=".SignInActivity" android:exported="false" />
+        <activity android:name=".HomeScreenActivity" android:exported="false" />
+
     </application>
 
 </manifest>
