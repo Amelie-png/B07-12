@@ -3,8 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.demoapp">
 
-    <uses-permission android:name="android.permission.INTERNET" />
-
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -24,6 +22,31 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- ParentActivity 作为启动页 -->
+        <activity
+            android:name=".ParentActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <!-- 其他 Activity -->
+        <activity android:name=".PasswordRecoveryActivity"
+            android:exported="false"/>
+        <activity android:name=".NavigationActivity"
+            android:exported="true"/>
+        <activity android:name=".CreateAccountActivity"
+            android:exported="false"/>
+        <activity android:name=".SignInActivity"
+            android:exported="false"/>
+        <activity android:name=".SelectRoleActivity"
+            android:exported="false"/>
+        <activity android:name=".HomeScreenActivity"
+            android:exported="false"/>
+
 
         <!-- No launcher tag here -->
         <activity android:name=".SelectSymptomsActivity" android:exported="false" />
