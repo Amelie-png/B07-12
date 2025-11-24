@@ -1,0 +1,49 @@
+package com.example.demoapp;
+
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
+public class ParentAddSymptomScreen extends Fragment {
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_parent_add_symptom_screen, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        Button addEntryButton = view.findViewById(R.id.add_entry_button);
+        addEntryButton.setOnClickListener(v ->
+                {   Toast.makeText(getContext(), "add_entry_button clicked", Toast.LENGTH_SHORT).show();
+                    Fragment next = new ChildSymptomsFragment();
+                    requireActivity()
+                            .getSupportFragmentManager()
+                            .beginTransaction()
+                            //TODO: replace R.id with the actual fragment container name
+                            .replace(R.id.fragment_container, next)
+                            .addToBackStack(null)
+                            .commit();}
+        );
+
+        if (savedInstanceState == null) {
+            SummaryCalendarFragment calendarFragment = new SummaryCalendarFragment();
+            getChildFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.display_browse_history_container, calendarFragment)
+                    .commit();
+        }
+    }
+}
