@@ -1,8 +1,14 @@
 package com.example.demoapp.models;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 public class Child {
+    private String childId;
+    private String firestoreId;
     private String name;
     private String dob;
     private String parentId;
@@ -10,11 +16,11 @@ public class Child {
     private Map<String, Boolean> sharing;
     private Set<String> providerIds;
     private Map<String, ShareCode> shareCodes;
-
-    // 新增 Firestore 文档 ID
-    private String firestoreId;
+    private String passwordHash;  // 存储哈希密码
+    private boolean hasSeenOnboardingChild = false;
 
     public Child() {
+        this.childId = UUID.randomUUID().toString();
         this.providerIds = new HashSet<>();
         this.sharing = new HashMap<>();
         this.shareCodes = new HashMap<>();
@@ -32,7 +38,12 @@ public class Child {
         this.sharing.put("triage", false);
     }
 
-    // Getter & Setter for Firestore ID
+    // ------------------------
+    // Getters / Setters
+    // ------------------------
+    public String getChildId() { return childId; }
+    public void setChildId(String childId) { this.childId = childId; }
+
     public String getFirestoreId() { return firestoreId; }
     public void setFirestoreId(String firestoreId) { this.firestoreId = firestoreId; }
 
@@ -51,26 +62,60 @@ public class Child {
     public Map<String, Boolean> getSharing() { return sharing; }
     public void setSharing(Map<String, Boolean> sharing) { this.sharing = sharing; }
 
-
-
     public Set<String> getProviderIds() { return providerIds; }
     public void setProviderIds(Set<String> providerIds) { this.providerIds = providerIds; }
 
     public Map<String, ShareCode> getShareCodes() { return shareCodes; }
     public void setShareCodes(Map<String, ShareCode> shareCodes) { this.shareCodes = shareCodes; }
 
-    // 增加或移除 provider
-    public void addProvider(String providerId) { this.providerIds.add(providerId); }
-    public void removeProvider(String providerId) {
-        this.providerIds.remove(providerId);
-        this.shareCodes.remove(providerId);
+    public String getPasswordHash() { return passwordHash; }
+    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
+
+    public boolean isHasSeenOnboardingChild() { return hasSeenOnboardingChild; }
+    public void setHasSeenOnboardingChild(boolean hasSeenOnboardingChild) {
+        this.hasSeenOnboardingChild = hasSeenOnboardingChild;
     }
 
-    // 一次性分享码对象
+    // ------------------------
+    // ShareCode 及 sharing
+    // ------------------------
+    public String generateOneTimeShareCode() {
+        String code = UUID.randomUUID().toString();
+        ShareCode shareCode = new ShareCode(code);
+        this.shareCodes.put(code, shareCode);
+        return code;
+    }
+
+    public boolean bindProvider(String code, String providerId) {
+        ShareCode sc = this.shareCodes.get(code);
+        if (sc != null && !sc.isRevoked() &&
+                System.currentTimeMillis() - sc.getTimestamp() <= 7L * 24 * 60 * 60 * 1000) {
+            this.providerIds.add(providerId);
+            this.shareCodes.put(providerId, sc);
+            this.shareCodes.remove(code);
+            return true;
+        }
+        return false;
+    }
+
+    public void revokeShareCode(String providerId) {
+        ShareCode sc = this.shareCodes.get(providerId);
+        if (sc != null) sc.revoke();
+    }
+
+    public boolean verifyShareCode(String providerId, String code) {
+        ShareCode sc = this.shareCodes.get(providerId);
+        if (sc == null || sc.isRevoked()) return false;
+        return System.currentTimeMillis() - sc.getTimestamp() <= 7L * 24 * 60 * 60 * 1000
+                && code.equals(sc.getCode());
+    }
+
     public static class ShareCode {
         private String code;
-        private long timestamp;  // 生成时间（毫秒）
+        private long timestamp;
         private boolean revoked;
+
+        public ShareCode() {}
 
         public ShareCode(String code) {
             this.code = code;
@@ -83,32 +128,4 @@ public class Child {
         public boolean isRevoked() { return revoked; }
         public void revoke() { this.revoked = true; }
     }
-
-    // 生成一次性分享码（有效期7天）
-    public String generateOneTimeShareCode(String providerId) {
-        String code = UUID.randomUUID().toString();
-        ShareCode shareCode = new ShareCode(code);
-        this.shareCodes.put(providerId, shareCode);
-        this.providerIds.add(providerId);
-        return code;
-    }
-
-    // 撤销分享码
-    public void revokeShareCode(String providerId) {
-        ShareCode sc = this.shareCodes.get(providerId);
-        if (sc != null) sc.revoke();
-    }
-
-    // 验证分享码是否有效
-    public boolean verifyShareCode(String providerId, String code) {
-        ShareCode sc = this.shareCodes.get(providerId);
-        if (sc == null) return false;
-        // 检查是否被撤销
-        if (sc.isRevoked()) return false;
-        // 检查是否过期（7天 = 7 * 24 * 60 * 60 * 1000 ms）
-        long now = System.currentTimeMillis();
-        if (now - sc.getTimestamp() > 7L * 24 * 60 * 60 * 1000) return false;
-        return code.equals(sc.getCode());
-    }
-
 }
