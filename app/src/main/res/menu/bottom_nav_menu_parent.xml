@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/medicineFragment"
+        android:title="Medicine"
+        android:icon="@drawable/ic_medicine"/>
+    <item
+        android:id="@+id/symptomFragment"
+        android:title="Symptom"
+        android:icon="@drawable/ic_symptom"/>
+    <item
+        android:id="@+id/homeFragment"
+        android:title="Home"
+        android:icon="@drawable/ic_home"/>
+    <item
+        android:id="@+id/badgeFragment"
+        android:title="Badge"
+        android:icon="@drawable/ic_badge_nav"/>
+    <item
+        android:id="@+id/profileFragment"
+        android:title="Profile"
+        android:icon="@drawable/ic_person"/>
+
+</menu>
