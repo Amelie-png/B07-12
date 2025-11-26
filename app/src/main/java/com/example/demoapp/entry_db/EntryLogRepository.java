@@ -1,5 +1,7 @@
 package com.example.demoapp.entry_db;
 
+import android.util.Pair;
+
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -17,48 +19,6 @@ public class EntryLogRepository {
         this.entriesCollection = db.collection("entries");
     }
 
-    public EntryLog parseEntry(String input) {
-        String[] sections = input.split("\\|");
-        ArrayList<String> symptoms = new ArrayList<>();
-        ArrayList<String> triggers = new ArrayList<>();
-
-        String recorder;
-        long timestamp;
-
-        int len = sections.length;
-        int arrayInput = len - 2;
-        for (int i=0; i<arrayInput; i++) {
-            String section = sections[i];
-            String[] parts = section.split(":");
-            if (parts.length == 2) {
-                String key = parts[0].trim().toLowerCase();
-                String[] values = parts[1].split(",");
-
-                ArrayList<String> valueList = new ArrayList<>();
-                for (String value : values) {
-                    String trimmed = value.trim();
-                    if (!trimmed.isEmpty()) {
-                        valueList.add(trimmed);
-                    }
-                }
-
-                switch (key) {
-                    case "symptoms":
-                        symptoms.addAll(valueList);
-                        break;
-                    case "triggers":
-                        triggers.addAll(valueList);
-                        break;
-                }
-            }
-        }
-
-        recorder = sections[len-2].trim();
-        timestamp = Long.parseLong(sections[len-1]);
-
-        return new EntryLog(symptoms, triggers, timestamp, recorder);
-    }
-
     public void saveEntry(EntryLog entry, OnSuccessListener onSuccess, OnFailureListener onFailure) {
         DocumentReference docRef = entriesCollection.document();
         entry.setId(docRef.getId());
@@ -68,15 +28,6 @@ public class EntryLogRepository {
                     onSuccess.onSuccess(docRef.getId());
                 })
                 .addOnFailureListener(onFailure::onFailure);
-    }
-
-    public void parseAndSave(String input, OnSuccessListener onSuccess, OnFailureListener onFailure) {
-        EntryLog entry = parseEntry(input);
-        if (entry != null) {
-            saveEntry(entry, onSuccess, onFailure);
-        } else {
-            onFailure.onFailure(new Exception("Failed to parse input"));
-        }
     }
 
     public void getEntry(String id, OnEntryRetrievedListener listener) {
