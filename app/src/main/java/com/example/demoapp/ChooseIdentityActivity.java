@@ -44,7 +44,7 @@ public class ChooseIdentityActivity extends AppCompatActivity {
         // Parent → MainNavActivity
         // ----------------------------
         parentHomeButton.setOnClickListener(v -> {
-            Intent intent = new Intent(ChooseIdentityActivity.this, MainNavActivity.class);
+            Intent intent = new Intent(ChooseIdentityActivity.this, ParentActivity.class);
             intent.putExtra("uid", parentUid);
             intent.putExtra("role", "parent");
             startActivity(intent);
