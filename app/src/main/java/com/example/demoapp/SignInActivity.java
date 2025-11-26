@@ -55,14 +55,10 @@ public class SignInActivity extends AppCompatActivity implements LoginContract.V
     }
 
     @Override
-    public void showLoading() {
-        // TODO: add progress indicator if desired
-    }
+    public void showLoading() {}
 
     @Override
-    public void hideLoading() {
-        // TODO: hide progress indicator if desired
-    }
+    public void hideLoading() {}
 
     @Override
     public void showError(String message) {
@@ -79,13 +75,14 @@ public class SignInActivity extends AppCompatActivity implements LoginContract.V
     }
 
     // ======================================================
-    // UPDATED NAVIGATION METHODS WITH ID PASSING
+    // UPDATED NAVIGATION METHODS WITH CORRECT ACTIVITIES
     // ======================================================
 
     @Override
     public void navigateToChildHome(String childId) {
-        Intent intent = new Intent(this, NavigationActivity.class);
-        intent.putExtra("childId", childId);
+        Intent intent = new Intent(this, MainNavActivity.class);
+        intent.putExtra("uid", childId);
+        intent.putExtra("role", "child");
         startActivity(intent);
         finish();
     }
@@ -100,8 +97,10 @@ public class SignInActivity extends AppCompatActivity implements LoginContract.V
 
     @Override
     public void navigateToProviderHome(String providerUid) {
-        Intent intent = new Intent(this, ProviderHomeScreen.class);
-        intent.putExtra("providerUid", providerUid);
+        // We will later replace this with ProviderNavActivity
+        Intent intent = new Intent(this, MainNavActivity.class);
+        intent.putExtra("uid", providerUid);
+        intent.putExtra("role", "provider");
         startActivity(intent);
         finish();
     }
