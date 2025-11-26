@@ -15,53 +15,45 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DemoApp">
         <activity
-            android:name=".ChooseIdentityActivity"
+            android:name=".MainNavActivity"
             android:exported="false" />
-        <!-- ⭐ MAIN SCREEN WHEN APP LAUNCHES ⭐ -->
+        <!-- ⭐ START APP ON SIGNUP PAGE ⭐ -->
         <activity
-            android:name=".MainActivity"
+            android:name=".CreateAccountActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> <!-- No launcher tag here -->
-        <activity
-            android:name=".SelectSymptomsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".SelectTriggersActivity"
-            android:exported="false" />
-        <activity
-            android:name=".PasswordRecoveryActivity"
-            android:exported="false" />
-        <activity
-            android:name=".CardViewHomeScreen"
-            android:exported="false" />
-        <activity
-            android:name=".NavigationActivity"
-            android:exported="false" />
-        <activity
-            android:name=".CreateAccountActivity"
-            android:exported="false" />
+        </activity> <!-- SIGN IN PAGE -->
         <activity
             android:name=".SignInActivity"
-            android:exported="false" />
+            android:exported="false" /> <!-- CHOOSE IDENTITY -->
+        <activity
+            android:name=".ChooseIdentityActivity"
+            android:exported="false" /> <!-- PASSWORD RECOVERY -->
+        <activity
+            android:name=".PasswordRecoveryActivity"
+            android:exported="false" /> <!-- OLD HOME SCREEN (if still used) -->
         <activity
             android:name=".HomeScreenActivity"
-            android:exported="false" />
+            android:exported="false" /> <!-- CARD VIEW TEST PAGE -->
         <activity
-        android:name=".NavigationActivity"
-        android:exported="true"
-            tools:ignore="DuplicateActivity">
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN"/>
-            <category android:name="android.intent.category.LAUNCHER"/>
-        </intent-filter>
-    </activity>
-
+            android:name=".CardViewHomeScreen"
+            android:exported="false" /> <!-- SYMPTOMS SELECTION -->
+        <activity
+            android:name=".SelectSymptomsActivity"
+            android:exported="false" /> <!-- TRIGGERS SELECTION -->
+        <activity
+            android:name=".SelectTriggersActivity"
+            android:exported="false" /> <!-- CHILD NAVIGATION ACTIVITY (bottom nav) -->
+        <activity
+            android:name=".ChildNavActivity"
+            android:exported="false" /> <!-- PARENT NAVIGATION ACTIVITY -->
+        <activity
+            android:name=".ParentNavActivity"
+            android:exported="false" />
     </application>
-
 
 </manifest>

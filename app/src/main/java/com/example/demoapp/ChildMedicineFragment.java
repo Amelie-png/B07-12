@@ -10,17 +10,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class ChildHomeFragment extends Fragment {
+public class ChildMedicineFragment extends Fragment {
 
     private String childUid;
 
-    public ChildHomeFragment() {}
+    public ChildMedicineFragment() {
+        // Required empty public constructor
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_children_home, container, false);
+        return inflater.inflate(R.layout.fragment_child_medicine, container, false);
     }
 
     @Override
@@ -33,14 +35,6 @@ public class ChildHomeFragment extends Fragment {
             childUid = getArguments().getString("uid");
         }
 
-        Log.d("ChildHomeFragment", "childUid = " + childUid);
-
-        // ---- Load ZoneFragment into the nested container ----
-        ZoneFragment zoneFragment = new ZoneFragment();
-
-        getChildFragmentManager()
-                .beginTransaction()
-                .replace(R.id.zoneFragmentContainer, zoneFragment)
-                .commit();
+        Log.d("ChildMedicineFragment", "childUid = " + childUid);
     }
 }
