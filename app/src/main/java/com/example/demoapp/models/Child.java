@@ -1,29 +1,26 @@
 package com.example.demoapp.models;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class Child {
-    private String childId;
-    private String firestoreId;
+    private String uid;                       // 唯一ID
+    private String firestoreId;                // Firestore文档ID
     private String name;
     private String dob;
     private String parentId;
     private String notes;
-    private Map<String, Boolean> sharing;
-    private Set<String> providerIds;
-    private Map<String, ShareCode> shareCodes;
-    private String passwordHash;  // 存储哈希密码
-    private boolean hasSeenOnboardingChild = false;
+    private Map<String, Boolean> sharing;     // 总体权限字段
+    private Set<String> providerIds;          // 已绑定的 Provider
+    private Map<String, ShareCode> shareCodes; // key: 一次性 code 或 providerId
+    private String passwordHash;
+    private boolean hasSeenOnboardingChild;   // 是否看过onboarding
 
     public Child() {
-        this.childId = UUID.randomUUID().toString();
-        this.providerIds = new HashSet<>();
+        this.uid = UUID.randomUUID().toString();
         this.sharing = new HashMap<>();
+        this.providerIds = new HashSet<>();
         this.shareCodes = new HashMap<>();
+        this.hasSeenOnboardingChild = false;
     }
 
     public Child(String name, String dob, String parentId, String notes) {
@@ -41,8 +38,8 @@ public class Child {
     // ------------------------
     // Getters / Setters
     // ------------------------
-    public String getChildId() { return childId; }
-    public void setChildId(String childId) { this.childId = childId; }
+    public String getUid() { return uid; }
+    public void setUid(String uid) { this.uid = uid; }
 
     public String getFirestoreId() { return firestoreId; }
     public void setFirestoreId(String firestoreId) { this.firestoreId = firestoreId; }
@@ -72,12 +69,10 @@ public class Child {
     public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
 
     public boolean isHasSeenOnboardingChild() { return hasSeenOnboardingChild; }
-    public void setHasSeenOnboardingChild(boolean hasSeenOnboardingChild) {
-        this.hasSeenOnboardingChild = hasSeenOnboardingChild;
-    }
+    public void setHasSeenOnboardingChild(boolean hasSeenOnboardingChild) { this.hasSeenOnboardingChild = hasSeenOnboardingChild; }
 
     // ------------------------
-    // ShareCode 及 sharing
+    // ShareCode 操作
     // ------------------------
     public String generateOneTimeShareCode() {
         String code = UUID.randomUUID().toString();
@@ -98,9 +93,16 @@ public class Child {
         return false;
     }
 
-    public void revokeShareCode(String providerId) {
+    public void revokeProvider(String providerId) {
         ShareCode sc = this.shareCodes.get(providerId);
         if (sc != null) sc.revoke();
+    }
+
+    public void updateProviderPermissions(String providerId, Map<String, Boolean> newPermissions) {
+        ShareCode sc = this.shareCodes.get(providerId);
+        if (sc != null && !sc.isRevoked()) {
+            sc.setPermissions(newPermissions);
+        }
     }
 
     public boolean verifyShareCode(String providerId, String code) {
@@ -110,10 +112,14 @@ public class Child {
                 && code.equals(sc.getCode());
     }
 
+    // ------------------------
+    // ShareCode 类
+    // ------------------------
     public static class ShareCode {
         private String code;
         private long timestamp;
         private boolean revoked;
+        private Map<String, Boolean> permissions;
 
         public ShareCode() {}
 
@@ -121,11 +127,14 @@ public class Child {
             this.code = code;
             this.timestamp = System.currentTimeMillis();
             this.revoked = false;
+            this.permissions = new HashMap<>();
         }
 
         public String getCode() { return code; }
         public long getTimestamp() { return timestamp; }
         public boolean isRevoked() { return revoked; }
         public void revoke() { this.revoked = true; }
+        public Map<String, Boolean> getPermissions() { return permissions; }
+        public void setPermissions(Map<String, Boolean> permissions) { this.permissions = permissions; }
     }
 }

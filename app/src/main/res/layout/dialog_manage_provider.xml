@@ -5,33 +5,27 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <!-- Provider 列表 -->
     <TextView
-        android:id="@+id/tv_share_code"
+        android:id="@+id/tv_providers"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="XXXXX"
-        android:textSize="18sp"
+        android:text="Providers"
+        android:textSize="16sp"
         android:paddingBottom="8dp" />
 
-    <TextView
-        android:id="@+id/tv_code_expiry"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Valid for 7 days"
-        android:textSize="14sp"
-        android:paddingBottom="16dp" />
-
+    <!-- Revoke 按钮 -->
     <Button
-        android:id="@+id/btn_copy_code"
+        android:id="@+id/btn_revoke"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Copy Code"
-        android:layout_marginBottom="8dp" />
+        android:text="Revoke" />
 
+    <!-- Update Permissions 按钮 -->
     <Button
-        android:id="@+id/btn_generate_new"
+        android:id="@+id/btn_update_permissions"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Generate New" />
+        android:text="Update Permissions" />
 
 </LinearLayout>
