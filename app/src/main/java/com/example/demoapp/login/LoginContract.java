@@ -8,13 +8,12 @@ public interface LoginContract {
         void showError(String message);
         void showSuccess(String message);
 
-        void navigateToChildHome();
-        void navigateToParentIdentitySelection();
-        void navigateToProviderHome();
+        void navigateToChildHome(String childId);
+        void navigateToParentIdentitySelection(String parentUid);
+        void navigateToProviderHome(String providerUid);
     }
 
     interface Presenter {
         void handleLogin(String identifier, String password);
     }
 }
-
