@@ -20,6 +20,7 @@ public class ChildAdapter extends RecyclerView.Adapter<ChildAdapter.VH> {
         void onEdit(int position);
         void onDelete(int position);
         void onGenerateShareCode(int position);
+        void onManageProvider(int position);
     }
 
     public ChildAdapter(List<Child> children, OnItemActionListener listener) {
@@ -45,16 +46,15 @@ public class ChildAdapter extends RecyclerView.Adapter<ChildAdapter.VH> {
         holder.btnEdit.setOnClickListener(v -> listener.onEdit(holder.getAdapterPosition()));
         holder.btnDelete.setOnClickListener(v -> listener.onDelete(holder.getAdapterPosition()));
         holder.btnShare.setOnClickListener(v -> listener.onGenerateShareCode(holder.getAdapterPosition()));
+        holder.btnManageProvider.setOnClickListener(v -> listener.onManageProvider(holder.getAdapterPosition()));
     }
 
     @Override
-    public int getItemCount() {
-        return children.size();
-    }
+    public int getItemCount() { return children.size(); }
 
     public static class VH extends RecyclerView.ViewHolder {
         public TextView tvName, tvDob, tvNotes;
-        public Button btnEdit, btnDelete, btnShare;
+        public Button btnEdit, btnDelete, btnShare, btnManageProvider;
 
         public VH(@NonNull View itemView) {
             super(itemView);
@@ -64,6 +64,7 @@ public class ChildAdapter extends RecyclerView.Adapter<ChildAdapter.VH> {
             btnEdit = itemView.findViewById(R.id.btn_edit);
             btnDelete = itemView.findViewById(R.id.btn_delete);
             btnShare = itemView.findViewById(R.id.btn_share);
+            btnManageProvider = itemView.findViewById(R.id.btn_manage_provider);
         }
     }
 }
