@@ -1,25 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:startDestination="@id/homeFragment">
+    android:id="@+id/nav_graph_child"
+    app:startDestination="@id/childHomeFragment">
 
     <fragment
-        android:id="@+id/homeFragment"
-        android:name="com.example.demoapp.HomeFragment"
+        android:id="@+id/childHomeFragment"
+        android:name="com.example.demoapp.ChildHomeFragment"
         android:label="Home"/>
 
     <fragment
-        android:id="@+id/symptomFragment"
+        android:id="@+id/childSymptomsFragment"
         android:name="com.example.demoapp.ChildSymptomsFragment"
-        android:label="Symptom"/>
+        android:label="Symptoms"/>
 
     <fragment
-        android:id="@+id/badgeFragment"
-        android:name="com.example.demoapp.BadgesFragment"
-        android:label="Badge"/>
+        android:id="@+id/childMedicineFragment"
+        android:name="com.example.demoapp.ChildMedicineFragment"
+        android:label="Medicine"/>
 
     <fragment
-        android:id="@+id/profileFragment"
+        android:id="@+id/childBadgesFragment"
+        android:name="com.example.demoapp.ChildBadgesFragment"
+        android:label="Badges"/>
+
+    <fragment
+        android:id="@+id/childProfileFragment"
         android:name="com.example.demoapp.ChildProfileFragment"
         android:label="Profile"/>
+
 </navigation>

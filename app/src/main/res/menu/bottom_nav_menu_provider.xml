@@ -2,27 +2,27 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/parentMedicineFragment"
+        android:id="@+id/providerMedicineFragment"
         android:title="Medicine"
         android:icon="@drawable/ic_medicine"/>
 
     <item
-        android:id="@+id/parentSymptomFragment"
+        android:id="@+id/providerSymptomFragment"
         android:title="Symptom"
         android:icon="@drawable/ic_symptom" />
 
     <item
-        android:id="@+id/parentHomeFragment"
+        android:id="@+id/providerHomeFragment"
         android:title="Home"
         android:icon="@drawable/ic_home"/>
 
     <item
-        android:id="@+id/parentBadgesFragment"
+        android:id="@+id/providerBadgesFragment"
         android:title="Badge"
         android:icon="@drawable/ic_badge_nav"/>
 
     <item
-        android:id="@+id/parentProfileFragment"
+        android:id="@+id/providerProfileFragment"
         android:title="Profile"
         android:icon="@drawable/ic_person"/>
 
