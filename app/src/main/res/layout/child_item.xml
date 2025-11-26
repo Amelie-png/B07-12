@@ -1,52 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="4dp">
+    android:padding="8dp">
 
-    <LinearLayout
+    <!-- Child Info -->
+    <TextView
+        android:id="@+id/tv_child_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Child Name"
+        android:textSize="16sp"
+        android:paddingBottom="4dp"/>
+
+    <TextView
+        android:id="@+id/tv_child_dob"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="DOB"
+        android:paddingBottom="4dp"/>
+
+    <TextView
+        android:id="@+id/tv_child_notes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Notes"
+        android:paddingBottom="8dp"/>
+
+    <!-- Horizontal Scrollable Buttons -->
+    <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="12dp">
+        android:scrollbars="none">
 
-        <!-- 孩子姓名 -->
-        <TextView
-            android:id="@+id/tv_child_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Child Name"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:paddingBottom="4dp" />
-
-        <!-- 孩子生日 -->
-        <TextView
-            android:id="@+id/tv_child_dob"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="DOB"
-            android:textSize="14sp"
-            android:paddingBottom="4dp" />
-
-        <!-- 孩子备注 -->
-        <TextView
-            android:id="@+id/tv_child_notes"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Notes"
-            android:textSize="14sp"
-            android:paddingBottom="8dp" />
-
-        <!-- 操作按钮 -->
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="end">
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
 
             <Button
                 android:id="@+id/btn_edit"
@@ -66,10 +57,14 @@
                 android:id="@+id/btn_share"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Share" />
+                android:text="Share"
+                android:layout_marginEnd="8dp"/>
 
+            <Button
+                android:id="@+id/btn_manage_provider"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Manage"/>
         </LinearLayout>
-
-    </LinearLayout>
-
-</androidx.cardview.widget.CardView>
+    </HorizontalScrollView>
+</LinearLayout>
