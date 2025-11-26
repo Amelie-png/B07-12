@@ -7,14 +7,17 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.demoapp.models.Child;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,14 +26,16 @@ import java.util.Objects;
 
 public class ParentActivity extends AppCompatActivity {
 
-
     private final ArrayList<Child> childrenList = new ArrayList<>();
     private ChildAdapter adapter;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.add_child);
+        setContentView(R.layout.add_child); // 确认布局名
+
+        db = FirebaseFirestore.getInstance();
 
         RecyclerView recyclerView = findViewById(R.id.rv_children_list);
         adapter = new ChildAdapter(childrenList, new ChildAdapter.OnItemActionListener() {
@@ -61,58 +66,138 @@ public class ParentActivity extends AppCompatActivity {
                     String name = etName.getText().toString().trim();
                     String dob = etDob.getText().toString().trim();
                     String notes = etNotes.getText().toString().trim();
-                    if (!TextUtils.isEmpty(name) && !TextUtils.isEmpty(dob)) {
-                        String parentId = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
-                        Child child = new Child(name, dob, parentId, notes);
 
-                        FirebaseFirestore db = FirebaseFirestore.getInstance();
-                        Map<String, Object> childMap = childToMap(child);
-                        db.collection("children")
-                                .add(childMap)
-                                .addOnSuccessListener(docRef -> {
-                                    child.setFirestoreId(docRef.getId());
-                                    childrenList.add(child);
-                                    adapter.notifyItemInserted(childrenList.size() - 1);
-                                    Toast.makeText(this, "Child saved to Firestore!", Toast.LENGTH_SHORT).show();
-                                })
-                                .addOnFailureListener(e -> Toast.makeText(this, "Error saving child: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-                    } else {
+                    if (TextUtils.isEmpty(name) || TextUtils.isEmpty(dob)) {
                         Toast.makeText(this, "Name and DOB cannot be empty", Toast.LENGTH_SHORT).show();
+                        return;
                     }
+
+                    // 检查 name 唯一性
+                    db.collection("children")
+                            .whereEqualTo("parentId", Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())
+                            .whereEqualTo("name", name)
+                            .get()
+                            .addOnSuccessListener(querySnapshot -> {
+                                if (!querySnapshot.isEmpty()) {
+                                    Toast.makeText(this, "Child name already exists", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    addChildToFirestore(name, dob, notes);
+                                }
+                            });
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
     }
 
-    private void showEditChildDialog(int position) { /* 同前面版本，确保用 child.getFirestoreId() 更新 Firestore */ }
-    private void showDeleteChildDialog(int position) { /* 同前面版本，直接用 docId 删除 */ }
+    private void addChildToFirestore(String name, String dob, String notes) {
+        String parentId = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
+        Child child = new Child(name, dob, parentId, notes);
 
-    private void showGenerateShareCodeDialog(int position) {
+        Map<String, Object> childMap = childToMap(child);
+        db.collection("children")
+                .add(childMap)
+                .addOnSuccessListener(docRef -> {
+                    child.setFirestoreId(docRef.getId());
+                    childrenList.add(child);
+                    adapter.notifyItemInserted(childrenList.size() - 1);
+                    Toast.makeText(this, "Child saved to Firestore!", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Error saving child: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+
+    private void showEditChildDialog(int position) {
         Child child = childrenList.get(position);
-        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_generate_share_code, null);
-        EditText etProviderId = dialogView.findViewById(R.id.et_provider_id);
-        TextView tvShareCode = dialogView.findViewById(R.id.tv_share_code);
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_child, null);
+        EditText etName = dialogView.findViewById(R.id.et_child_name);
+        EditText etDob = dialogView.findViewById(R.id.et_child_dob);
+        EditText etNotes = dialogView.findViewById(R.id.et_child_notes);
+
+        etName.setText(child.getName());
+        etDob.setText(child.getDob());
+        etNotes.setText(child.getNotes());
 
         new AlertDialog.Builder(this)
-                .setTitle("Generate One-Time Share Code")
+                .setTitle("Edit Child")
                 .setView(dialogView)
-                .setPositiveButton("Generate", (dialog, which) -> {
-                    String providerId = etProviderId.getText().toString().trim();
-                    if (TextUtils.isEmpty(providerId)) {
-                        Toast.makeText(this, "Provider ID cannot be empty", Toast.LENGTH_SHORT).show();
+                .setPositiveButton("Save", (dialog, which) -> {
+                    String newName = etName.getText().toString().trim();
+                    String newDob = etDob.getText().toString().trim();
+                    String newNotes = etNotes.getText().toString().trim();
+
+                    if (TextUtils.isEmpty(newName) || TextUtils.isEmpty(newDob)) {
+                        Toast.makeText(this, "Name and DOB cannot be empty", Toast.LENGTH_SHORT).show();
                         return;
                     }
 
-                    // 生成分享码
-                    String code = child.generateOneTimeShareCode(providerId);
-                    tvShareCode.setText(code); // 显示在对话框里
-
-                    // 更新 Firestore
-                    FirebaseFirestore db = FirebaseFirestore.getInstance();
-                    Map<String, Object> childMap = childToMap(child);
+                    // 检查 name 是否重复（排除自己）
                     db.collection("children")
-                            .document(child.getFirestoreId()) // 必须有 firestoreId
-                            .set(childMap)
+                            .whereEqualTo("parentId", child.getParentId())
+                            .whereEqualTo("name", newName)
+                            .get()
+                            .addOnSuccessListener(QuerySnapshot::isEmpty)
+                            .addOnSuccessListener(querySnapshot -> {
+                                if (!querySnapshot.isEmpty()) {
+                                    // 有重复
+                                    Toast.makeText(this, "Child name already exists", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+                                // 更新对象
+                                child.setName(newName);
+                                child.setDob(newDob);
+                                child.setNotes(newNotes);
+
+                                db.collection("children")
+                                        .document(child.getFirestoreId())
+                                        .set(childToMap(child))
+                                        .addOnSuccessListener(aVoid -> {
+                                            childrenList.set(position, child);
+                                            adapter.notifyItemChanged(position);
+                                            Toast.makeText(this, "Child updated", Toast.LENGTH_SHORT).show();
+                                        })
+                                        .addOnFailureListener(e -> Toast.makeText(this, "Error updating child: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                            });
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void showDeleteChildDialog(int position) {
+        Child child = childrenList.get(position);
+        new AlertDialog.Builder(this)
+                .setTitle("Delete Child")
+                .setMessage("Are you sure you want to delete this child?")
+                .setPositiveButton("Delete", (dialog, which) -> {
+                    db.collection("children")
+                            .document(child.getFirestoreId())
+                            .delete()
+                            .addOnSuccessListener(aVoid -> {
+                                childrenList.remove(position);
+                                adapter.notifyItemRemoved(position);
+                                Toast.makeText(this, "Child deleted", Toast.LENGTH_SHORT).show();
+                            })
+                            .addOnFailureListener(e -> Toast.makeText(this, "Error deleting: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void showGenerateShareCodeDialog(int position) {
+        Child child = childrenList.get(position);
+
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_generate_share_code, null);
+        TextView tvShareCode = dialogView.findViewById(R.id.tv_share_code);
+
+        new AlertDialog.Builder(this)
+                .setTitle("One-Time Share Code")
+                .setView(dialogView)
+                .setPositiveButton("Generate", (dialog, which) -> {
+                    String code = child.generateOneTimeShareCode(); // 不需要 providerId
+                    tvShareCode.setText(code);
+
+                    db.collection("children")
+                            .document(child.getFirestoreId())
+                            .set(childToMap(child))
                             .addOnSuccessListener(aVoid ->
                                     Toast.makeText(this, "Share code saved!", Toast.LENGTH_SHORT).show())
                             .addOnFailureListener(e ->
@@ -121,6 +206,7 @@ public class ParentActivity extends AppCompatActivity {
                 .setNegativeButton("Cancel", null)
                 .show();
     }
+
 
     private Map<String, Object> childToMap(Child child) {
         Map<String, Object> map = new HashMap<>();
@@ -142,6 +228,4 @@ public class ParentActivity extends AppCompatActivity {
         map.put("shareCodes", codesMap);
         return map;
     }
-
-
 }

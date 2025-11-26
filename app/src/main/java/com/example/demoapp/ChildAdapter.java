@@ -3,14 +3,18 @@ package com.example.demoapp;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.widget.Button;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.demoapp.models.Child;
+
 import java.util.List;
 
-public class ChildAdapter extends RecyclerView.Adapter<ChildAdapter.ViewHolder> {
+public class ChildAdapter extends RecyclerView.Adapter<ChildAdapter.VH> {
+
+    private final List<Child> children;
+    private final OnItemActionListener listener;
 
     public interface OnItemActionListener {
         void onEdit(int position);
@@ -18,46 +22,48 @@ public class ChildAdapter extends RecyclerView.Adapter<ChildAdapter.ViewHolder> 
         void onGenerateShareCode(int position);
     }
 
-    private List<Child> childList;
-    private OnItemActionListener listener;
-
-    public ChildAdapter(List<Child> childList, OnItemActionListener listener) {
-        this.childList = childList;
+    public ChildAdapter(List<Child> children, OnItemActionListener listener) {
+        this.children = children;
         this.listener = listener;
     }
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.child_item, parent, false);
-        return new ViewHolder(view);
+    public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.child_item, parent, false);
+        return new VH(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Child child = childList.get(position);
-        holder.nameText.setText(child.getName());
-        holder.dobText.setText(child.getDob());
+    public void onBindViewHolder(@NonNull VH holder, int position) {
+        Child child = children.get(position);
+        holder.tvName.setText(child.getName());
+        holder.tvDob.setText(child.getDob());
+        holder.tvNotes.setText(child.getNotes());
 
-        holder.editButton.setOnClickListener(v -> listener.onEdit(position));
-        holder.deleteButton.setOnClickListener(v -> listener.onDelete(position));
+        holder.btnEdit.setOnClickListener(v -> listener.onEdit(holder.getAdapterPosition()));
+        holder.btnDelete.setOnClickListener(v -> listener.onDelete(holder.getAdapterPosition()));
+        holder.btnShare.setOnClickListener(v -> listener.onGenerateShareCode(holder.getAdapterPosition()));
     }
 
     @Override
     public int getItemCount() {
-        return childList.size();
+        return children.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView nameText, dobText;
-        ImageView editButton, deleteButton;
+    public static class VH extends RecyclerView.ViewHolder {
+        public TextView tvName, tvDob, tvNotes;
+        public Button btnEdit, btnDelete, btnShare;
 
-        public ViewHolder(@NonNull View itemView) {
+        public VH(@NonNull View itemView) {
             super(itemView);
-            nameText = itemView.findViewById(R.id.tv_child_name);
-            dobText = itemView.findViewById(R.id.tv_child_dob);
-            editButton = itemView.findViewById(R.id.iv_edit_child);
-            deleteButton = itemView.findViewById(R.id.iv_delete_child);
+            tvName = itemView.findViewById(R.id.tv_child_name);
+            tvDob = itemView.findViewById(R.id.tv_child_dob);
+            tvNotes = itemView.findViewById(R.id.tv_child_notes);
+            btnEdit = itemView.findViewById(R.id.btn_edit);
+            btnDelete = itemView.findViewById(R.id.btn_delete);
+            btnShare = itemView.findViewById(R.id.btn_share);
         }
     }
 }
