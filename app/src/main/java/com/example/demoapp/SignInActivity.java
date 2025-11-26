@@ -78,23 +78,30 @@ public class SignInActivity extends AppCompatActivity implements LoginContract.V
         );
     }
 
+    // ======================================================
+    // UPDATED NAVIGATION METHODS WITH ID PASSING
+    // ======================================================
+
     @Override
-    public void navigateToChildHome() {
+    public void navigateToChildHome(String childId) {
         Intent intent = new Intent(this, NavigationActivity.class);
+        intent.putExtra("childId", childId);
         startActivity(intent);
         finish();
     }
 
     @Override
-    public void navigateToParentIdentitySelection() {
+    public void navigateToParentIdentitySelection(String parentUid) {
         Intent intent = new Intent(this, ChooseIdentityActivity.class);
+        intent.putExtra("parentUid", parentUid);
         startActivity(intent);
         finish();
     }
 
     @Override
-    public void navigateToProviderHome() {
+    public void navigateToProviderHome(String providerUid) {
         Intent intent = new Intent(this, ProviderHomeScreen.class);
+        intent.putExtra("providerUid", providerUid);
         startActivity(intent);
         finish();
     }
