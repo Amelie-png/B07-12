@@ -1,63 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="12dp"
-    android:gravity="center_vertical"
-    android:background="?android:attr/selectableItemBackground"
-    android:clickable="true">
+    android:layout_margin="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="4dp">
 
-    <!-- 孩子头像 -->
-    <ImageView
-        android:id="@+id/iv_child_avatar"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:src="@drawable/ic_default_avatar"
-        android:scaleType="centerCrop"
-        android:layout_marginEnd="12dp"
-        android:contentDescription="Child Avatar"
-        android:background="@drawable/circle_background"/>
-
-    <!-- 名字和生日 -->
     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="wrap_content">
+        android:padding="12dp">
 
+        <!-- 孩子姓名 -->
         <TextView
             android:id="@+id/tv_child_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Child Name"
             android:textSize="18sp"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            android:paddingBottom="4dp" />
 
+        <!-- 孩子生日 -->
         <TextView
             android:id="@+id/tv_child_dob"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="DOB: YYYY-MM-DD"
+            android:text="DOB"
             android:textSize="14sp"
-            android:layout_marginTop="4dp"/>
+            android:paddingBottom="4dp" />
+
+        <!-- 孩子备注 -->
+        <TextView
+            android:id="@+id/tv_child_notes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Notes"
+            android:textSize="14sp"
+            android:paddingBottom="8dp" />
+
+        <!-- 操作按钮 -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end">
+
+            <Button
+                android:id="@+id/btn_edit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Edit"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btn_delete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Delete"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btn_share"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Share" />
+
+        </LinearLayout>
+
     </LinearLayout>
 
-    <!-- 编辑按钮 -->
-    <ImageView
-        android:id="@+id/iv_edit_child"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:src="@android:drawable/ic_menu_edit"
-        android:contentDescription="Edit Child"
-        android:padding="4dp"/>
-
-    <ImageView
-        android:id="@+id/iv_delete_child"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginStart="8dp"
-        android:contentDescription="Delete Child"
-        android:src="@android:drawable/ic_menu_delete"/>
-</LinearLayout>
+</androidx.cardview.widget.CardView>
