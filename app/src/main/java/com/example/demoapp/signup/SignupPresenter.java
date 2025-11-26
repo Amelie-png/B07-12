@@ -47,13 +47,23 @@ public class SignupPresenter implements SignupContract.Presenter {
             return;
         }
 
-        if (role.equals("Select Role") || role.equals("Item 1")) {
+        // ========================================
+        // 2. VALIDATE ROLE
+        // ========================================
+        // Based on your strings.xml (Select account type…)
+        if (role.equals("Select account type…")) {
             view.showError("Please choose a valid role.");
             return;
         }
 
+        // Only Parent + Provider allowed
+        if (!role.equals("Parent") && !role.equals("Provider")) {
+            view.showError("Invalid role.");
+            return;
+        }
+
         // ========================================
-        // 2. VALIDATE USERNAME FORMAT
+        // 3. VALIDATE USERNAME FORMAT
         // ========================================
         if (!username.matches("[a-zA-Z0-9._-]+")) {
             view.showError("Username may only contain letters, numbers, dots, underscores, and hyphens.");
@@ -69,18 +79,12 @@ public class SignupPresenter implements SignupContract.Presenter {
         view.showLoading();
 
         // ========================================
-        // 3. CHECK USERNAME UNIQUENESS
-        // Search both users AND children collections
+        // 4. CHECK USERNAME UNIQUENESS IN BOTH COLLECTIONS
         // ========================================
         checkUsernameUnique(firstName, lastName, username, email, password, role);
     }
 
 
-    /**
-     * Checks username uniqueness across:
-     *  - users collection (Parents + Providers)
-     *  - children collection (Child accounts)
-     */
     private void checkUsernameUnique(
             String firstName,
             String lastName,
@@ -95,6 +99,15 @@ public class SignupPresenter implements SignupContract.Presenter {
                 .get()
                 .addOnCompleteListener(userTask -> {
 
+
+                    if (!userTask.isSuccessful()) {
+                        view.hideLoading();
+                        Exception e = userTask.getException();
+                        view.showError("Error checking username: " + e.getMessage());
+                        return;
+                    }
+
+
                     if (!userTask.isSuccessful()) {
                         view.hideLoading();
                         view.showError("Error checking username.");
@@ -107,7 +120,6 @@ public class SignupPresenter implements SignupContract.Presenter {
                         return;
                     }
 
-                    // If not in users, check children
                     firestore.collection("children")
                             .whereEqualTo("username", username)
                             .get()
@@ -125,19 +137,13 @@ public class SignupPresenter implements SignupContract.Presenter {
                                     return;
                                 }
 
-                                // Username is FREE → proceed with FirebaseAuth signup
-                                createFirebaseUser(
-                                        firstName, lastName, username, email, password, role
-                                );
-
+                                // Username is FREE!
+                                createFirebaseUser(firstName, lastName, username, email, password, role);
                             });
                 });
     }
 
 
-    /**
-     * Creates Firebase Authentication user (email/password)
-     */
     private void createFirebaseUser(
             String firstName,
             String lastName,
@@ -157,17 +163,11 @@ public class SignupPresenter implements SignupContract.Presenter {
                     }
 
                     String uid = task.getResult().getUser().getUid();
-
-                    saveUserToFirestore(
-                            uid, firstName, lastName, username, email, role
-                    );
+                    saveUserToFirestore(uid, firstName, lastName, username, email, role);
                 });
     }
 
 
-    /**
-     * Saves parent/provider data to Firestore
-     */
     private void saveUserToFirestore(
             String uid,
             String firstName,
@@ -180,7 +180,7 @@ public class SignupPresenter implements SignupContract.Presenter {
         Map<String, Object> userData = new HashMap<>();
         userData.put("uid", uid);
         userData.put("firstName", firstName);
-        userData.put("lastName", lastName);
+        userData.put("lastName", lastName); // FIXED typo
         userData.put("username", username);
         userData.put("email", email);
         userData.put("role", role);
