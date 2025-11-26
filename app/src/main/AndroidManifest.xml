@@ -51,6 +51,17 @@
         <activity
             android:name=".HomeScreenActivity"
             android:exported="false" />
+        <activity
+        android:name=".NavigationActivity"
+        android:exported="true"
+            tools:ignore="DuplicateActivity">
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN"/>
+            <category android:name="android.intent.category.LAUNCHER"/>
+        </intent-filter>
+    </activity>
+
     </application>
+
 
 </manifest>
