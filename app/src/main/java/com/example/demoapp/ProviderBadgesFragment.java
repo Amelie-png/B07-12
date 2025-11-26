@@ -2,6 +2,7 @@ package com.example.demoapp;
 
 import android.os.Bundle;
 import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -10,17 +11,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class ChildHomeFragment extends Fragment {
+public class ProviderBadgesFragment extends Fragment {
 
-    private String childUid;
+    private String providerUid;
 
-    public ChildHomeFragment() {}
+    public ProviderBadgesFragment() {}
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_children_home, container, false);
+        return inflater.inflate(R.layout.fragment_provider_badges, container, false);
     }
 
     @Override
@@ -28,19 +29,11 @@ public class ChildHomeFragment extends Fragment {
                               @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // ---- Retrieve UID from arguments ----
+        // Unified argument key: "uid"
         if (getArguments() != null) {
-            childUid = getArguments().getString("uid");
+            providerUid = getArguments().getString("uid");
         }
 
-        Log.d("ChildHomeFragment", "childUid = " + childUid);
-
-        // ---- Load ZoneFragment into the nested container ----
-        ZoneFragment zoneFragment = new ZoneFragment();
-
-        getChildFragmentManager()
-                .beginTransaction()
-                .replace(R.id.zoneFragmentContainer, zoneFragment)
-                .commit();
+        Log.d("ProviderBadgesFragment", "providerUid = " + providerUid);
     }
 }
