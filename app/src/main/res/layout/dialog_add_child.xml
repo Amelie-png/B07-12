@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add Child"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="16dp"/>
+    <ImageView
+        android:id="@+id/iv_child_avatar_dialog"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@android:drawable/ic_menu_camera"
+        android:contentDescription="Child Avatar"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/circle_background"/>
+
+    <EditText
+        android:id="@+id/et_child_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Child Name"
+        android:inputType="textPersonName"/>
+
+    <EditText
+        android:id="@+id/et_child_dob"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Date of Birth (YYYY-MM-DD)"
+        android:inputType="date"
+        android:layout_marginTop="12dp"/>
+
+
+    <!-- 新增备注输入框 -->
+    <EditText
+        android:id="@+id/et_child_notes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Notes (optional)"
+        android:inputType="textMultiLine"
+        android:layout_marginTop="12dp"
+        android:minLines="2"
+        android:maxLines="4"/>
+
+</LinearLayout>
