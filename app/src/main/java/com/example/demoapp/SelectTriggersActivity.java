@@ -2,6 +2,7 @@ package com.example.demoapp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Pair;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -33,7 +34,12 @@ public class SelectTriggersActivity extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.recyclerTriggers);
         Button buttonAddSelected = findViewById(R.id.buttonAddSelected);
 
-        ArrayList<String> triggers = new ArrayList<>(Arrays.asList(TRIGGERS_ARRAY));
+
+        ArrayList<Pair<String, String>> triggers = new ArrayList<>();
+        for(String t: TRIGGERS_ARRAY){
+            Pair<String, String> p = new Pair<>(t, t);
+            triggers.add(p);
+        }
 
         // ⭐ Correct 3-argument constructor
         adapter = new SymptomsAdapter(
@@ -49,7 +55,18 @@ public class SelectTriggersActivity extends AppCompatActivity {
 
         buttonAddSelected.setOnClickListener(v -> {
             Intent result = new Intent();
-            result.putStringArrayListExtra("selectedTriggers", adapter.getSelected());
+
+            ArrayList<Pair<String, String>> selectedPairs = adapter.getSelected();
+            ArrayList<Bundle> bundleList = new ArrayList<>();
+
+            for (Pair<String, String> pair : selectedPairs) {
+                Bundle b = new Bundle();
+                b.putString("category", pair.first);
+                b.putString("name", pair.second);
+                bundleList.add(b);
+            }
+
+            result.putParcelableArrayListExtra("selectedTriggers", bundleList);
             setResult(RESULT_OK, result);
             finish();
         });

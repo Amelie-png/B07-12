@@ -11,6 +11,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.demoapp.entry_db.EntryLog;
+
 public class ParentAddSymptomScreen extends Fragment {
 
     @Nullable
@@ -27,15 +29,17 @@ public class ParentAddSymptomScreen extends Fragment {
 
         Button addEntryButton = view.findViewById(R.id.add_entry_button);
         addEntryButton.setOnClickListener(v ->
-                {   Toast.makeText(getContext(), "add_entry_button clicked", Toast.LENGTH_SHORT).show();
-                    Fragment next = new ChildSymptomsFragment();
+                {
+                    Toast.makeText(getContext(), "add_entry_button clicked", Toast.LENGTH_SHORT).show();
+                    Fragment next = new ChildSymptomsFragment("Parent");
                     requireActivity()
                             .getSupportFragmentManager()
                             .beginTransaction()
                             //TODO: replace R.id with the actual fragment container name
                             .replace(R.id.fragment_container, next)
                             .addToBackStack(null)
-                            .commit();}
+                            .commit();
+                }
         );
 
         if (savedInstanceState == null) {
