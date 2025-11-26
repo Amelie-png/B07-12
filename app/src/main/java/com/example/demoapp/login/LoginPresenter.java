@@ -76,11 +76,11 @@ public class LoginPresenter implements LoginContract.Presenter {
                                 switch (role) {
 
                                     case "Parent":
-                                        view.navigateToParentIdentitySelection();
+                                        view.navigateToParentIdentitySelection(uid);
                                         break;
 
                                     case "Provider":
-                                        view.navigateToProviderHome();
+                                        view.navigateToProviderHome(uid);
                                         break;
 
                                     default:
@@ -121,8 +121,10 @@ public class LoginPresenter implements LoginContract.Presenter {
                             }
 
                             // SUCCESS → Child logged in
+                            String childId = childDoc.getId();
+
                             view.hideLoading();
-                            view.navigateToChildHome();
+                            view.navigateToChildHome(childId);
                             return;
                         }
                     }
@@ -169,15 +171,17 @@ public class LoginPresenter implements LoginContract.Presenter {
                                                     return;
                                                 }
 
+                                                String uid = firebaseAuth.getCurrentUser().getUid();
+
                                                 // SUCCESS → Navigate based on role
                                                 switch (role) {
 
                                                     case "Parent":
-                                                        view.navigateToParentIdentitySelection();
+                                                        view.navigateToParentIdentitySelection(uid);
                                                         break;
 
                                                     case "Provider":
-                                                        view.navigateToProviderHome();
+                                                        view.navigateToProviderHome(uid);
                                                         break;
 
                                                     default:
