@@ -63,8 +63,11 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
 
-    //for getting local time
-    implementation("com.jakewharton.threetenabp:threetenabp:1.2.1")
+    // ----------------------------
+    // AndroidX Navigation Component
+    // ----------------------------
+    implementation("androidx.navigation:navigation-fragment:2.7.5")
+    implementation("androidx.navigation:navigation-ui:2.7.5")
 
     //for chip
     implementation("com.google.android.material:material:1.12.0")
