@@ -38,8 +38,6 @@ android {
 }
 
 dependencies {
-    implementation(libs.ui.text)
-    implementation(libs.firebase.storage)
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5");
 
     implementation(libs.appcompat)

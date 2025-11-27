@@ -62,8 +62,14 @@ public class ProviderProfile extends Fragment {
 
     private void setUpForgetPassword(){
         forgetPassword.setOnClickListener(v -> {
-            Intent intent = new Intent(requireActivity(), PasswordRecoveryActivity.class);
-            startActivity(intent);
+            Fragment next = new ProviderPasswordRecovery();
+            requireActivity()
+                    .getSupportFragmentManager()
+                    .beginTransaction()
+                    //TODO: replace R.id with the actual fragment container name
+                    .replace(R.id.fragment_container, next)
+                    .addToBackStack(null)
+                    .commit();
         });
     }
 
