@@ -2,6 +2,7 @@ package com.example.demoapp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Pair;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -10,6 +11,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.demoapp.symptoms.SymptomsAdapter;
+
+import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,7 +41,11 @@ public class SelectSymptomsActivity extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.recyclerSymptoms);
         Button buttonAddSelected = findViewById(R.id.buttonAddSelected);
 
-        ArrayList<String> symptoms = new ArrayList<>(Arrays.asList(SYMPTOMS_ARRAY));
+        ArrayList<Pair<String, String>> symptoms = new ArrayList<>();
+        for(String s: SYMPTOMS_ARRAY){
+            Pair<String, String> p = new Pair<>(s, s);
+            symptoms.add(p);
+        }
 
         // ⭐ UPDATED: Added "this" as context in the constructor
         adapter = new SymptomsAdapter(
@@ -54,7 +61,18 @@ public class SelectSymptomsActivity extends AppCompatActivity {
 
         buttonAddSelected.setOnClickListener(v -> {
             Intent result = new Intent();
-            result.putStringArrayListExtra("selectedSymptoms", adapter.getSelected());
+
+            ArrayList<Pair<String, String>> selectedPairs = adapter.getSelected();
+            ArrayList<Bundle> bundleList = new ArrayList<>();
+
+            for (Pair<String, String> pair : selectedPairs) {
+                Bundle b = new Bundle();
+                b.putString("category", pair.first);
+                b.putString("name", pair.second);
+                bundleList.add(b);
+            }
+
+            result.putParcelableArrayListExtra("selectedSymptoms", bundleList);
             setResult(RESULT_OK, result);
             finish();
         });
