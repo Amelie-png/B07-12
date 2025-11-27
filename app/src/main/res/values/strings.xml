@@ -53,17 +53,12 @@
         - You have read-only access — no data can be edited or added.\n
         - Parents can update or revoke your access in real time.
     </string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 
     <string name="add_medication_message">
         Please add your medications to track usages\n
         through your parent.
     </string>
 
-    <string name="add_medication_message">
-        Please add your medications to track usages\n
-        through your parent.
-    </string>
+
 
 </resources>
