@@ -2,6 +2,7 @@ package com.example.demoapp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,20 +25,29 @@ public class ChildProfileFragment extends Fragment {
     private TextView dobValue;
     private Button logoutButton;
 
+    private String childUid;
+
     public ChildProfileFragment() {
         // Required empty public constructor
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_child_profile, container, false);
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view,
+                              @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // ---- Retrieve UID argument ----
+        if (getArguments() != null) {
+            childUid = getArguments().getString("uid");
+        }
+        Log.d("ChildProfileFragment", "childUid = " + childUid);
 
         // Bind UI elements
         profileImage = view.findViewById(R.id.profileImage);
@@ -53,15 +63,10 @@ public class ChildProfileFragment extends Fragment {
 
         // Handle logout click
         logoutButton.setOnClickListener(v -> {
-            // Sign out from Firebase
             FirebaseAuth.getInstance().signOut();
 
-            // Go back to LoginActivity
             Intent intent = new Intent(requireActivity(), SignInActivity.class);
-
-            // Clear the back stack so user cannot press back to return
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-
             startActivity(intent);
         });
     }

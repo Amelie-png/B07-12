@@ -17,6 +17,9 @@ import android.widget.Toast;
 
 import com.example.demoapp.card_view.CardAdapter;
 import com.example.demoapp.card_view.CardItem;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 
@@ -26,6 +29,9 @@ public class ProviderHomeScreen extends Fragment {
     private ArrayList<CardItem> cardList;
     private CardAdapter adapter;
 
+    private FirebaseFirestore db;
+
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -33,6 +39,7 @@ public class ProviderHomeScreen extends Fragment {
                              @Nullable Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.provider_home_screen, container, false);
+        db = FirebaseFirestore.getInstance();
 
         // Find button
         addItemButton = view.findViewById(R.id.add_item_button);
@@ -66,4 +73,36 @@ public class ProviderHomeScreen extends Fragment {
         AddPatientPopup popup = new AddPatientPopup();
         popup.show(getParentFragmentManager(), "addPatientPopup");
     }
+    // ------------------------------------------------------------
+    //  onboarding popup
+    // ------------------------------------------------------------
+    private void checkProviderOnboarding() {
+
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        if (uid == null) {
+            return;  // Provider 未登录
+        }
+
+        DocumentReference doc = db.collection("users").document(uid);
+
+        doc.get().addOnSuccessListener(snapshot -> {
+            if (!snapshot.exists()) return;
+
+            Boolean hasSeen = snapshot.getBoolean("hasSeenOnboardingProvider");
+
+            if (hasSeen == null || !hasSeen) {
+
+                // ⭐ 显示 Provider Onboarding
+                if (isAdded()) {
+                    new ProviderOnboardingDialog()
+                            .show(getChildFragmentManager(), "providerOnboarding");
+                }
+
+                // ⭐ 更新 Firestore，防止下次再弹
+                doc.update("hasSeenOnboardingProvider", true);
+            }
+        });
+    }
+
+
 }
