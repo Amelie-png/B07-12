@@ -10,9 +10,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 public class ChildHomeFragment extends Fragment {
 
-    private String childUid;
+    private String childId;
+    private String role;
+    private FirebaseFirestore db;
+    private boolean popupShown = false;
 
     public ChildHomeFragment() {}
 
@@ -20,7 +26,15 @@ public class ChildHomeFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_children_home, container, false);
+
+        View view = inflater.inflate(R.layout.fragment_children_home, container, false);
+        db = FirebaseFirestore.getInstance();
+
+        // Retrieve child ID & role from Navigation args
+        childId = requireArguments().getString("uid");
+        role = requireArguments().getString("role");
+
+        return view;
     }
 
     @Override
@@ -28,19 +42,52 @@ public class ChildHomeFragment extends Fragment {
                               @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // ---- Retrieve UID from arguments ----
-        if (getArguments() != null) {
-            childUid = getArguments().getString("uid");
+        if (childId != null) {
+
+            // Pass both childId and role into ZoneFragment
+            Bundle args = new Bundle();
+            args.putString("uid", childId);
+            args.putString("role", role);
+
+            ZoneFragment zoneFragment = new ZoneFragment();
+            zoneFragment.setArguments(args);
+
+            getChildFragmentManager().beginTransaction()
+                    .replace(R.id.zoneFragmentContainer, zoneFragment)
+                    .commit();
         }
+    }
 
-        Log.d("ChildHomeFragment", "childUid = " + childUid);
+    @Override
+    public void onResume() {
+        super.onResume();
 
-        // ---- Load ZoneFragment into the nested container ----
-        ZoneFragment zoneFragment = new ZoneFragment();
+        if (!popupShown && childId != null) {
+            popupShown = true;
+            checkOnboardingPopup();
+        }
+    }
 
-        getChildFragmentManager()
-                .beginTransaction()
-                .replace(R.id.zoneFragmentContainer, zoneFragment)
-                .commit();
+    private void checkOnboardingPopup() {
+        DocumentReference childDoc = db.collection("children").document(childId);
+
+        childDoc.get().addOnSuccessListener(snapshot -> {
+
+            if (!snapshot.exists()) return;
+
+            Boolean hasSeen = snapshot.getBoolean("hasSeenOnboardingChild");
+
+            if (hasSeen == null || !hasSeen) {
+                showOnboardingPopup();
+                childDoc.update("hasSeenOnboardingChild", true);
+            }
+        });
+    }
+
+    private void showOnboardingPopup() {
+        if (!isAdded()) return;
+
+        new ChildOnboardingDialog(() -> {})
+                .show(getChildFragmentManager(), "childOnboarding");
     }
 }
