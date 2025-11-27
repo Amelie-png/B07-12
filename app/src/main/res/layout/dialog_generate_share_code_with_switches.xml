@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="20dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal">
+
+        <TextView
+            android:id="@+id/tv_share_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Generate Share Code"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/tv_share_code"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CODE123"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/tv_code_expiry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Valid for 7 days"
+            android:layout_marginBottom="16dp"/>
+
+        <Button
+            android:id="@+id/btn_copy_code"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Copy Code"
+            android:layout_marginBottom="8dp"/>
+
+        <Button
+            android:id="@+id/btn_generate_new"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Generate New"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Permissions Switches -->
+        <TextView android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Share Symptoms"/>
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switch_symptoms"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Share Medicines"/>
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switch_medicines"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Share PEF"/>
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switch_pef"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Share Triage"/>
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switch_triage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <Button
+            android:id="@+id/btn_save_sharing"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save Permissions"
+            android:layout_marginTop="24dp"/>
+    </LinearLayout>
+</ScrollView>
