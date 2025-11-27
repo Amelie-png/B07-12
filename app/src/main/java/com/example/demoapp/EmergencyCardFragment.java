@@ -18,40 +18,43 @@ import java.util.Map;
 
 public class EmergencyCardFragment extends Fragment {
 
+    private String childId;
+    private String parentId;
+
     public EmergencyCardFragment() {}
 
-    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container,
-                             Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-        return inflater.inflate(R.layout.card_emergency, container, false);
+        if (getArguments() != null) {
+            childId = getArguments().getString("childId");
+            parentId = getArguments().getString("parentId");
+        }
+
+        // Auto-load parentId if missing (child logged in directly)
+        if (parentId == null && childId != null) {
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            db.collection("children").document(childId)
+                    .get()
+                    .addOnSuccessListener(doc -> {
+                        if (doc.exists()) {
+                            parentId = doc.getString("parentId");
+                        }
+                    });
+        }
     }
 
-    @Override
-    public void onViewCreated(@NonNull View view,
-                              @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    // ... (onCreateView, onViewCreated)
 
-        Button backHomeBtn = view.findViewById(R.id.btnBackHome);
-
-
-
-
-        // Back to home
-        backHomeBtn.setOnClickListener(v ->
-                getParentFragmentManager().popBackStack()
-        );
-    }
     private void sendParentAlert(String type, String message) {
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         Map<String, Object> alert = new HashMap<>();
         alert.put("childId", childId);
-        alert.put("parentId", parentId);  // you must pass this in from parent
-        alert.put("type", type);          // triage_start / triage_escalation
+        alert.put("parentId", parentId);
+        alert.put("type", type);
         alert.put("message", message);
         alert.put("timestamp", System.currentTimeMillis());
 
@@ -64,5 +67,4 @@ public class EmergencyCardFragment extends Fragment {
                     System.out.println("Alert failed: " + e.getMessage());
                 });
     }
-
 }
