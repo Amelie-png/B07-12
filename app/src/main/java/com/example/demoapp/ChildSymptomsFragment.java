@@ -157,7 +157,7 @@ public class ChildSymptomsFragment extends Fragment {
         buttonAddSymptoms.setOnClickListener(v -> saveEntryToFirebase());
     }
 
-    protected String formatPairList(ArrayList<Pair<String, String>> list) {
+    private String formatPairList(ArrayList<Pair<String, String>> list) {
         if (list.isEmpty()) return "None selected";
         String formattedStr = "";
         for (Pair<String, String> p : list) {
@@ -166,7 +166,7 @@ public class ChildSymptomsFragment extends Fragment {
         return formattedStr.substring(0, formattedStr.length() - 2);
     }
 
-    protected void openTimePicker() {
+    private void openTimePicker() {
         Calendar c = Calendar.getInstance();
         new TimePickerDialog(requireContext(),
                 (view, hour, minute) -> {
@@ -195,7 +195,7 @@ public class ChildSymptomsFragment extends Fragment {
         ).show();
     }
 
-    protected void saveEntryToFirebase() {
+    private void saveEntryToFirebase() {
         if (selectedSymptomsList.isEmpty()) {
             Toast.makeText(requireContext(), "Please select at least one symptom", Toast.LENGTH_SHORT).show();
             return;
@@ -222,14 +222,14 @@ public class ChildSymptomsFragment extends Fragment {
                 });
     }
 
-    protected void clearForm() {
+    private void clearForm() {
         selectedSymptomsList.clear();
         selectedTriggersList.clear();
         setNoSelectionText();
         selectedTime = Calendar.getInstance();
     }
 
-    protected void setNoSelectionText(){
+    private void setNoSelectionText(){
         selectedSymptomsText.setText("None selected");
         selectedTriggersText.setText("None selected");
         timeValue.setText("Tap to select time");
