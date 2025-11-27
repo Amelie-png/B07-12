@@ -5,7 +5,7 @@ import java.util.*;
 public class Child {
     private String uid;                       // 唯一ID
     private String firestoreId;                // Firestore文档ID
-    private String name;
+    private String username;                   // 原 name
     private String dob;
     private String parentId;
     private String notes;
@@ -15,17 +15,20 @@ public class Child {
     private String passwordHash;
     private boolean hasSeenOnboardingChild;   // 是否看过onboarding
 
+    private double pb; // Personal Best
+
     public Child() {
         this.uid = UUID.randomUUID().toString();
         this.sharing = new HashMap<>();
         this.providerIds = new HashSet<>();
         this.shareCodes = new HashMap<>();
         this.hasSeenOnboardingChild = false;
+        this.pb = 0.0;
     }
 
-    public Child(String name, String dob, String parentId, String notes) {
+    public Child(String username, String dob, String parentId, String notes) {
         this();
-        this.name = name;
+        this.username = username;
         this.dob = dob;
         this.parentId = parentId;
         this.notes = notes;
@@ -33,6 +36,7 @@ public class Child {
         this.sharing.put("medicines", false);
         this.sharing.put("pef", false);
         this.sharing.put("triage", false);
+        this.pb = 0.0;
     }
 
     // ------------------------
@@ -44,8 +48,8 @@ public class Child {
     public String getFirestoreId() { return firestoreId; }
     public void setFirestoreId(String firestoreId) { this.firestoreId = firestoreId; }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
 
     public String getDob() { return dob; }
     public void setDob(String dob) { this.dob = dob; }
@@ -70,6 +74,8 @@ public class Child {
 
     public boolean isHasSeenOnboardingChild() { return hasSeenOnboardingChild; }
     public void setHasSeenOnboardingChild(boolean hasSeenOnboardingChild) { this.hasSeenOnboardingChild = hasSeenOnboardingChild; }
+    public double getPb() { return pb; }
+    public void setPb(double pb) { this.pb = pb; }
 
     // ------------------------
     // ShareCode 操作
@@ -136,5 +142,6 @@ public class Child {
         public void revoke() { this.revoked = true; }
         public Map<String, Boolean> getPermissions() { return permissions; }
         public void setPermissions(Map<String, Boolean> permissions) { this.permissions = permissions; }
+
     }
 }
