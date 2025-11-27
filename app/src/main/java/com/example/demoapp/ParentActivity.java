@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.demoapp.models.Child;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,7 +31,7 @@ public class ParentActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.add_child); // 布局确认
+        setContentView(R.layout.add_child);
 
         db = FirebaseFirestore.getInstance();
 
@@ -57,8 +56,10 @@ public class ParentActivity extends AppCompatActivity {
         btnAddChild.setOnClickListener(v -> showAddChildDialog());
     }
 
+    // ---------------------------
+    // Username uniqueness check
+    // ---------------------------
     private void checkUsernameUniqueForChild(String username, Runnable onUsernameAvailable) {
-        // 先查 users collection
         db.collection("users")
                 .whereEqualTo("username", username)
                 .get()
@@ -73,7 +74,6 @@ public class ParentActivity extends AppCompatActivity {
                         return;
                     }
 
-                    // 再查 children collection
                     db.collection("children")
                             .whereEqualTo("username", username)
                             .get()
@@ -88,14 +88,18 @@ public class ParentActivity extends AppCompatActivity {
                                     return;
                                 }
 
-                                // username 可用
                                 onUsernameAvailable.run();
                             });
                 });
     }
+
+
+    // ---------------------------
+    // Add Child Dialog
+    // ---------------------------
     private void showAddChildDialog() {
         View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_child, null);
-        EditText etUsername = dialogView.findViewById(R.id.et_child_name); // 改为 username
+        EditText etUsername = dialogView.findViewById(R.id.et_child_name);
         EditText etDob = dialogView.findViewById(R.id.et_child_dob);
         EditText etNotes = dialogView.findViewById(R.id.et_child_notes);
         EditText etPassword = dialogView.findViewById(R.id.et_child_password);
@@ -114,7 +118,6 @@ public class ParentActivity extends AppCompatActivity {
                         return;
                     }
 
-                    // 检查 username 是否唯一
                     checkUsernameUniqueForChild(username, () -> {
                         String parentId = UserUtils.getUid();
                         Child child = new Child(username, dob, parentId, notes);
@@ -127,20 +130,39 @@ public class ParentActivity extends AppCompatActivity {
                 .show();
     }
 
+
+    // ---------------------------
+    // Firestore Add Child (Fixed UID)
+    // ---------------------------
     private void addChildToFirestore(Child child) {
         Map<String, Object> childMap = childToMap(child);
+
         db.collection("children")
                 .add(childMap)
                 .addOnSuccessListener(docRef -> {
-                    child.setFirestoreId(docRef.getId());
+
+                    String docId = docRef.getId();
+
+                    // 🔥 Use Firestore ID as UID
+                    child.setFirestoreId(docId);
+                    child.setUid(docId);
+
+                    // 🔥 Update Firestore with correct UID
+                    docRef.update("uid", docId);
+
                     childrenList.add(child);
                     adapter.notifyItemInserted(childrenList.size() - 1);
+
                     Toast.makeText(this, "Child saved to Firestore!", Toast.LENGTH_SHORT).show();
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Error saving child: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
+
+    // ---------------------------
+    // SHA-256
+    // ---------------------------
     private String hashPassword(String password) {
         try {
             java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
@@ -158,9 +180,14 @@ public class ParentActivity extends AppCompatActivity {
         }
     }
 
+
+    // ---------------------------
+    // Edit Child
+    // ---------------------------
     private void showEditChildDialog(int position) {
         Child child = childrenList.get(position);
         View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_child, null);
+
         EditText etUsername = dialogView.findViewById(R.id.et_child_name);
         EditText etDob = dialogView.findViewById(R.id.et_child_dob);
         EditText etNotes = dialogView.findViewById(R.id.et_child_notes);
@@ -182,9 +209,7 @@ public class ParentActivity extends AppCompatActivity {
                         return;
                     }
 
-                    // 检查 username 是否在整个数据库唯一，排除自己
                     checkUsernameUniqueForChild(newUsername, () -> {
-                        // 如果新 username 和原 username 不同，才更新
                         child.setUsername(newUsername);
                         child.setDob(newDob);
                         child.setNotes(newNotes);
@@ -206,6 +231,9 @@ public class ParentActivity extends AppCompatActivity {
     }
 
 
+    // ---------------------------
+    // Delete Child
+    // ---------------------------
     private void showDeleteChildDialog(int position) {
         Child child = childrenList.get(position);
         new AlertDialog.Builder(this)
@@ -227,6 +255,10 @@ public class ParentActivity extends AppCompatActivity {
                 .show();
     }
 
+
+    // ---------------------------
+    // Share Code Dialog
+    // ---------------------------
     private void showGenerateShareCodeDialog(int position) {
         Child child = childrenList.get(position);
 
@@ -236,12 +268,10 @@ public class ParentActivity extends AppCompatActivity {
         Button btnCopyCode = dialogView.findViewById(R.id.btn_copy_code);
         Button btnGenerateNew = dialogView.findViewById(R.id.btn_generate_new);
 
-        // 打开对话框时立即生成一次性分享码
         String code = child.generateOneTimeShareCode();
         tvShareCode.setText(code);
         tvCodeExpiry.setText("Valid for 7 days");
 
-        // 保存到 Firestore
         db.collection("children")
                 .document(child.getFirestoreId())
                 .set(childToMap(child))
@@ -250,7 +280,6 @@ public class ParentActivity extends AppCompatActivity {
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Error saving share code: " + e.getMessage(), Toast.LENGTH_SHORT).show());
 
-        // 复制按钮
         btnCopyCode.setOnClickListener(v -> {
             android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
             android.content.ClipData clip = android.content.ClipData.newPlainText("Share Code", code);
@@ -258,14 +287,15 @@ public class ParentActivity extends AppCompatActivity {
             Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
         });
 
-        // 生成新码按钮
         btnGenerateNew.setOnClickListener(v -> {
             String newCode = child.generateOneTimeShareCode();
             tvShareCode.setText(newCode);
             tvCodeExpiry.setText("Valid for 7 days");
+
             db.collection("children")
                     .document(child.getFirestoreId())
                     .set(childToMap(child));
+
             Toast.makeText(this, "New share code generated!", Toast.LENGTH_SHORT).show();
         });
 
@@ -276,6 +306,10 @@ public class ParentActivity extends AppCompatActivity {
                 .show();
     }
 
+
+    // ---------------------------
+    // Manage Providers Dialog
+    // ---------------------------
     private void showManageProviderDialog(int position) {
         Child child = childrenList.get(position);
         View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_manage_provider, null);
@@ -314,6 +348,10 @@ public class ParentActivity extends AppCompatActivity {
                 .show();
     }
 
+
+    // ---------------------------
+    // Convert Child → Firestore Map
+    // ---------------------------
     private Map<String, Object> childToMap(Child child) {
         Map<String, Object> map = new HashMap<>();
         map.put("uid", child.getUid());
@@ -336,6 +374,7 @@ public class ParentActivity extends AppCompatActivity {
             codesMap.put(entry.getKey(), codeInfo);
         }
         map.put("shareCodes", codesMap);
+
         return map;
     }
 }

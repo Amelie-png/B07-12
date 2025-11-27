@@ -3,22 +3,22 @@ package com.example.demoapp.models;
 import java.util.*;
 
 public class Child {
-    private String uid;                       // 唯一ID
-    private String firestoreId;                // Firestore文档ID
-    private String username;                   // 原 name
+    private String uid;                       // Will match Firestore document ID
+    private String firestoreId;               // Firestore document ID
+    private String username;
     private String dob;
     private String parentId;
     private String notes;
-    private Map<String, Boolean> sharing;     // 总体权限字段
-    private Set<String> providerIds;          // 已绑定的 Provider
-    private Map<String, ShareCode> shareCodes; // key: 一次性 code 或 providerId
+    private Map<String, Boolean> sharing;
+    private Set<String> providerIds;
+    private Map<String, ShareCode> shareCodes;
     private String passwordHash;
-    private boolean hasSeenOnboardingChild;   // 是否看过onboarding
+    private boolean hasSeenOnboardingChild;
 
     private double pb; // Personal Best
 
     public Child() {
-        this.uid = UUID.randomUUID().toString();
+        // ❗ NO MORE random UUID here — will use Firestore document ID instead
         this.sharing = new HashMap<>();
         this.providerIds = new HashSet<>();
         this.shareCodes = new HashMap<>();
@@ -32,11 +32,11 @@ public class Child {
         this.dob = dob;
         this.parentId = parentId;
         this.notes = notes;
+
         this.sharing.put("symptoms", false);
         this.sharing.put("medicines", false);
         this.sharing.put("pef", false);
         this.sharing.put("triage", false);
-        this.pb = 0.0;
     }
 
     // ------------------------
@@ -74,6 +74,7 @@ public class Child {
 
     public boolean isHasSeenOnboardingChild() { return hasSeenOnboardingChild; }
     public void setHasSeenOnboardingChild(boolean hasSeenOnboardingChild) { this.hasSeenOnboardingChild = hasSeenOnboardingChild; }
+
     public double getPb() { return pb; }
     public void setPb(double pb) { this.pb = pb; }
 
@@ -91,6 +92,7 @@ public class Child {
         ShareCode sc = this.shareCodes.get(code);
         if (sc != null && !sc.isRevoked() &&
                 System.currentTimeMillis() - sc.getTimestamp() <= 7L * 24 * 60 * 60 * 1000) {
+
             this.providerIds.add(providerId);
             this.shareCodes.put(providerId, sc);
             this.shareCodes.remove(code);
@@ -114,6 +116,7 @@ public class Child {
     public boolean verifyShareCode(String providerId, String code) {
         ShareCode sc = this.shareCodes.get(providerId);
         if (sc == null || sc.isRevoked()) return false;
+
         return System.currentTimeMillis() - sc.getTimestamp() <= 7L * 24 * 60 * 60 * 1000
                 && code.equals(sc.getCode());
     }
@@ -142,6 +145,5 @@ public class Child {
         public void revoke() { this.revoked = true; }
         public Map<String, Boolean> getPermissions() { return permissions; }
         public void setPermissions(Map<String, Boolean> permissions) { this.permissions = permissions; }
-
     }
 }
