@@ -184,6 +184,7 @@ public class SignupPresenter implements SignupContract.Presenter {
         userData.put("username", username);
         userData.put("email", email);
         userData.put("role", role);
+        userData.put("hasSeenOnboarding", false);
 
         userRepository.saveUserProfile(uid, userData)
                 .addOnCompleteListener(saveTask -> {
