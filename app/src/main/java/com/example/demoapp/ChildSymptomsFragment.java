@@ -1,102 +1,164 @@
 package com.example.demoapp;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 
 public class ChildSymptomsFragment extends Fragment {
 
-    private EditText symptomsInput;
+    private String childUid;
+
+    // Symptoms
+    private TextView selectedSymptomsText;
+    private Button buttonSelectSymptoms;
+
+    // Triggers
+    private TextView selectedTriggersText;
+    private Button buttonSelectTriggers;
+
+    // Time + Date
     private TextView timeValue, dateValue;
     private Button buttonAddSymptoms;
 
-    public ChildSymptomsFragment() {
-        // Required empty constructor
-    }
+    // Launchers
+    private ActivityResultLauncher<Intent> selectSymptomsLauncher;
+    private ActivityResultLauncher<Intent> selectTriggersLauncher;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_child_symptoms, container, false);
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view,
+                              @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        symptomsInput = view.findViewById(R.id.symptomsInput);
+        // ---- Retrieve UID argument ----
+        if (getArguments() != null) {
+            childUid = getArguments().getString("uid");
+        }
+        Log.d("ChildSymptomsFragment", "childUid = " + childUid);
+
+        // Symptoms UI
+        buttonSelectSymptoms = view.findViewById(R.id.buttonSelectSymptoms);
+        selectedSymptomsText = view.findViewById(R.id.selectedSymptomsText);
+
+        // Triggers UI
+        buttonSelectTriggers = view.findViewById(R.id.buttonSelectTriggers);
+        selectedTriggersText = view.findViewById(R.id.selectedTriggersText);
+
+        // Time + Date UI
         timeValue = view.findViewById(R.id.timeValue);
         dateValue = view.findViewById(R.id.dateValue);
         buttonAddSymptoms = view.findViewById(R.id.buttonAddSymptoms);
 
-        // Time Picker
-        timeValue.setOnClickListener(v -> {
-            Calendar c = Calendar.getInstance();
-            int hour = c.get(Calendar.HOUR_OF_DAY);
-            int min = c.get(Calendar.MINUTE);
+        // ============================
+        // SYMPTOMS RESULT HANDLER
+        // ============================
+        selectSymptomsLauncher =
+                registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                        result -> {
+                            if (result.getResultCode() == Activity.RESULT_OK) {
+                                Intent data = result.getData();
+                                if (data != null) {
+                                    ArrayList<String> list =
+                                            data.getStringArrayListExtra("selectedSymptoms");
 
-            TimePickerDialog dialog = new TimePickerDialog(
-                    requireContext(),
-                    (timePicker, selectedHour, selectedMinute) -> {
-                        String formatted = String.format("%02d:%02d", selectedHour, selectedMinute);
-                        timeValue.setText(formatted);
-                    },
-                    hour, min, true
-            );
+                                    if (list != null && !list.isEmpty()) {
+                                        selectedSymptomsText.setText(list.toString());
+                                    } else {
+                                        selectedSymptomsText.setText("No symptoms selected");
+                                    }
+                                }
+                            }
+                        });
 
-            dialog.show();
+        buttonSelectSymptoms.setOnClickListener(v -> {
+            Intent intent = new Intent(requireContext(), SelectSymptomsActivity.class);
+            selectSymptomsLauncher.launch(intent);
         });
 
-        // Date Picker
-        dateValue.setOnClickListener(v -> {
-            Calendar c = Calendar.getInstance();
-            int year = c.get(Calendar.YEAR);
-            int month = c.get(Calendar.MONTH);
-            int day = c.get(Calendar.DAY_OF_MONTH);
+        // ============================
+        // TRIGGERS RESULT HANDLER
+        // ============================
+        selectTriggersLauncher =
+                registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                        result -> {
+                            if (result.getResultCode() == Activity.RESULT_OK) {
+                                Intent data = result.getData();
+                                if (data != null) {
+                                    ArrayList<String> list =
+                                            data.getStringArrayListExtra("selectedTriggers");
 
-            DatePickerDialog dialog = new DatePickerDialog(
-                    requireContext(),
-                    (datePicker, y, m, d) -> {
-                        String formatted = String.format("%02d.%02d.%04d", d, m + 1, y);
-                        dateValue.setText(formatted);
-                    },
-                    year, month, day
-            );
+                                    if (list != null && !list.isEmpty()) {
+                                        selectedTriggersText.setText(list.toString());
+                                    } else {
+                                        selectedTriggersText.setText("No triggers selected");
+                                    }
+                                }
+                            }
+                        });
 
-            dialog.show();
+        buttonSelectTriggers.setOnClickListener(v -> {
+            Intent intent = new Intent(requireContext(), SelectTriggersActivity.class);
+            selectTriggersLauncher.launch(intent);
         });
 
-        // Add button validation
-        buttonAddSymptoms.setOnClickListener(v -> {
-            String symptoms = symptomsInput.getText().toString().trim();
-            String time = timeValue.getText().toString();
-            String date = dateValue.getText().toString();
+        // Time picker
+        timeValue.setOnClickListener(v -> openTimePicker());
 
-            if (symptoms.isEmpty() ||
-                    time.equals("Tap to select time") ||
-                    date.equals("Tap to select date")) {
-                Toast.makeText(requireContext(), "Please fill all fields", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(requireContext(), "Symptoms Saved!", Toast.LENGTH_SHORT).show();
+        // Date picker
+        dateValue.setOnClickListener(v -> openDatePicker());
 
-                // Optional: clear inputs
-                symptomsInput.setText("");
-                timeValue.setText("Tap to select time");
-                dateValue.setText("Tap to select date");
-            }
-        });
+        // Add entry
+        buttonAddSymptoms.setOnClickListener(v ->
+                Toast.makeText(requireContext(),
+                        "Entry saved successfully!",
+                        Toast.LENGTH_SHORT).show()
+        );
+    }
+
+    private void openTimePicker() {
+        Calendar c = Calendar.getInstance();
+        new TimePickerDialog(requireContext(),
+                (view, hour, minute) ->
+                        timeValue.setText(String.format("%02d:%02d", hour, minute)),
+                c.get(Calendar.HOUR_OF_DAY),
+                c.get(Calendar.MINUTE),
+                true
+        ).show();
+    }
+
+    private void openDatePicker() {
+        Calendar c = Calendar.getInstance();
+        new DatePickerDialog(requireContext(),
+                (view, year, month, day) ->
+                        dateValue.setText(String.format("%02d.%02d.%04d", day, month + 1, year)),
+                c.get(Calendar.YEAR),
+                c.get(Calendar.MONTH),
+                c.get(Calendar.DAY_OF_MONTH)
+        ).show();
     }
 }

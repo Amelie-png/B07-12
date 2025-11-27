@@ -1,6 +1,7 @@
 package com.example.demoapp;
 
 import android.os.Bundle;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -14,21 +15,32 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BadgesFragment extends Fragment {
+public class ChildBadgesFragment extends Fragment {
 
-    public BadgesFragment() {
+    private String childUid;
+
+    public ChildBadgesFragment() {
         // Required empty public constructor
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_badges, container, false);
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view,
+                              @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // Retrieve uid argument passed from MainNavActivity
+        if (getArguments() != null) {
+            childUid = getArguments().getString("uid");
+        }
+
+        Log.d("ChildBadgesFragment", "childUid = " + childUid);
 
         // ---------- BADGE COLLECTION ----------
         RecyclerView badgeRecycler = view.findViewById(R.id.recyclerBadges);
@@ -44,7 +56,6 @@ public class BadgesFragment extends Fragment {
 
         BadgeAdapter badgeAdapter = new BadgeAdapter(badges);
         badgeRecycler.setAdapter(badgeAdapter);
-
 
         // ---------- TROPHY COLLECTION ----------
         RecyclerView trophyRecycler = view.findViewById(R.id.recyclerTrophies);
