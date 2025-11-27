@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/titleTriage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Asthma Triage"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:paddingBottom="12dp" />
+
+        <!-- RED FLAG SECTION -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Red-flag symptoms:"
+            android:textStyle="bold"
+            android:paddingTop="8dp"/>
+
+        <CheckBox
+            android:id="@+id/chkCantSpeak"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Can't speak full sentences" />
+
+        <CheckBox
+            android:id="@+id/chkRetractions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Chest pulling in (retractions)" />
+
+        <CheckBox
+            android:id="@+id/chkBlueLips"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Blue/gray lips or nails" />
+
+        <!-- MODERATE SYMPTOMS -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:text="Other symptoms:"
+            android:paddingTop="16dp"/>
+
+        <CheckBox
+            android:id="@+id/chkCough"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Coughing/wheezing" />
+
+        <CheckBox
+            android:id="@+id/chkChestTight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Chest tightness" />
+
+        <!-- RESCUE ATTEMPTS -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:text="Rescue medication attempts (past 20–30 min):"
+            android:paddingTop="16dp"/>
+
+        <EditText
+            android:id="@+id/inputRescueAttempts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:hint="e.g. 0, 1, 2+" />
+
+        <!-- Optional PEF -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:text="Current PEF (optional):"
+            android:paddingTop="16dp"/>
+
+        <EditText
+            android:id="@+id/inputPEF"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter value (or leave blank)"
+            android:inputType="number" />
+
+        <Button
+            android:id="@+id/btnCheckTriage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Check Triage"
+            android:layout_marginTop="24dp" />
+
+        <!-- Result Card -->
+        <LinearLayout
+            android:id="@+id/resultCard"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/darker_gray"
+            android:padding="16dp"
+            android:layout_marginTop="20dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textRiskTitle"
+                android:text="Risk Result"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/textRiskDetails"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Details here"
+                android:paddingTop="8dp"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>
