@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.util.Pair;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 public class ChildSymptomsFragment extends Fragment {
+
+    private String childUid;
 
     // Symptoms
     protected TextView selectedSymptomsText;
@@ -54,22 +57,35 @@ public class ChildSymptomsFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_child_symptoms, container, false);
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view,
+                              @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         entryLogRepository = new EntryLogRepository();
 
         // Connect views
+        // ---- Retrieve UID argument ----
+        if (getArguments() != null) {
+            childUid = getArguments().getString("uid");
+        }
+        Log.d("ChildSymptomsFragment", "childUid = " + childUid);
+
+        // Symptoms UI
         buttonSelectSymptoms = view.findViewById(R.id.buttonSelectSymptoms);
         selectedSymptomsText = view.findViewById(R.id.selectedSymptomsText);
+
+        // Triggers UI
         buttonSelectTriggers = view.findViewById(R.id.buttonSelectTriggers);
         selectedTriggersText = view.findViewById(R.id.selectedTriggersText);
+
+        // Time + Date UI
         timeValue = view.findViewById(R.id.timeValue);
         dateValue = view.findViewById(R.id.dateValue);
         buttonAddSymptoms = view.findViewById(R.id.buttonAddSymptoms);
@@ -98,6 +114,7 @@ public class ChildSymptomsFragment extends Fragment {
                             }
                         });
 
+        // Open SelectSymptomsActivity
         buttonSelectSymptoms.setOnClickListener(v -> {
             Intent intent = new Intent(requireContext(), SelectSymptomsActivity.class);
             selectSymptomsLauncher.launch(intent);
@@ -124,6 +141,7 @@ public class ChildSymptomsFragment extends Fragment {
                             }
                         });
 
+        // Open SelectTriggersActivity
         buttonSelectTriggers.setOnClickListener(v -> {
             Intent intent = new Intent(requireContext(), SelectTriggersActivity.class);
             selectTriggersLauncher.launch(intent);
@@ -162,7 +180,7 @@ public class ChildSymptomsFragment extends Fragment {
         ).show();
     }
 
-    protected void openDatePicker() {
+    private void openDatePicker() {
         Calendar c = Calendar.getInstance();
         new DatePickerDialog(requireContext(),
                 (view, year, month, day) -> {

@@ -1,39 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.demoapp">
 
+    <!-- 权限 -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.DemoApp">
 
-        <!-- ⭐ MAIN SCREEN WHEN APP LAUNCHES ⭐ -->
+        <!-- Launcher Activity -->
         <activity
-            android:name=".MainActivity"
+            android:name=".CreateAccountActivity"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
-        <!-- No launcher tag here -->
+        <!-- 内部使用 Activity -->
+        <activity android:name=".ChooseIdentityActivity" android:exported="false" />
         <activity android:name=".SelectSymptomsActivity" android:exported="false" />
         <activity android:name=".SelectTriggersActivity" android:exported="false" />
         <activity android:name=".PasswordRecoveryActivity" android:exported="false" />
         <activity android:name=".CardViewHomeScreen" android:exported="false" />
-        <activity android:name=".NavigationActivity" android:exported="false" />
-        <activity android:name=".CreateAccountActivity" android:exported="false" />
+
         <activity android:name=".SignInActivity" android:exported="false" />
         <activity android:name=".HomeScreenActivity" android:exported="false" />
+
+        <!-- ParentActivity -->
+        <activity android:name=".ParentActivity" android:exported="false" />
+
+        <!-- NEW: MainNavActivity -->
+        <activity android:name=".MainNavActivity" android:exported="false" />
 
     </application>
 

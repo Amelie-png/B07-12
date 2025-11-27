@@ -23,17 +23,18 @@ public class UserRepository {
     /**
      * Saves a user's profile data to Firestore.
      *
-     * Example fields inside 'data' map:
-     *  - firstName
-     *  - lastName
-     *  - username
-     *  - email
-     *  - role
-     *  - dob
+     * Automatically includes new fields:
+     *  - createdAt (timestamp)
+     *  - hasSeenOnboarding (default = false)
      */
     public Task<Void> saveUserProfile(String uid, Map<String, Object> data) {
-        // Add a timestamp when user is created
+        // Always add creation timestamp
         data.put("createdAt", Timestamp.now());
+
+        // New field for onboarding
+        if (!data.containsKey("hasSeenOnboarding")) {
+            data.put("hasSeenOnboarding", false);
+        }
 
         return db.collection("users")
                 .document(uid)
@@ -58,5 +59,13 @@ public class UserRepository {
                 .document(uid)
                 .get(); // Presenter will extract "role" from the snapshot
     }
-}
 
+    /**
+     * Marks a user as having completed onboarding.
+     */
+    public Task<Void> setOnboardingSeen(String uid) {
+        return db.collection("users")
+                .document(uid)
+                .update("hasSeenOnboarding", true);
+    }
+}

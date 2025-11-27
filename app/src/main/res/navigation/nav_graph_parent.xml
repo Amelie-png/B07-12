@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph_parent"
+    app:startDestination="@id/parentHomeFragment">
+
+    <fragment
+        android:id="@+id/parentHomeFragment"
+        android:name="com.example.demoapp.ParentHomeFragment"
+        android:label="Home"/>
+
+    <fragment
+        android:id="@+id/parentSymptomFragment"
+        android:name="com.example.demoapp.ParentSymptomFragment"
+        android:label="Symptom"/>
+
+    <fragment
+        android:id="@+id/parentMedicineFragment"
+        android:name="com.example.demoapp.ParentMedicineFragment"
+        android:label="Medicine"/>
+
+    <fragment
+        android:id="@+id/parentBadgesFragment"
+        android:name="com.example.demoapp.ParentBadgesFragment"
+        android:label="Badges"/>
+
+    <fragment
+        android:id="@+id/parentProfileFragment"
+        android:name="com.example.demoapp.ParentProfileFragment"
+        android:label="Profile"/>
+
+</navigation>
