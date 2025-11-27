@@ -3,6 +3,7 @@ package com.example.demoapp.symptoms;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.text.InputType;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,8 +20,8 @@ import java.util.ArrayList;
 
 public class SymptomsAdapter extends RecyclerView.Adapter<SymptomsAdapter.ViewHolder> {
 
-    private final ArrayList<String> symptomsList;
-    private final ArrayList<String> selectedSymptoms;
+    private final ArrayList<Pair<String, String>> symptomsList;
+    private final ArrayList<Pair<String, String>> selectedSymptoms;
     private final OnSelectionChangedListener listener;
     private final Context context;
 
@@ -28,7 +29,7 @@ public class SymptomsAdapter extends RecyclerView.Adapter<SymptomsAdapter.ViewHo
         void onSelectionChanged(int count);
     }
 
-    public SymptomsAdapter(ArrayList<String> symptomsList,
+    public SymptomsAdapter(ArrayList<Pair<String, String>> symptomsList,
                            OnSelectionChangedListener listener,
                            Context context) {
         this.symptomsList = symptomsList;
@@ -37,7 +38,7 @@ public class SymptomsAdapter extends RecyclerView.Adapter<SymptomsAdapter.ViewHo
         this.context = context;
     }
 
-    public ArrayList<String> getSelected() {
+    public ArrayList<Pair<String, String>> getSelected() {
         return selectedSymptoms;
     }
 
@@ -53,11 +54,12 @@ public class SymptomsAdapter extends RecyclerView.Adapter<SymptomsAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull SymptomsAdapter.ViewHolder holder,
                                  int position) {
-
-        String symptom = symptomsList.get(position);
+        Pair<String, String> symptomPair = symptomsList.get(position);
+        String symptom = symptomPair.second;
         holder.textName.setText(symptom);
 
-        boolean isSelected = selectedSymptoms.contains(symptom);
+        boolean isSelected = isSelected(symptomPair, selectedSymptoms);
+
         holder.circle.setImageResource(
                 isSelected ? R.drawable.ic_circle_selected : R.drawable.ic_circle_unselected
         );
@@ -76,14 +78,25 @@ public class SymptomsAdapter extends RecyclerView.Adapter<SymptomsAdapter.ViewHo
             // NORMAL SELECT/DESELECT
             // ------------------------
             if (isSelected) {
-                selectedSymptoms.remove(symptom);
+                selectedSymptoms.removeIf(p -> p.first.equals(symptom) && p.second.equals(symptom));
             } else {
-                selectedSymptoms.add(symptom);
+                selectedSymptoms.add(new Pair<>(symptom, symptom));
             }
 
             notifyItemChanged(position);
             listener.onSelectionChanged(selectedSymptoms.size());
         });
+    }
+
+    public boolean isSelected(Pair<String, String> target, ArrayList<Pair<String, String>> list){
+        String first = target.first;
+        String second = target.second;
+        for (Pair<String, String> p : list) {
+            if (p.first.equals(first) && p.second.equals(second)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -102,11 +115,7 @@ public class SymptomsAdapter extends RecyclerView.Adapter<SymptomsAdapter.ViewHo
         }
     }
 
-    // ====================================================
-    //       CUSTOM INPUT DIALOG (Option A — Recommended)
-    // ====================================================
     private void showCustomInputDialog() {
-
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Enter custom symptom");
 
@@ -117,19 +126,13 @@ public class SymptomsAdapter extends RecyclerView.Adapter<SymptomsAdapter.ViewHo
 
         builder.setPositiveButton("OK", (dialog, which) -> {
             String custom = input.getText().toString().trim();
-
             if (!custom.isEmpty()) {
-
-                // Add to selected list
-                selectedSymptoms.add(custom);
-
-                // Update count on bottom button
+                selectedSymptoms.add(new Pair<>("Other", custom));
                 listener.onSelectionChanged(selectedSymptoms.size());
             }
         });
 
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
-
         builder.show();
     }
 }
