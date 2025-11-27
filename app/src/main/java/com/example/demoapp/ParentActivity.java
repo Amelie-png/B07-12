@@ -57,9 +57,45 @@ public class ParentActivity extends AppCompatActivity {
         btnAddChild.setOnClickListener(v -> showAddChildDialog());
     }
 
+    private void checkUsernameUniqueForChild(String username, Runnable onUsernameAvailable) {
+        // 先查 users collection
+        db.collection("users")
+                .whereEqualTo("username", username)
+                .get()
+                .addOnCompleteListener(userTask -> {
+                    if (!userTask.isSuccessful()) {
+                        Toast.makeText(this, "Error checking username: " + userTask.getException(), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    if (!userTask.getResult().isEmpty()) {
+                        Toast.makeText(this, "Username already exists in users.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    // 再查 children collection
+                    db.collection("children")
+                            .whereEqualTo("username", username)
+                            .get()
+                            .addOnCompleteListener(childTask -> {
+                                if (!childTask.isSuccessful()) {
+                                    Toast.makeText(this, "Error checking username.", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+
+                                if (!childTask.getResult().isEmpty()) {
+                                    Toast.makeText(this, "Username already exists in children.", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+
+                                // username 可用
+                                onUsernameAvailable.run();
+                            });
+                });
+    }
     private void showAddChildDialog() {
         View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_child, null);
-        EditText etName = dialogView.findViewById(R.id.et_child_name);
+        EditText etUsername = dialogView.findViewById(R.id.et_child_name); // 改为 username
         EditText etDob = dialogView.findViewById(R.id.et_child_dob);
         EditText etNotes = dialogView.findViewById(R.id.et_child_notes);
         EditText etPassword = dialogView.findViewById(R.id.et_child_password);
@@ -68,32 +104,24 @@ public class ParentActivity extends AppCompatActivity {
                 .setTitle("Add Child")
                 .setView(dialogView)
                 .setPositiveButton("Add", (dialog, which) -> {
-                    String name = etName.getText().toString().trim();
+                    String username = etUsername.getText().toString().trim();
                     String dob = etDob.getText().toString().trim();
                     String notes = etNotes.getText().toString().trim();
                     String password = etPassword.getText().toString().trim();
 
-                    if (TextUtils.isEmpty(name) || TextUtils.isEmpty(dob) || TextUtils.isEmpty(password)) {
-                        Toast.makeText(this, "Name, DOB, and Password cannot be empty", Toast.LENGTH_SHORT).show();
+                    if (TextUtils.isEmpty(username) || TextUtils.isEmpty(dob) || TextUtils.isEmpty(password)) {
+                        Toast.makeText(this, "Username, DOB, and Password cannot be empty", Toast.LENGTH_SHORT).show();
                         return;
                     }
 
-                    // 检查是否有同名 child
-                    db.collection("children")
-                            .whereEqualTo("parentId", UserUtils.getUid())
-                            .whereEqualTo("name", name)
-                            .get()
-                            .addOnSuccessListener(querySnapshot -> {
-                                if (!querySnapshot.isEmpty()) {
-                                    Toast.makeText(this, "Child name already exists", Toast.LENGTH_SHORT).show();
-                                    return;
-                                }
-                                // 添加 child
-                                String parentId = UserUtils.getUid();
-                                Child child = new Child(name, dob, parentId, notes);
-                                child.setPasswordHash(hashPassword(password));
-                                addChildToFirestore(child);
-                            });
+                    // 检查 username 是否唯一
+                    checkUsernameUniqueForChild(username, () -> {
+                        String parentId = UserUtils.getUid();
+                        Child child = new Child(username, dob, parentId, notes);
+                        child.setPasswordHash(hashPassword(password));
+
+                        addChildToFirestore(child);
+                    });
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
@@ -133,11 +161,11 @@ public class ParentActivity extends AppCompatActivity {
     private void showEditChildDialog(int position) {
         Child child = childrenList.get(position);
         View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_child, null);
-        EditText etName = dialogView.findViewById(R.id.et_child_name);
+        EditText etUsername = dialogView.findViewById(R.id.et_child_name);
         EditText etDob = dialogView.findViewById(R.id.et_child_dob);
         EditText etNotes = dialogView.findViewById(R.id.et_child_notes);
 
-        etName.setText(child.getName());
+        etUsername.setText(child.getUsername());
         etDob.setText(child.getDob());
         etNotes.setText(child.getNotes());
 
@@ -145,45 +173,38 @@ public class ParentActivity extends AppCompatActivity {
                 .setTitle("Edit Child")
                 .setView(dialogView)
                 .setPositiveButton("Save", (dialog, which) -> {
-                    String newName = etName.getText().toString().trim();
+                    String newUsername = etUsername.getText().toString().trim();
                     String newDob = etDob.getText().toString().trim();
                     String newNotes = etNotes.getText().toString().trim();
 
-                    if (TextUtils.isEmpty(newName) || TextUtils.isEmpty(newDob)) {
-                        Toast.makeText(this, "Name and DOB cannot be empty", Toast.LENGTH_SHORT).show();
+                    if (TextUtils.isEmpty(newUsername) || TextUtils.isEmpty(newDob)) {
+                        Toast.makeText(this, "Username and DOB cannot be empty", Toast.LENGTH_SHORT).show();
                         return;
                     }
 
-                    // 检查 name 是否重复（排除自己）
-                    db.collection("children")
-                            .whereEqualTo("parentId", child.getParentId())
-                            .whereEqualTo("name", newName)
-                            .get()
-                            .addOnSuccessListener(querySnapshot -> {
-                                if (!querySnapshot.isEmpty()) {
-                                    Toast.makeText(this, "Child name already exists", Toast.LENGTH_SHORT).show();
-                                    return;
-                                }
-                                // 更新对象
-                                child.setName(newName);
-                                child.setDob(newDob);
-                                child.setNotes(newNotes);
+                    // 检查 username 是否在整个数据库唯一，排除自己
+                    checkUsernameUniqueForChild(newUsername, () -> {
+                        // 如果新 username 和原 username 不同，才更新
+                        child.setUsername(newUsername);
+                        child.setDob(newDob);
+                        child.setNotes(newNotes);
 
-                                db.collection("children")
-                                        .document(child.getFirestoreId())
-                                        .set(childToMap(child))
-                                        .addOnSuccessListener(aVoid -> {
-                                            childrenList.set(position, child);
-                                            adapter.notifyItemChanged(position);
-                                            Toast.makeText(this, "Child updated", Toast.LENGTH_SHORT).show();
-                                        })
-                                        .addOnFailureListener(e ->
-                                                Toast.makeText(this, "Error updating child: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-                            });
+                        db.collection("children")
+                                .document(child.getFirestoreId())
+                                .set(childToMap(child))
+                                .addOnSuccessListener(aVoid -> {
+                                    childrenList.set(position, child);
+                                    adapter.notifyItemChanged(position);
+                                    Toast.makeText(this, "Child updated", Toast.LENGTH_SHORT).show();
+                                })
+                                .addOnFailureListener(e ->
+                                        Toast.makeText(this, "Error updating child: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                    });
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
     }
+
 
     private void showDeleteChildDialog(int position) {
         Child child = childrenList.get(position);
@@ -255,8 +276,6 @@ public class ParentActivity extends AppCompatActivity {
                 .show();
     }
 
-
-
     private void showManageProviderDialog(int position) {
         Child child = childrenList.get(position);
         View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_manage_provider, null);
@@ -298,13 +317,14 @@ public class ParentActivity extends AppCompatActivity {
     private Map<String, Object> childToMap(Child child) {
         Map<String, Object> map = new HashMap<>();
         map.put("uid", child.getUid());
-        map.put("name", child.getName());
+        map.put("username", child.getUsername());
         map.put("dob", child.getDob());
         map.put("parentId", child.getParentId());
         map.put("notes", child.getNotes());
         map.put("sharing", child.getSharing());
         map.put("providerIds", new ArrayList<>(child.getProviderIds()));
         map.put("hasSeenOnboardingChild", child.isHasSeenOnboardingChild());
+        map.put("passwordHash", child.getPasswordHash());
 
         Map<String, Map<String, Object>> codesMap = new HashMap<>();
         for (Map.Entry<String, Child.ShareCode> entry : child.getShareCodes().entrySet()) {
