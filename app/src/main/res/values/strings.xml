@@ -59,6 +59,15 @@
         through your parent.
     </string>
 
-
+    <string name="home">Home</string>
+    <string name="symptom">Symptom</string>
+    <string name="badge">Badge</string>
+    <string name="profile">Profile</string>
+    <string name="sharing_settings">Sharing Settings</string>
+    <string name="share_symptoms">Share Symptoms</string>
+    <string name="share_medicines">Share Medicines</string>
+    <string name="share_pef">Share PEF</string>
+    <string name="share_triage">Share Triage</string>
+    <string name="save_settings">Save Settings</string>
 
 </resources>
