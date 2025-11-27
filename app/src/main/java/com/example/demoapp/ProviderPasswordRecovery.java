@@ -10,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Toast;
 
 public class ProviderPasswordRecovery extends Fragment {
     @Nullable
@@ -28,7 +27,7 @@ public class ProviderPasswordRecovery extends Fragment {
         Button back = view.findViewById(R.id.back_button);
         back.setOnClickListener(v ->
                 {
-                    Fragment backFragment = new ProviderProfile();
+                    Fragment backFragment = new ProviderProfileFragment();
                     requireActivity()
                             .getSupportFragmentManager()
                             .beginTransaction()
