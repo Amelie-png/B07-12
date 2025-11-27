@@ -39,7 +39,7 @@ public class ChildAdapter extends RecyclerView.Adapter<ChildAdapter.VH> {
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
         Child child = children.get(position);
-        holder.tvName.setText(child.getName());
+        holder.tvName.setText(child.getUsername());
         holder.tvDob.setText(child.getDob());
         holder.tvNotes.setText(child.getNotes());
 
