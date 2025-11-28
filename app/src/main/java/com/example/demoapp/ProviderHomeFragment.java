@@ -19,11 +19,13 @@ import com.example.demoapp.card_view.CardAdapter;
 import com.example.demoapp.card_view.CardItem;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class ProviderHomeFragment extends Fragment {
+public class ProviderHomeFragment extends Fragment implements AddPatientPopup.OnDataChangedListener {
     private String providerUid;
     private Button addItemButton;
     private RecyclerView recyclerView;
@@ -35,13 +37,14 @@ public class ProviderHomeFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        db = FirebaseFirestore.getInstance();
-        auth = FirebaseAuth.getInstance();
-
         super.onViewCreated(view, savedInstanceState);
 
         if (getArguments() != null) {
             providerUid = getArguments().getString("uid");
+        }
+        //TODO: delete else
+        else{
+            providerUid = "65eaII6T0dTv20cnH6ZNPGkkHTQ2";
         }
 
         Log.d("ProviderHomeFragment", "providerUid = " + providerUid);
@@ -54,7 +57,8 @@ public class ProviderHomeFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.provider_home_screen, container, false);
-
+        db = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
 
         // Find button
         addItemButton = view.findViewById(R.id.add_item_button);
@@ -70,36 +74,47 @@ public class ProviderHomeFragment extends Fragment {
         recyclerView = view.findViewById(R.id.patient_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Sample data for testing
+        // Load Children card view
         cardList = new ArrayList<>();
-        cardList.add(new CardItem("A", R.drawable.profile_default_img, R.color.white, "", "", new ArrayList<String>()));
-        cardList.add(new CardItem("B", R.drawable.profile_default_img, R.color.white,"", "", new ArrayList<String>()));
-        cardList.add(new CardItem("C", R.drawable.profile_default_img, R.color.white, "", "", new ArrayList<String>()));
-        cardList.add(new CardItem("D", R.drawable.profile_default_img, R.color.white, "", "", new ArrayList<String>()));
-
-        // Set adapter
         adapter = new CardAdapter(cardList);
         recyclerView.setAdapter(adapter);
+
+        loadChildrenList();
 
         return view;
     }
     private void onAddPatientClicked() {
-        Toast.makeText(getContext(), "Button clicked!", Toast.LENGTH_SHORT).show();
-        AddPatientPopup popup = new AddPatientPopup();
+        AddPatientPopup popup = new AddPatientPopup(providerUid);
+        popup.setOnDataChangedListener(this);
         popup.show(getParentFragmentManager(), "addPatientPopup");
     }
 
-    private String getProviderID(){
-        if (auth.getCurrentUser() != null) {
-            String providerId = auth.getCurrentUser().getUid();
-            // Now you can use providerId
-            Toast.makeText(getContext(), "Current provider UID: " + providerId, Toast.LENGTH_SHORT).show();
-            return providerId;
-        } else {
-            // No user logged in
-            Toast.makeText(getContext(), "No provider logged in!", Toast.LENGTH_SHORT).show();
-        }
-        return null;
+    private void loadChildrenList(){
+        ArrayList<CardItem> childrenList = new ArrayList<CardItem>();
+        db.collection("children")
+                .get()
+                .addOnSuccessListener(childrenSnapshot -> {
+                    List<DocumentSnapshot> childrenDocs = childrenSnapshot.getDocuments();
+                    for (DocumentSnapshot individualChildDoc : childrenDocs) {
+                        // Check if providerIds  contains the current providerId
+                        ArrayList<String> providerIds = (ArrayList<String>) individualChildDoc.get("providerIds");
+                        if (providerIds != null && providerIds.contains(providerUid)) {
+                            String childName = individualChildDoc.getString("username");
+                            String childId = individualChildDoc.getString("uid");
+                            String parentId = individualChildDoc.getString("parentId");
+                            childrenList.add(new CardItem(childName, R.drawable.profile_default_img, R.color.white, childId, parentId, new ArrayList<String>()));
+                        }
+                    }
+                    cardList = childrenList;
+                    adapter.setList(childrenList);
+                    adapter.notifyDataSetChanged();
+                })
+                .addOnFailureListener(e -> Log.e("FirestoreCheck", "Error fetching children collection", e));
+    }
+
+    @Override
+    public void onDataChanged() {
+        loadChildrenList();
     }
 
     // ------------------------------------------------------------
