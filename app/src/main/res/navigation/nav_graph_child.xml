@@ -4,29 +4,73 @@
     android:id="@+id/nav_graph_child"
     app:startDestination="@id/childHomeFragment">
 
+    <!-- Global Args -->
+    <argument
+        android:name="uid"
+        app:argType="string" />
+
+    <argument
+        android:name="role"
+        app:argType="string" />
+
     <fragment
         android:id="@+id/childHomeFragment"
         android:name="com.example.demoapp.ChildHomeFragment"
-        android:label="Home"/>
+        android:label="Home">
+        <argument
+            android:name="uid"
+            app:argType="string" />
+        <argument
+            android:name="role"
+            app:argType="string" />
+    </fragment>
 
     <fragment
         android:id="@+id/childSymptomsFragment"
         android:name="com.example.demoapp.ChildSymptomsFragment"
-        android:label="Symptoms"/>
+        android:label="Symptoms">
+        <argument
+            android:name="uid"
+            app:argType="string" />
+        <argument
+            android:name="role"
+            app:argType="string" />
+    </fragment>
 
     <fragment
         android:id="@+id/childMedicineFragment"
         android:name="com.example.demoapp.ChildMedicineFragment"
-        android:label="Medicine"/>
+        android:label="Medicine">
+        <argument
+            android:name="uid"
+            app:argType="string" />
+        <argument
+            android:name="role"
+            app:argType="string" />
+    </fragment>
 
     <fragment
         android:id="@+id/childBadgesFragment"
         android:name="com.example.demoapp.ChildBadgesFragment"
-        android:label="Badges"/>
+        android:label="Badges">
+        <argument
+            android:name="uid"
+            app:argType="string" />
+        <argument
+            android:name="role"
+            app:argType="string" />
+    </fragment>
 
     <fragment
         android:id="@+id/childProfileFragment"
         android:name="com.example.demoapp.ChildProfileFragment"
-        android:label="Profile"/>
+        android:label="Profile">
+        <argument
+            android:name="uid"
+            app:argType="string" />
+        <argument
+            android:name="role"
+            app:argType="string" />
+    </fragment>
 
 </navigation>

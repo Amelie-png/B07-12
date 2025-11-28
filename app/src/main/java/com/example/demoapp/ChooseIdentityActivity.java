@@ -64,7 +64,7 @@ public class ChooseIdentityActivity extends AppCompatActivity {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         db.collection("children")
-                .whereEqualTo("parentUid", parentUid)
+                .whereEqualTo("parentId", parentUid)
                 .addSnapshotListener((value, error) -> {
                     if (error != null) {
                         Toast.makeText(this, "Error loading children", Toast.LENGTH_SHORT).show();
@@ -85,12 +85,20 @@ public class ChooseIdentityActivity extends AppCompatActivity {
                         String childName = childDoc.getString("username");
                         String childId = childDoc.getId();
 
+                        // Create Child Button
                         Button childButton = new Button(this);
                         childButton.setText("Log in as " + childName);
 
-                        // ----------------------------
-                        // Child → MainNavActivity
-                        // ----------------------------
+                        // ===== Add spacing (IMPORTANT) =====
+                        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
+                        );
+                        params.setMargins(0, 20, 0, 20); // top = 20dp, bottom = 20dp
+                        childButton.setLayoutParams(params);
+                        // ====================================
+
+                        // OnClick → Child home
                         childButton.setOnClickListener(v -> {
                             Intent intent = new Intent(ChooseIdentityActivity.this, MainNavActivity.class);
                             intent.putExtra("uid", childId);

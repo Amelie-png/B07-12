@@ -7,7 +7,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
-import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -49,10 +48,10 @@ public class MainNavActivity extends AppCompatActivity {
 
         BottomNavigationView bottomNav = findViewById(R.id.main_bottom_nav);
 
-        // VERY IMPORTANT: Clear any existing menu first
+        // Clear menu first
         bottomNav.getMenu().clear();
 
-        // Load correct bottom menu depending on role
+        // Load menu depending on role
         switch (role) {
             case "child":
                 bottomNav.inflateMenu(R.menu.bottom_nav_menu_child);
@@ -60,18 +59,18 @@ public class MainNavActivity extends AppCompatActivity {
             case "provider":
                 bottomNav.inflateMenu(R.menu.bottom_nav_menu_provider);
                 break;
-            default: // parent
+            default:
                 bottomNav.inflateMenu(R.menu.bottom_nav_menu_parent);
         }
 
-        // Nav Host Setup
+        // NavHost
         NavHostFragment navHostFragment =
                 (NavHostFragment) getSupportFragmentManager()
                         .findFragmentById(R.id.main_nav_host_fragment);
 
         NavController navController = navHostFragment.getNavController();
 
-        // Choose the correct navigation graph
+        // Choose correct navigation graph
         int graph;
         switch (role) {
             case "child":
@@ -84,14 +83,45 @@ public class MainNavActivity extends AppCompatActivity {
                 graph = R.navigation.nav_graph_parent;
         }
 
-        // Pass uid + role into all fragments
+        // Initial arguments
         Bundle args = new Bundle();
         args.putString("uid", uid);
         args.putString("role", role);
 
         navController.setGraph(graph, args);
 
-        // Attach bottom nav to the nav controller
-        NavigationUI.setupWithNavController(bottomNav, navController);
+        bottomNav.setOnItemSelectedListener(item -> {
+
+            Bundle passArgs = new Bundle();
+            passArgs.putString("uid", uid);
+            passArgs.putString("role", role);
+
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.childHomeFragment) {
+                navController.navigate(R.id.childHomeFragment, passArgs);
+                return true;
+
+            } else if (itemId == R.id.childSymptomsFragment) {
+                navController.navigate(R.id.childSymptomsFragment, passArgs);
+                return true;
+
+            } else if (itemId == R.id.childMedicineFragment) {
+                navController.navigate(R.id.childMedicineFragment, passArgs);
+                return true;
+
+            } else if (itemId == R.id.childBadgesFragment) {
+                navController.navigate(R.id.childBadgesFragment, passArgs);
+                return true;
+
+            } else if (itemId == R.id.childProfileFragment) {
+                navController.navigate(R.id.childProfileFragment, passArgs);
+                return true;
+            }
+
+            return false;
+        });
+
+
     }
 }
