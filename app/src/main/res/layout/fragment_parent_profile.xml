@@ -1,13 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="24dp">
 
-    <TextView
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Parent Profile Page"
-        android:gravity="center"
-        android:textSize="22sp" />
+        android:layout_height="wrap_content">
 
-</FrameLayout>
+        <!-- Title -->
+        <TextView
+            android:id="@+id/titleParentProfile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Child Profile"
+            android:textSize="26sp"
+            android:textStyle="bold" />
+
+        <!-- Profile Image + Name -->
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp">
+
+            <ImageView
+                android:id="@+id/profileImageParent"
+                android:layout_width="90dp"
+                android:layout_height="90dp"
+                android:src="@drawable/ic_profile_placeholder"
+                android:background="@drawable/circle_bg"
+                android:scaleType="centerCrop" />
+
+            <TextView
+                android:id="@+id/parentChildName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Child Name"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:layout_marginLeft="20dp"
+                android:layout_gravity="center_vertical" />
+        </LinearLayout>
+
+        <!-- DOB -->
+        <TextView
+            android:id="@+id/parentDobLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Date of Birth:"
+            android:textSize="16sp"
+            android:textColor="#555"
+            android:layout_marginTop="24dp"/>
+
+        <TextView
+            android:id="@+id/parentDobValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="YYYY-MM-DD"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="4dp"/>
+
+        <!-- Personal Best -->
+        <TextView
+            android:id="@+id/parentPBLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Personal Best:"
+            android:textSize="16sp"
+            android:textColor="#555"
+            android:layout_marginTop="24dp"/>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp">
+
+            <TextView
+                android:id="@+id/parentPBValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0.0"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/parentEditPBButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Edit"
+                android:layout_marginLeft="20dp"/>
+
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/returnToParentButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Return to Parent Home"
+            android:layout_marginTop="40dp"
+            android:backgroundTint="#7755CC"
+            android:textColor="#FFFFFF"/>
+
+    </LinearLayout>
+
+</ScrollView>
