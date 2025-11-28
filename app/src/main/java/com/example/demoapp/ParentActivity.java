@@ -1,5 +1,6 @@
 package com.example.demoapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -9,6 +10,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -17,10 +19,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.demoapp.models.Child;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.Map;import java.util.HashSet;import java.util.List;
+
 
 public class ParentActivity extends AppCompatActivity {
 
@@ -31,11 +35,13 @@ public class ParentActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.add_child);
+        setContentView(R.layout.add_child); // 布局必须有 rv_children_list 和 btn_add_child
 
         db = FirebaseFirestore.getInstance();
 
         RecyclerView recyclerView = findViewById(R.id.rv_children_list);
+        FloatingActionButton btnAddChild = findViewById(R.id.btn_add_child);
+
         adapter = new ChildAdapter(childrenList, new ChildAdapter.OnItemActionListener() {
             @Override
             public void onEdit(int position) { showEditChildDialog(position); }
@@ -49,17 +55,87 @@ public class ParentActivity extends AppCompatActivity {
             @Override
             public void onManageProvider(int position) { showManageProviderDialog(position); }
         });
+
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
-        FloatingActionButton btnAddChild = findViewById(R.id.btn_add_child);
+        // 点击跳转
+        adapter.setOnChildClick(child -> {
+            Intent intent = new Intent(ParentActivity.this, MainNavActivity.class);
+            intent.putExtra("uid", child.getUid());
+            intent.putExtra("role", "child");
+            startActivity(intent);
+        });
+
         btnAddChild.setOnClickListener(v -> showAddChildDialog());
+
+        loadChildren(); // 加载孩子列表
     }
 
+    private void loadChildren() {
+        // 获取当前父账户 UID
+        String parentId = UserUtils.getUid();
+        if (parentId == null) {
+            Toast.makeText(this, "Error: parent UID is null", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // 查询 Firestore
+        db.collection("children")
+                .whereEqualTo("parentId", parentId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        Toast.makeText(this, "Failed to load children: " + task.getException(), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    childrenList.clear(); // 清空已有列表
+
+                    for (var doc : task.getResult()) {
+                        try {
+                            // 打印文档调试
+                            System.out.println("Child doc: " + doc.getData());
+
+                            // 安全映射到 Child 对象
+                            Child child = doc.toObject(Child.class);
+                            if (child == null) {
+                                System.out.println("Warning: doc.toObject returned null for " + doc.getId());
+                                continue;
+                            }
+
+                            // 设置 Firestore ID 和 UID
+                            child.setFirestoreId(doc.getId());
+                            if (child.getUid() == null || child.getUid().isEmpty()) {
+                                child.setUid(doc.getId());
+                            }
+
+                            // 避免 null 导致 Adapter 崩溃
+                            if (child.getUsername() == null) child.setUsername("");
+                            if (child.getDob() == null) child.setDob("");
+                            if (child.getNotes() == null) child.setNotes("");
+                            if (child.getSharing() == null) child.setSharing(new HashMap<>());
+                            if (child.getProviderIds() == null) child.setProviderIds(new HashSet<>());
+                            if (child.getShareCodes() == null) child.setShareCodes(new HashMap<>());
+
+                            childrenList.add(child);
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            System.out.println("Error parsing child doc: " + doc.getId());
+                        }
+                    }
+
+                    adapter.notifyDataSetChanged();
+                    Toast.makeText(this, "Loaded " + childrenList.size() + " children", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+
     // ---------------------------
-    // Username uniqueness check
-    // ---------------------------
-    private void checkUsernameUniqueForChild(String username, Runnable onUsernameAvailable) {
+// Username uniqueness check (for add & edit)
+// ---------------------------
+    private void checkUsernameUniqueForChild(String username, String currentChildUid, Runnable onUsernameAvailable) {
         db.collection("users")
                 .whereEqualTo("username", username)
                 .get()
@@ -83,7 +159,16 @@ public class ParentActivity extends AppCompatActivity {
                                     return;
                                 }
 
-                                if (!childTask.getResult().isEmpty()) {
+                                boolean exists = false;
+                                for (var doc : childTask.getResult()) {
+                                    String uid = doc.getString("uid");
+                                    if (currentChildUid == null || !uid.equals(currentChildUid)) { // 排除当前 child
+                                        exists = true;
+                                        break;
+                                    }
+                                }
+
+                                if (exists) {
                                     Toast.makeText(this, "Username already exists in children.", Toast.LENGTH_SHORT).show();
                                     return;
                                 }
@@ -118,7 +203,8 @@ public class ParentActivity extends AppCompatActivity {
                         return;
                     }
 
-                    checkUsernameUniqueForChild(username, () -> {
+                    // 新增时传 null，表示不排除任何 child
+                    checkUsernameUniqueForChild(username, null, () -> {
                         String parentId = UserUtils.getUid();
                         Child child = new Child(username, dob, parentId, notes);
                         child.setPasswordHash(hashPassword(password));
@@ -129,6 +215,7 @@ public class ParentActivity extends AppCompatActivity {
                 .setNegativeButton("Cancel", null)
                 .show();
     }
+
 
 
     // ---------------------------
@@ -184,6 +271,9 @@ public class ParentActivity extends AppCompatActivity {
     // ---------------------------
     // Edit Child
     // ---------------------------
+    // ---------------------------
+// Edit Child Dialog
+// ---------------------------
     private void showEditChildDialog(int position) {
         Child child = childrenList.get(position);
         View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_child, null);
@@ -209,7 +299,8 @@ public class ParentActivity extends AppCompatActivity {
                         return;
                     }
 
-                    checkUsernameUniqueForChild(newUsername, () -> {
+                    // 使用修改后的 checkUsernameUniqueForChild，排除当前 child
+                    checkUsernameUniqueForChild(newUsername, child.getUid(), () -> {
                         child.setUsername(newUsername);
                         child.setDob(newDob);
                         child.setNotes(newNotes);
@@ -259,27 +350,57 @@ public class ParentActivity extends AppCompatActivity {
     // ---------------------------
     // Share Code Dialog
     // ---------------------------
+    // ---------------------------
+// Share Code Dialog (generate without binding)
+// ---------------------------
+    // ---------------------------
+// Share Code + Permission Dialog
+// ---------------------------
     private void showGenerateShareCodeDialog(int position) {
         Child child = childrenList.get(position);
 
-        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_generate_share_code, null);
+        View dialogView = LayoutInflater.from(this)
+                .inflate(R.layout.dialog_generate_share_code_with_switches, null);
+
         TextView tvShareCode = dialogView.findViewById(R.id.tv_share_code);
         TextView tvCodeExpiry = dialogView.findViewById(R.id.tv_code_expiry);
         Button btnCopyCode = dialogView.findViewById(R.id.btn_copy_code);
         Button btnGenerateNew = dialogView.findViewById(R.id.btn_generate_new);
 
+        // 权限 Switch
+        com.google.android.material.switchmaterial.SwitchMaterial switchSymptoms = dialogView.findViewById(R.id.switch_symptoms);
+        com.google.android.material.switchmaterial.SwitchMaterial switchMedicines = dialogView.findViewById(R.id.switch_medicines);
+        com.google.android.material.switchmaterial.SwitchMaterial switchPEF = dialogView.findViewById(R.id.switch_pef);
+        com.google.android.material.switchmaterial.SwitchMaterial switchTriage = dialogView.findViewById(R.id.switch_triage);
+
+        // 🔹 生成一次性分享码（不绑定 provider）
         String code = child.generateOneTimeShareCode();
         tvShareCode.setText(code);
         tvCodeExpiry.setText("Valid for 7 days");
 
+        // ✅ 初始化 Switch 状态：从 ShareCode 中读取权限，如果不存在则默认 false
+        Child.ShareCode shareCode = child.getShareCodes().get(code);
+        if (shareCode != null) {
+            Map<String, Boolean> perms = shareCode.getPermissions();
+            switchSymptoms.setChecked(perms.getOrDefault("symptoms", false));
+            switchMedicines.setChecked(perms.getOrDefault("medicines", false));
+            switchPEF.setChecked(perms.getOrDefault("pef", false));
+            switchTriage.setChecked(perms.getOrDefault("triage", false));
+        } else {
+            switchSymptoms.setChecked(false);
+            switchMedicines.setChecked(false);
+            switchPEF.setChecked(false);
+            switchTriage.setChecked(false);
+        }
+
+        // 保存到 Firestore（生成新 code）
         db.collection("children")
                 .document(child.getFirestoreId())
                 .set(childToMap(child))
-                .addOnSuccessListener(aVoid ->
-                        Toast.makeText(this, "Share code generated!", Toast.LENGTH_SHORT).show())
-                .addOnFailureListener(e ->
-                        Toast.makeText(this, "Error saving share code: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                .addOnSuccessListener(aVoid -> Toast.makeText(this, "Share code generated!", Toast.LENGTH_SHORT).show())
+                .addOnFailureListener(e -> Toast.makeText(this, "Error saving share code: " + e.getMessage(), Toast.LENGTH_SHORT).show());
 
+        // 复制到剪贴板
         btnCopyCode.setOnClickListener(v -> {
             android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
             android.content.ClipData clip = android.content.ClipData.newPlainText("Share Code", code);
@@ -287,66 +408,107 @@ public class ParentActivity extends AppCompatActivity {
             Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
         });
 
+        // 生成新分享码
         btnGenerateNew.setOnClickListener(v -> {
             String newCode = child.generateOneTimeShareCode();
             tvShareCode.setText(newCode);
             tvCodeExpiry.setText("Valid for 7 days");
 
+            // 初始化 Switch 状态
+            Child.ShareCode newShareCode = child.getShareCodes().get(newCode);
+            if (newShareCode != null) {
+                Map<String, Boolean> perms = newShareCode.getPermissions();
+                switchSymptoms.setChecked(perms.getOrDefault("symptoms", false));
+                switchMedicines.setChecked(perms.getOrDefault("medicines", false));
+                switchPEF.setChecked(perms.getOrDefault("pef", false));
+                switchTriage.setChecked(perms.getOrDefault("triage", false));
+            } else {
+                switchSymptoms.setChecked(false);
+                switchMedicines.setChecked(false);
+                switchPEF.setChecked(false);
+                switchTriage.setChecked(false);
+            }
+
             db.collection("children")
                     .document(child.getFirestoreId())
                     .set(childToMap(child));
-
             Toast.makeText(this, "New share code generated!", Toast.LENGTH_SHORT).show();
         });
 
         new AlertDialog.Builder(this)
-                .setTitle("One-Time Share Code")
+                .setTitle("Share Code & Permissions")
                 .setView(dialogView)
-                .setPositiveButton("Close", null)
+                .setPositiveButton("Save Permissions", (dialog, which) -> {
+                    Map<String, Boolean> perms = new HashMap<>();
+                    perms.put("symptoms", switchSymptoms.isChecked());
+                    perms.put("medicines", switchMedicines.isChecked());
+                    perms.put("pef", switchPEF.isChecked());
+                    perms.put("triage", switchTriage.isChecked());
+
+                    // 更新最新生成的 share code 权限
+                    Child.ShareCode latest = child.getShareCodes().get(code);
+                    if (latest != null) latest.setPermissions(perms);
+
+                    db.collection("children")
+                            .document(child.getFirestoreId())
+                            .set(childToMap(child));
+                    Toast.makeText(this, "Permissions saved!", Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("Close", null)
                 .show();
     }
+
 
 
     // ---------------------------
     // Manage Providers Dialog
     // ---------------------------
+
+    // ---------------------------
+// Manage Providers Dialog
+// ---------------------------
     private void showManageProviderDialog(int position) {
         Child child = childrenList.get(position);
-        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_manage_provider, null);
+        Child finalChild = child; // 🔹 使用 final 引用，避免 lambda 捕获报错
 
-        TextView tvProviders = dialogView.findViewById(R.id.tv_providers);
-        Button btnRevoke = dialogView.findViewById(R.id.btn_revoke);
-        Button btnUpdate = dialogView.findViewById(R.id.btn_update_permissions);
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_manage_providers, null);
+        RecyclerView rvShareCodes = dialogView.findViewById(R.id.rv_share_codes);
 
-        tvProviders.setText("Providers: " + child.getProviderIds().toString());
+        List<Child.ShareCode> codes = new ArrayList<>(finalChild.getShareCodes().values());
+        ShareCodeAdapter adapter = new ShareCodeAdapter(codes, updatedCode -> {
+            // 🔹 使用 finalChild 替代 child
+            if (finalChild.getShareCodes() == null) finalChild.setShareCodes(new HashMap<>());
+            finalChild.getShareCodes().put(updatedCode.getCode(), updatedCode);
 
-        btnRevoke.setOnClickListener(v -> {
-            for (String pid : child.getProviderIds()) {
-                child.revokeProvider(pid);
+            if (finalChild.getFirestoreId() != null) {
+                db.collection("children")
+                        .document(finalChild.getFirestoreId())
+                        .set(childToMap(finalChild))
+                        .addOnSuccessListener(aVoid -> {
+                            // 可选：刷新 UI
+                            Toast.makeText(ParentActivity.this, "Share code updated!", Toast.LENGTH_SHORT).show();
+                        })
+                        .addOnFailureListener(e -> {
+                            Toast.makeText(ParentActivity.this, "Error updating share code: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        });
             }
-            db.collection("children").document(child.getFirestoreId()).set(childToMap(child));
-            Toast.makeText(this, "All providers revoked", Toast.LENGTH_SHORT).show();
         });
 
-        btnUpdate.setOnClickListener(v -> {
-            for (String pid : child.getProviderIds()) {
-                Map<String, Boolean> perms = new HashMap<>();
-                perms.put("symptoms", true);
-                perms.put("medicines", true);
-                perms.put("pef", true);
-                perms.put("triage", true);
-                child.updateProviderPermissions(pid, perms);
-            }
-            db.collection("children").document(child.getFirestoreId()).set(childToMap(child));
-            Toast.makeText(this, "Permissions updated", Toast.LENGTH_SHORT).show();
-        });
+        rvShareCodes.setLayoutManager(new LinearLayoutManager(this));
+        rvShareCodes.setAdapter(adapter);
 
         new AlertDialog.Builder(this)
-                .setTitle("Manage Providers")
+                .setTitle("Manage Share Codes & Permissions")
                 .setView(dialogView)
                 .setNegativeButton("Close", null)
                 .show();
     }
+
+
+
+
+
+
 
 
     // ---------------------------
@@ -361,8 +523,10 @@ public class ParentActivity extends AppCompatActivity {
         map.put("notes", child.getNotes());
         map.put("sharing", child.getSharing());
         map.put("providerIds", new ArrayList<>(child.getProviderIds()));
+        map.put("providerBindings", child.getProviderBindings()); // 🔹 新增
         map.put("hasSeenOnboardingChild", child.isHasSeenOnboardingChild());
         map.put("passwordHash", child.getPasswordHash());
+        map.put("pb", child.getPb());
 
         Map<String, Map<String, Object>> codesMap = new HashMap<>();
         for (Map.Entry<String, Child.ShareCode> entry : child.getShareCodes().entrySet()) {
@@ -371,10 +535,15 @@ public class ParentActivity extends AppCompatActivity {
             codeInfo.put("timestamp", entry.getValue().getTimestamp());
             codeInfo.put("revoked", entry.getValue().isRevoked());
             codeInfo.put("permissions", entry.getValue().getPermissions());
+            codeInfo.put("providerId", entry.getValue().getProviderId()); // 🔹 保存绑定情况
             codesMap.put(entry.getKey(), codeInfo);
         }
         map.put("shareCodes", codesMap);
 
         return map;
     }
+
+
+
+
 }
