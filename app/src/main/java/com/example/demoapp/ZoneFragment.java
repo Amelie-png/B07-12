@@ -90,13 +90,12 @@ public class ZoneFragment extends Fragment {
     // Load PB + PEF
     // =========================================================================
     private void loadPersonalBest() {
-        db.collection("PB")
+        db.collection("children")
                 .document(childId)
                 .get()
                 .addOnSuccessListener(doc -> {
-
-                    if (doc.exists()) {
-                        personalBest = doc.getLong("value").intValue();
+                    if (doc.exists() && doc.contains("pb")) {
+                        personalBest = doc.getLong("pb").intValue();
                     } else {
                         personalBest = -1;
                     }
@@ -104,6 +103,7 @@ public class ZoneFragment extends Fragment {
                     loadTodayPef();
                 });
     }
+
 
     private void loadTodayPef() {
 
@@ -287,12 +287,18 @@ public class ZoneFragment extends Fragment {
     }
 
     private void savePersonalBest(int value) {
-        Map<String, Object> data = new HashMap<>();
-        data.put("childId", childId);
-        data.put("value", value);
-
-        db.collection("PB")
+        db.collection("children")
                 .document(childId)
-                .set(data);
+                .update("pb", value)
+                .addOnFailureListener(e -> {
+                    // If the document doesn't exist, fallback to set()
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("pb", value);
+
+                    db.collection("children")
+                            .document(childId)
+                            .set(data);
+                });
     }
+
 }
