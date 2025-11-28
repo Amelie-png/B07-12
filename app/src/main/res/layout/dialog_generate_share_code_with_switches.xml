@@ -82,11 +82,5 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
-        <Button
-            android:id="@+id/btn_save_sharing"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Save Permissions"
-            android:layout_marginTop="24dp"/>
     </LinearLayout>
 </ScrollView>
