@@ -526,6 +526,7 @@ public class ParentActivity extends AppCompatActivity {
         map.put("providerBindings", child.getProviderBindings()); // 🔹 新增
         map.put("hasSeenOnboardingChild", child.isHasSeenOnboardingChild());
         map.put("passwordHash", child.getPasswordHash());
+        map.put("pb", child.getPb());
 
         Map<String, Map<String, Object>> codesMap = new HashMap<>();
         for (Map.Entry<String, Child.ShareCode> entry : child.getShareCodes().entrySet()) {
