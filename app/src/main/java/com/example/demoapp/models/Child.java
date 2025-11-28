@@ -74,9 +74,6 @@ public class Child {
     // ShareCode 操作
     // ------------------------
 
-    /**
-     * 生成分享码（未绑定 provider，延迟绑定）
-     */
     public String generateOneTimeShareCode(Map<String, Boolean> defaultPermissions) {
         String code = "SC-" + System.currentTimeMillis() + "-" + (int)(Math.random() * 1000);
         ShareCode sc = new ShareCode(code, null, defaultPermissions);
@@ -84,9 +81,6 @@ public class Child {
         return code;
     }
 
-    /**
-     * 生成分享码（使用默认权限，便于 ParentActivity 调用）
-     */
     public String generateOneTimeShareCode() {
         return generateOneTimeShareCode(this.sharing);
     }
@@ -98,14 +92,10 @@ public class Child {
         }
     }
 
-    /**
-     * Provider 使用分享码绑定
-     */
     public boolean bindProviderWithShareCode(String providerId, String code) {
         ShareCode sc = shareCodes.get(code);
         if (sc != null && !sc.isRevoked() && sc.getProviderId() == null &&
                 System.currentTimeMillis() - sc.getTimestamp() <= 7L * 24 * 60 * 60 * 1000) {
-
             sc.setProviderId(providerId);
             providerIds.add(providerId);
             providerBindings.put(providerId, code);
@@ -114,15 +104,12 @@ public class Child {
         return false;
     }
 
-    /**
-     * 验证 provider 的 share code 是否有效
-     */
     public boolean verifyShareCode(String providerId, String code) {
         ShareCode sc = shareCodes.get(code);
         return sc != null &&
                 !sc.isRevoked() &&
                 providerId.equals(sc.getProviderId()) &&
-                System.currentTimeMillis() - sc.getTimestamp() <= 7L*24*60*60*1000;
+                System.currentTimeMillis() - sc.getTimestamp() <= 7L * 24 * 60 * 60 * 1000;
     }
 
     public void revokeProvider(String providerId) {
@@ -161,9 +148,13 @@ public class Child {
             this.permissions = new HashMap<>(permissions);
         }
 
+        // ✅ 完整 Getter / Setter
         public String getCode() { return code; }
+        public void setCode(String code) { this.code = code; }
         public long getTimestamp() { return timestamp; }
+        public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
         public boolean isRevoked() { return revoked; }
+        public void setRevoked(boolean revoked) { this.revoked = revoked; }
         public void revoke() { this.revoked = true; }
         public Map<String, Boolean> getPermissions() { return permissions; }
         public void setPermissions(Map<String, Boolean> permissions) { this.permissions = permissions; }

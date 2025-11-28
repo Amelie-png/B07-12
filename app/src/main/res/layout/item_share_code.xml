@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        tools:ignore="MissingConstraints">
+
+        <!-- 标题 -->
+        <TextView
+            android:id="@+id/tv_share_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sharing Settings"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp" />
+
+        <!-- 分享码显示 -->
+        <TextView
+            android:id="@+id/tv_code"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Share Code"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tv_expiry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Valid: 7d 0h"
+            android:layout_marginBottom="16dp" />
+
+        <!-- 权限开关 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Share Symptoms" />
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/cb_symptoms"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Share Medicines"
+            android:layout_marginTop="8dp" />
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/cb_medicines"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Share PEF"
+            android:layout_marginTop="8dp" />
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/cb_pef"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Share Triage"
+            android:layout_marginTop="8dp" />
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/cb_triage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <!-- 撤销开关 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Revoke ShareCode"
+            android:layout_marginTop="8dp" />
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/cb_revoked"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <!-- 保存按钮 -->
+        <Button
+            android:id="@+id/btn_save_sharing"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save Settings"
+            android:layout_marginTop="24dp" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
