@@ -24,7 +24,7 @@ public class MainNavActivity extends AppCompatActivity {
 
         // Receive uid + role
         uid = getIntent().getStringExtra("uid");
-        role = getIntent().getStringExtra("role"); // "parent" / "child" / "provider"
+        role = getIntent().getStringExtra("role");
 
         if (uid == null || role == null) {
             Toast.makeText(this, "Error: Missing user data", Toast.LENGTH_LONG).show();
@@ -48,10 +48,10 @@ public class MainNavActivity extends AppCompatActivity {
 
         BottomNavigationView bottomNav = findViewById(R.id.main_bottom_nav);
 
-        // Clear menu first
+        // Clear old menu
         bottomNav.getMenu().clear();
 
-        // Load menu depending on role
+        // Load correct menu
         switch (role) {
             case "child":
                 bottomNav.inflateMenu(R.menu.bottom_nav_menu_child);
@@ -63,14 +63,14 @@ public class MainNavActivity extends AppCompatActivity {
                 bottomNav.inflateMenu(R.menu.bottom_nav_menu_parent);
         }
 
-        // NavHost
+        // Nav Host
         NavHostFragment navHostFragment =
                 (NavHostFragment) getSupportFragmentManager()
                         .findFragmentById(R.id.main_nav_host_fragment);
 
         NavController navController = navHostFragment.getNavController();
 
-        // Choose correct navigation graph
+        // Choose correct graph
         int graph;
         switch (role) {
             case "child":
@@ -83,45 +83,43 @@ public class MainNavActivity extends AppCompatActivity {
                 graph = R.navigation.nav_graph_parent;
         }
 
-        // Initial arguments
+        // Set initial graph
         Bundle args = new Bundle();
         args.putString("uid", uid);
         args.putString("role", role);
 
         navController.setGraph(graph, args);
 
+        // -------------------------------------------------
+        // FIX: Highlight correct Home tab on screen load
+        // -------------------------------------------------
+        switch (role) {
+            case "child":
+                bottomNav.setSelectedItemId(R.id.childHomeFragment);
+                break;
+            case "provider":
+                bottomNav.setSelectedItemId(R.id.providerHomeFragment);
+                break;
+            default:
+                bottomNav.setSelectedItemId(R.id.parentHomeFragment);
+                break;
+        }
+
+        // ------------ UNIVERSAL NAVIGATION HANDLER -------------
         bottomNav.setOnItemSelectedListener(item -> {
+
+            int dest = item.getItemId();
 
             Bundle passArgs = new Bundle();
             passArgs.putString("uid", uid);
             passArgs.putString("role", role);
 
-            int itemId = item.getItemId();
-
-            if (itemId == R.id.childHomeFragment) {
-                navController.navigate(R.id.childHomeFragment, passArgs);
+            try {
+                navController.navigate(dest, passArgs);
                 return true;
-
-            } else if (itemId == R.id.childSymptomsFragment) {
-                navController.navigate(R.id.childSymptomsFragment, passArgs);
-                return true;
-
-            } else if (itemId == R.id.childMedicineFragment) {
-                navController.navigate(R.id.childMedicineFragment, passArgs);
-                return true;
-
-            } else if (itemId == R.id.childBadgesFragment) {
-                navController.navigate(R.id.childBadgesFragment, passArgs);
-                return true;
-
-            } else if (itemId == R.id.childProfileFragment) {
-                navController.navigate(R.id.childProfileFragment, passArgs);
-                return true;
+            } catch (Exception e) {
+                return false;
             }
-
-            return false;
         });
-
-
     }
 }

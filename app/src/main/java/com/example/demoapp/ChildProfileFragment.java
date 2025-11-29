@@ -3,11 +3,6 @@ package com.example.demoapp;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,16 +11,21 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class ChildProfileFragment extends Fragment {
 
-    private ImageView profileImage;
     private TextView childName;
+    private TextView childUsername;
     private TextView dobValue;
     private Button logoutButton;
 
+    private FirebaseFirestore db;
     private String childUid;
 
     public ChildProfileFragment() {}
@@ -42,55 +42,67 @@ public class ChildProfileFragment extends Fragment {
                               @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // ---- Retrieve UID passed from MainNavActivity ----
+        db = FirebaseFirestore.getInstance();
+
+        // Retrieve child UID from MainNavActivity argument bundle
         if (getArguments() != null) {
             childUid = getArguments().getString("uid");
         }
-        Log.d("ChildProfileFragment", "childUid = " + childUid);
 
-        // Bind UI elements
-        profileImage = view.findViewById(R.id.profileImage);
-        childName = view.findViewById(R.id.childName);
-        dobValue = view.findViewById(R.id.dobValue);
-        logoutButton = view.findViewById(R.id.logoutButton);
-
-        loadChildProfile();
-
-        logoutButton.setOnClickListener(v -> {
-            FirebaseAuth.getInstance().signOut();
-            Intent intent = new Intent(requireActivity(), SignInActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-        });
-    }
-
-    private void loadChildProfile() {
         if (childUid == null) {
             Toast.makeText(requireContext(), "Missing child ID", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        // Bind UI
+        childName = view.findViewById(R.id.childName);
+        childUsername = view.findViewById(R.id.childUsername);
+        dobValue = view.findViewById(R.id.dobValue);
+        logoutButton = view.findViewById(R.id.logoutButton);
 
+        loadProfile();
+
+        logoutButton.setOnClickListener(v -> {
+            FirebaseAuth.getInstance().signOut();
+            Intent intent = new Intent(requireActivity(), SignInActivity.class);
+            startActivity(intent);
+            requireActivity().finish();
+        });
+    }
+
+    // ================================
+    // Load Child Profile
+    // ================================
+    private void loadProfile() {
         db.collection("children")
                 .document(childUid)
                 .get()
                 .addOnSuccessListener(doc -> {
+
                     if (!doc.exists()) {
-                        Toast.makeText(requireContext(), "Child profile not found", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), "Profile not found", Toast.LENGTH_SHORT).show();
                         return;
                     }
 
+                    String first = doc.getString("firstName");
+                    String last = doc.getString("lastName");
                     String username = doc.getString("username");
                     String dob = doc.getString("dob");
 
-                    // Update UI
-                    childName.setText(username != null ? username : "Unknown Child");
+                    // Set full name
+                    String fullName = ((first != null) ? first : "") + " " + ((last != null) ? last : "");
+                    childName.setText(fullName.trim().isEmpty() ? "Unknown" : fullName);
+
+                    // Username
+                    childUsername.setText(username != null ? username : "-");
+
+                    // DOB
                     dobValue.setText(dob != null ? dob : "-");
+
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(requireContext(), "Failed to load child profile", Toast.LENGTH_SHORT).show();
-                    Log.e("ChildProfile", "Error loading profile", e);
+                    Toast.makeText(requireContext(), "Failed to load profile", Toast.LENGTH_SHORT).show();
+                    Log.e("ChildProfile", "Error loading child profile", e);
                 });
     }
 }
