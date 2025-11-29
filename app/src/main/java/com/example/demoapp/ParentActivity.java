@@ -23,11 +23,12 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;import java.util.HashSet;import java.util.List;
+import java.util.Map;import java.util.HashSet;import java.util.List;import android.util.Log;import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 
 public class ParentActivity extends AppCompatActivity {
 
+    private static final String TAG = "ParentActivity";
     private final ArrayList<Child> childrenList = new ArrayList<>();
     private ChildAdapter adapter;
     private FirebaseFirestore db;
@@ -73,63 +74,57 @@ public class ParentActivity extends AppCompatActivity {
     }
 
     private void loadChildren() {
-        // 获取当前父账户 UID
-        String parentId = UserUtils.getUid();
-        if (parentId == null) {
-            Toast.makeText(this, "Error: parent UID is null", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        String parentId = UserUtils.getUid(); // 获取当前父账号 UID
 
-        // 查询 Firestore
         db.collection("children")
                 .whereEqualTo("parentId", parentId)
                 .get()
                 .addOnCompleteListener(task -> {
-                    if (!task.isSuccessful()) {
-                        Toast.makeText(this, "Failed to load children: " + task.getException(), Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+                    if (task.isSuccessful()) {
+                        childrenList.clear(); // 先清空旧数据
+                        for (QueryDocumentSnapshot doc : task.getResult()) {
+                            try {
+                                Child child = doc.toObject(Child.class);
+                                if (child != null) {
+                                    // ✅ 核心修改：把 Firestore 文档 ID 赋给 Child 对象
+                                    child.setFirestoreId(doc.getId());
 
-                    childrenList.clear(); // 清空已有列表
+                                    // 确保 providerIds 不为 null
+                                    if (child.getProviderIds() == null) {
+                                        child.setProviderIds(new ArrayList<>());
+                                    }
 
-                    for (var doc : task.getResult()) {
-                        try {
-                            // 打印文档调试
-                            System.out.println("Child doc: " + doc.getData());
+                                    // 可以根据需要确保 sharing map 不为 null
+                                    if (child.getSharing() == null) {
+                                        child.setSharing(new HashMap<>());
+                                    }
 
-                            // 安全映射到 Child 对象
-                            Child child = doc.toObject(Child.class);
-                            if (child == null) {
-                                System.out.println("Warning: doc.toObject returned null for " + doc.getId());
-                                continue;
+                                    Log.d(TAG, "Loaded child: " + child.getUsername() +
+                                            ", UID: " + child.getUid() +
+                                            ", FirestoreId: " + child.getFirestoreId() +
+                                            ", ProviderIds: " + child.getProviderIds());
+
+                                    childrenList.add(child);
+                                }
+                            } catch (Exception e) {
+                                Log.e(TAG, "Error parsing child doc: " + doc.getId(), e);
                             }
-
-                            // 设置 Firestore ID 和 UID
-                            child.setFirestoreId(doc.getId());
-                            if (child.getUid() == null || child.getUid().isEmpty()) {
-                                child.setUid(doc.getId());
-                            }
-
-                            // 避免 null 导致 Adapter 崩溃
-                            if (child.getUsername() == null) child.setUsername("");
-                            if (child.getDob() == null) child.setDob("");
-                            if (child.getNotes() == null) child.setNotes("");
-                            if (child.getSharing() == null) child.setSharing(new HashMap<>());
-                            if (child.getProviderIds() == null) child.setProviderIds(new HashSet<>());
-                            if (child.getShareCodes() == null) child.setShareCodes(new HashMap<>());
-
-                            childrenList.add(child);
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            System.out.println("Error parsing child doc: " + doc.getId());
                         }
-                    }
 
-                    adapter.notifyDataSetChanged();
-                    Toast.makeText(this, "Loaded " + childrenList.size() + " children", Toast.LENGTH_SHORT).show();
+                        if (childrenList.isEmpty()) {
+                            Log.d(TAG, "No children found for parentId: " + parentId);
+                        }
+
+                        adapter.notifyDataSetChanged();
+                    } else {
+                        Log.e(TAG, "Error getting children", task.getException());
+                    }
                 });
     }
+
+
+
 
 
     // ---------------------------
@@ -184,7 +179,10 @@ public class ParentActivity extends AppCompatActivity {
     // ---------------------------
     private void showAddChildDialog() {
         View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_child, null);
+
         EditText etUsername = dialogView.findViewById(R.id.et_child_name);
+        EditText etFirstName = dialogView.findViewById(R.id.et_child_first_name);
+        EditText etLastName = dialogView.findViewById(R.id.et_child_last_name);
         EditText etDob = dialogView.findViewById(R.id.et_child_dob);
         EditText etNotes = dialogView.findViewById(R.id.et_child_notes);
         EditText etPassword = dialogView.findViewById(R.id.et_child_password);
@@ -194,19 +192,23 @@ public class ParentActivity extends AppCompatActivity {
                 .setView(dialogView)
                 .setPositiveButton("Add", (dialog, which) -> {
                     String username = etUsername.getText().toString().trim();
+                    String firstName = etFirstName.getText().toString().trim();
+                    String lastName = etLastName.getText().toString().trim();
                     String dob = etDob.getText().toString().trim();
                     String notes = etNotes.getText().toString().trim();
                     String password = etPassword.getText().toString().trim();
 
-                    if (TextUtils.isEmpty(username) || TextUtils.isEmpty(dob) || TextUtils.isEmpty(password)) {
-                        Toast.makeText(this, "Username, DOB, and Password cannot be empty", Toast.LENGTH_SHORT).show();
+                    if (TextUtils.isEmpty(username) || TextUtils.isEmpty(firstName)
+                            || TextUtils.isEmpty(lastName) || TextUtils.isEmpty(dob)
+                            || TextUtils.isEmpty(password)) {
+                        Toast.makeText(this, "Username, First Name, Last Name, DOB, and Password cannot be empty", Toast.LENGTH_SHORT).show();
                         return;
                     }
 
-                    // 新增时传 null，表示不排除任何 child
+                    // 检查 username 唯一性
                     checkUsernameUniqueForChild(username, null, () -> {
                         String parentId = UserUtils.getUid();
-                        Child child = new Child(username, dob, parentId, notes);
+                        Child child = new Child(username, firstName, lastName, dob, parentId, notes);
                         child.setPasswordHash(hashPassword(password));
 
                         addChildToFirestore(child);
@@ -215,6 +217,7 @@ public class ParentActivity extends AppCompatActivity {
                 .setNegativeButton("Cancel", null)
                 .show();
     }
+
 
 
 
@@ -275,14 +278,21 @@ public class ParentActivity extends AppCompatActivity {
 // Edit Child Dialog
 // ---------------------------
     private void showEditChildDialog(int position) {
+        if (position < 0 || position >= childrenList.size()) return;
+
         Child child = childrenList.get(position);
         View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_child, null);
 
         EditText etUsername = dialogView.findViewById(R.id.et_child_name);
+        EditText etFirstName = dialogView.findViewById(R.id.et_child_first_name);
+        EditText etLastName = dialogView.findViewById(R.id.et_child_last_name);
         EditText etDob = dialogView.findViewById(R.id.et_child_dob);
         EditText etNotes = dialogView.findViewById(R.id.et_child_notes);
 
+        // 设置初始值
         etUsername.setText(child.getUsername());
+        etFirstName.setText(child.getFirstName());
+        etLastName.setText(child.getLastName());
         etDob.setText(child.getDob());
         etNotes.setText(child.getNotes());
 
@@ -291,17 +301,23 @@ public class ParentActivity extends AppCompatActivity {
                 .setView(dialogView)
                 .setPositiveButton("Save", (dialog, which) -> {
                     String newUsername = etUsername.getText().toString().trim();
+                    String newFirstName = etFirstName.getText().toString().trim();
+                    String newLastName = etLastName.getText().toString().trim();
                     String newDob = etDob.getText().toString().trim();
                     String newNotes = etNotes.getText().toString().trim();
 
-                    if (TextUtils.isEmpty(newUsername) || TextUtils.isEmpty(newDob)) {
-                        Toast.makeText(this, "Username and DOB cannot be empty", Toast.LENGTH_SHORT).show();
+                    // ✅ 校验 firstName 和 lastName 不能为空
+                    if (TextUtils.isEmpty(newUsername) || TextUtils.isEmpty(newFirstName)
+                            || TextUtils.isEmpty(newLastName) || TextUtils.isEmpty(newDob)) {
+                        Toast.makeText(this, "Username, First Name, Last Name, and DOB cannot be empty", Toast.LENGTH_SHORT).show();
                         return;
                     }
 
-                    // 使用修改后的 checkUsernameUniqueForChild，排除当前 child
+                    // 检查 username 唯一性，排除当前 child
                     checkUsernameUniqueForChild(newUsername, child.getUid(), () -> {
                         child.setUsername(newUsername);
+                        child.setFirstName(newFirstName);
+                        child.setLastName(newLastName);
                         child.setDob(newDob);
                         child.setNotes(newNotes);
 
@@ -322,29 +338,57 @@ public class ParentActivity extends AppCompatActivity {
     }
 
 
+
+
+
     // ---------------------------
     // Delete Child
     // ---------------------------
     private void showDeleteChildDialog(int position) {
+        // 检查 position 是否越界
+        if (position < 0 || position >= childrenList.size()) return;
+
         Child child = childrenList.get(position);
-        new AlertDialog.Builder(this)
+
+        // 核心修改：如果 firestoreId 为空，尝试使用文档 ID（适用于从 Firestore 读取时未赋值）
+        if (child.getFirestoreId() == null || child.getFirestoreId().isEmpty()) {
+            Toast.makeText(ParentActivity.this, "Assigning Firestore ID...", Toast.LENGTH_SHORT).show();
+
+            // 这里假设 Child 对象有一个临时字段 docRefId 或者你可以直接从列表里取 DocumentSnapshot
+            // 如果没有，可以在读取 Firestore 时赋值，下面是示例：
+            // child.setFirestoreId(doc.getId());
+
+            // 如果实在拿不到 ID，就不能删除
+            Toast.makeText(ParentActivity.this, "Invalid child ID", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String firestoreId = child.getFirestoreId();
+
+        new AlertDialog.Builder(ParentActivity.this)
                 .setTitle("Delete Child")
                 .setMessage("Are you sure you want to delete this child?")
                 .setPositiveButton("Delete", (dialog, which) -> {
                     db.collection("children")
-                            .document(child.getFirestoreId())
+                            .document(firestoreId)
                             .delete()
                             .addOnSuccessListener(aVoid -> {
-                                childrenList.remove(position);
-                                adapter.notifyItemRemoved(position);
-                                Toast.makeText(this, "Child deleted", Toast.LENGTH_SHORT).show();
+                                // 删除列表并通知 Adapter
+                                if (position < childrenList.size()) {
+                                    childrenList.remove(position);
+                                    adapter.notifyItemRemoved(position);
+                                    Toast.makeText(ParentActivity.this, "Child deleted", Toast.LENGTH_SHORT).show();
+                                }
                             })
-                            .addOnFailureListener(e ->
-                                    Toast.makeText(this, "Error deleting: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                            .addOnFailureListener(e -> {
+                                e.printStackTrace();
+                                Toast.makeText(ParentActivity.this, "Error deleting: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            });
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
     }
+
 
 
     // ---------------------------
@@ -526,6 +570,8 @@ public class ParentActivity extends AppCompatActivity {
         map.put("providerBindings", child.getProviderBindings()); // 🔹 新增
         map.put("hasSeenOnboardingChild", child.isHasSeenOnboardingChild());
         map.put("passwordHash", child.getPasswordHash());
+        map.put("firstName", child.getFirstName());
+        map.put("lastName", child.getLastName());
         map.put("pb", child.getPb());
 
         Map<String, Map<String, Object>> codesMap = new HashMap<>();

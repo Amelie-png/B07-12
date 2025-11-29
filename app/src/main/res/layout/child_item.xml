@@ -5,61 +5,124 @@
     android:layout_height="wrap_content"
     android:padding="8dp">
 
-    <!-- Child Info -->
-    <TextView
-        android:id="@+id/tv_child_name"
-        android:layout_width="wrap_content"
+    <!-- Username -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Child Name"
-        android:textSize="16sp"
-        android:paddingBottom="4dp"/>
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Username:"
+            android:textStyle="bold"
+            android:layout_marginEnd="8dp"/>
+        <TextView
+            android:id="@+id/tv_child_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""/>
+    </LinearLayout>
 
-    <TextView
-        android:id="@+id/tv_child_dob"
-        android:layout_width="wrap_content"
+    <!-- First Name -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="DOB"
-        android:paddingBottom="4dp"/>
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="First Name:"
+            android:textStyle="bold"
+            android:layout_marginEnd="8dp"/>
+        <TextView
+            android:id="@+id/tvFirstName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""/>
+    </LinearLayout>
 
-    <TextView
-        android:id="@+id/tv_child_notes"
-        android:layout_width="wrap_content"
+    <!-- Last Name -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Notes"
-        android:paddingBottom="8dp"/>
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Last Name:"
+            android:textStyle="bold"
+            android:layout_marginEnd="8dp"/>
+        <TextView
+            android:id="@+id/tvLastName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""/>
+    </LinearLayout>
+
+    <!-- DOB -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="DOB:"
+            android:textStyle="bold"
+            android:layout_marginEnd="8dp"/>
+        <TextView
+            android:id="@+id/tv_child_dob"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""/>
+    </LinearLayout>
+
+    <!-- Notes -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Notes:"
+            android:textStyle="bold"
+            android:layout_marginEnd="8dp"/>
+        <TextView
+            android:id="@+id/tv_child_notes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""/>
+    </LinearLayout>
 
     <!-- Horizontal Scrollable Buttons -->
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:scrollbars="none">
-
+        android:scrollbars="none"
+        android:paddingTop="8dp">
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
-
             <Button
                 android:id="@+id/btn_edit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Edit"
                 android:layout_marginEnd="8dp"/>
-
             <Button
                 android:id="@+id/btn_delete"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Delete"
                 android:layout_marginEnd="8dp"/>
-
             <Button
                 android:id="@+id/btn_share"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Share"
                 android:layout_marginEnd="8dp"/>
-
             <Button
                 android:id="@+id/btn_manage_provider"
                 android:layout_width="wrap_content"
@@ -67,4 +130,5 @@
                 android:text="Manage"/>
         </LinearLayout>
     </HorizontalScrollView>
+
 </LinearLayout>
