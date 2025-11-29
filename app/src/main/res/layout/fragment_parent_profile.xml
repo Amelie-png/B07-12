@@ -18,7 +18,7 @@
             android:textSize="26sp"
             android:textStyle="bold" />
 
-        <!-- Profile Image + Name -->
+        <!-- Profile image + name + username -->
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
@@ -33,15 +33,32 @@
                 android:background="@drawable/circle_bg"
                 android:scaleType="centerCrop" />
 
-            <TextView
-                android:id="@+id/parentChildName"
-                android:layout_width="wrap_content"
+            <!-- Name + Username stacked -->
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Child Name"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:layout_marginLeft="20dp"
-                android:layout_gravity="center_vertical" />
+                android:layout_marginStart="20dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/parentChildName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Child Name"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/parentChildUsername"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="username123"
+                    android:textSize="16sp"
+                    android:textColor="#666666"
+                    android:layout_marginTop="6dp" />
+            </LinearLayout>
+
         </LinearLayout>
 
         <!-- DOB -->
@@ -92,11 +109,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Edit"
-                android:layout_marginLeft="20dp"/>
-
-
+                android:layout_marginStart="20dp" />
         </LinearLayout>
 
+        <!-- Return button -->
         <Button
             android:id="@+id/returnToParentButton"
             android:layout_width="match_parent"
@@ -104,7 +120,7 @@
             android:text="Return to Parent Home"
             android:layout_marginTop="40dp"
             android:backgroundTint="#7755CC"
-            android:textColor="#FFFFFF"/>
+            android:textColor="#FFFFFF" />
 
     </LinearLayout>
 

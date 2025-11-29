@@ -6,32 +6,105 @@
     android:fillViewport="true">
 
 
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="top"
-        android:padding="16dp"
+        android:padding="0dp"
         >
+        <!-- STREAK CHIP ROW -->
+        <LinearLayout
+            android:id="@+id/streakChipRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal"
+            android:paddingTop="8dp"
+            android:paddingBottom="0dp"
+            android:layout_marginBottom="0dp">
 
+            <!-- MEDICATION CHIP -->
+            <LinearLayout
+                android:id="@+id/chipMedStreak"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:layout_marginRight="8dp"
+                >
+
+                <ImageView
+                    android:id="@+id/iconChipMed"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/ic_lightning" />
+
+                <TextView
+                    android:id="@+id/textChipMed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="5 days"
+                    android:textSize="18sp"
+                    android:paddingLeft="6dp"/>
+            </LinearLayout>
+
+            <!-- TECHNIQUE CHIP -->
+            <LinearLayout
+                android:id="@+id/chipTechStreak"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="0dp"
+                >
+
+                <ImageView
+                    android:id="@+id/iconChipTech"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/ic_star" />
+
+                <TextView
+                    android:id="@+id/textChipTech"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="3 days"
+                    android:textSize="18sp"
+                    android:paddingLeft="6dp"/>
+            </LinearLayout>
+
+        </LinearLayout>
 
         <!-- TITLE 1: Emergency Section   -->
+
+
+        <!-- CARD 1 : Emergency Section    -->
         <TextView
             android:id="@+id/titleEmergency"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingBottom="8dp"
             android:text="Emergency Check:"
+            android:layout_marginLeft="16dp"
+
             android:textSize="20sp"
-            android:textStyle="bold"
-            android:paddingBottom="8dp" />
+            android:textStyle="bold" />
 
-
-        <!-- CARD 1 : Emergency Section    -->
         <androidx.cardview.widget.CardView
             android:id="@+id/cardEmergency"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="24dp"
+            android:layout_marginHorizontal="15dp"
             app:cardBackgroundColor="#D32F2F"
             app:cardCornerRadius="16dp"
             app:cardElevation="6dp">
@@ -69,6 +142,8 @@
             android:id="@+id/zoneFragmentContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginHorizontal="15dp"
+
             android:minHeight="250dp"
             android:layout_marginBottom="24dp" />
 
@@ -91,6 +166,8 @@
             android:layout_height="wrap_content"
             android:text="Your Medications:"
             android:textSize="20sp"
+            android:layout_marginLeft="16dp"
+
             android:textStyle="bold"
             android:paddingBottom="8dp"/>
 
@@ -100,6 +177,8 @@
             android:id="@+id/cardMedication"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginHorizontal="15dp"
+
             android:layout_marginBottom="24dp"
             app:cardCornerRadius="16dp"
             app:cardElevation="6dp">
