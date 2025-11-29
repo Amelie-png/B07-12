@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp">
@@ -327,14 +329,14 @@
             android:layout_marginTop="24dp"/>
 
         <!--FILTERED ENTRIES-->
-        <LinearLayout
+        <FrameLayout
             android:id="@+id/filtered_entry_list"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:layout_marginTop="16dp">
-        </LinearLayout>
+        </FrameLayout>
 
     </LinearLayout>
 
-</ScrollView>
+</LinearLayout>
