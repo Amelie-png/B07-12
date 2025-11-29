@@ -14,12 +14,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
-import android.widget.LinearLayout;
+import android.widget.FrameLayout;
 
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -28,19 +29,18 @@ public class FilterEntriesScreen extends Fragment {
     private TextInputEditText startDateEditText, endDateEditText;
     private ChipGroup chipGroupSymptoms, chipGroupTriggers;
     private Button btnSymptomsToggle, btnTriggersToggle, btnApplyFilter;
-    private LinearLayout filteredEntryContainer;
-
     private ArrayList<Entry> filteredEntry;
+    private String childUid;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-
         View view = inflater.inflate(R.layout.fragment_filter_entries_screen, container, false);
-
         initViews(view);
+        //TODO: replace with actual childUid retrieve code
+        childUid = "oKaNrSiogbRxH5iCxfjS";
         setupDatePickers();
         setupChipGroupControls();
         setupListView();
@@ -61,8 +61,6 @@ public class FilterEntriesScreen extends Fragment {
         btnTriggersToggle = view.findViewById(R.id.filter_by_trigger_button);
         btnApplyFilter = view.findViewById(R.id.btnApplyFilter);
 
-        filteredEntryContainer = view.findViewById(R.id.filtered_entry_list);
-
         // Hide chip groups on start
         chipGroupSymptoms.setVisibility(View.GONE);
         chipGroupTriggers.setVisibility(View.GONE);
@@ -79,8 +77,10 @@ public class FilterEntriesScreen extends Fragment {
         DatePickerDialog dialog = new DatePickerDialog(
                 requireContext(),
                 (DatePicker view, int year, int month, int dayOfMonth) -> {
-                    String date = (month + 1) + "/" + dayOfMonth + "/" + year;
-                    targetEditText.setText(date);
+                    String formattedDate = (month + 1) + "/" + dayOfMonth + "/" + year;
+                    targetEditText.setText(formattedDate);
+                    LocalDate date = LocalDate.of(year, month + 1, dayOfMonth);
+                    targetEditText.setTag(date);
                 },
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
@@ -124,8 +124,9 @@ public class FilterEntriesScreen extends Fragment {
     }
 
     private void applyFilters() {
-        //filteredEntry.clear();
-        filteredEntryContainer.removeAllViews();
+        chipGroupSymptoms.setVisibility(View.GONE);
+        chipGroupTriggers.setVisibility(View.GONE);
+
         // Collect selected symptoms
         ArrayList<String> selectedSymptoms = new ArrayList<>();
         getCheckedChips(chipGroupSymptoms, selectedSymptoms);
@@ -134,17 +135,26 @@ public class FilterEntriesScreen extends Fragment {
         ArrayList<String> selectedTriggers = new ArrayList<>();
         getCheckedChips(chipGroupTriggers, selectedTriggers);
 
+        // Create bundle with filter data
+        LocalDate startDate = (LocalDate) startDateEditText.getTag();
+        LocalDate endDate = (LocalDate) endDateEditText.getTag();
+
+        // Pass filter data to DailyEntryDisplayScreen
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("startDate", startDate);
+        bundle.putSerializable("endDate", endDate);
+        bundle.putStringArrayList("symptoms", selectedSymptoms);
+        bundle.putStringArrayList("triggers", selectedTriggers);
+        bundle.putString("childId", childUid);
+
         // Add filtered entries
         filteredEntry.clear();
-        // TODO: Replace this with real filter logic - DB
-        filteredEntry.add(new Entry("Entry #1", "08:30 AM", "A", "Cough, Wheezing", "Dust, Pollen"));
-
-        // Inflate and add each entry view
-        for (Entry entry : filteredEntry) {
-            View entryView = getLayoutInflater().inflate(R.layout.entry, filteredEntryContainer, false);
-            // Bind data to entryView here (set TextViews, etc.)
-            filteredEntryContainer.addView(entryView);
-        }
+        DailyEntryDisplayScreen dailyEntryScreen = new DailyEntryDisplayScreen();
+        dailyEntryScreen.setArguments(bundle);
+        getChildFragmentManager()
+                .beginTransaction()
+                .replace(R.id.filtered_entry_list, dailyEntryScreen)
+                .commit();
     }
 
     private void getCheckedChips(ChipGroup group, ArrayList<String> outputList) {

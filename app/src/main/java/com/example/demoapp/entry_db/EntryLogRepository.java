@@ -1,7 +1,5 @@
 package com.example.demoapp.entry_db;
 
-import android.util.Pair;
-
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -12,12 +10,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class EntryLogRepository {
-    private final CollectionReference entriesCollection;
+    private final CollectionReference entriesCollection = FirebaseFirestore.getInstance().collection("entries");
 
-    public EntryLogRepository() {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        this.entriesCollection = db.collection("entries");
-    }
+    public EntryLogRepository() { }
 
     public void saveEntry(EntryLog entry, OnSuccessListener onSuccess, OnFailureListener onFailure) {
         DocumentReference docRef = entriesCollection.document();
@@ -54,22 +49,56 @@ public class EntryLogRepository {
                 .addOnFailureListener(listener::onError);
     }
 
-    public void getSelectedDateEntries(OnEntriesRetrievedListener listener, LocalDate selectedStartDate, LocalDate selectedEndDate){
-        entriesCollection.orderBy("timestamp", Query.Direction.DESCENDING).get()
+    public void getFilteredEntries(OnEntriesRetrievedListener listener,
+                                   String childUid, LocalDate selectedStartDate,
+                                   LocalDate selectedEndDate,
+                                   ArrayList<String> selectedSymptoms,
+                                   ArrayList<String> selectedTriggers){
+        entriesCollection.get()
                 .addOnSuccessListener(querySnapshot -> {
                     ArrayList<EntryLog> entries = new ArrayList<>();
                     for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
                         EntryLog entry = doc.toObject(EntryLog.class);
-                        LocalDate entryDate = LocalDate.parse(entry.getDate());
-                        boolean afterStartDate = entryDate.isAfter(selectedStartDate) || entryDate.isEqual(selectedStartDate);
-                        boolean beforeEndDate = entryDate.isBefore(selectedEndDate) || entryDate.isEqual(selectedEndDate);
-                        if (afterStartDate && beforeEndDate) {
-                            entries.add(entry);
+                        if(entry != null && childUid.equals(entry.getChildUid())){
+                            LocalDate entryDate = LocalDate.parse(entry.getDate());
+                            boolean afterStartDate = entryDate.isAfter(selectedStartDate) || entryDate.isEqual(selectedStartDate);
+                            boolean beforeEndDate = entryDate.isBefore(selectedEndDate) || entryDate.isEqual(selectedEndDate);
+
+                            ArrayList<CategoryName> entrySymptoms = entry.getSymptoms();
+                            ArrayList<CategoryName> entryTriggers = entry.getTriggers();
+                            if(entrySymptoms != null && entryTriggers != null && hasMatchingSymptomsTriggers(entrySymptoms, entryTriggers, selectedSymptoms, selectedTriggers)){
+                                if (afterStartDate && beforeEndDate) {
+                                    entries.add(entry);
+                                }
+                            }
                         }
                     }
                     listener.onEntriesRetrieved(entries);
                 })
                 .addOnFailureListener(listener::onError);
+    }
+
+    private boolean hasMatchingSymptomsTriggers(ArrayList<CategoryName> entrySymptoms,
+                                                ArrayList<CategoryName> entryTriggers,
+                                                ArrayList<String> selectedSymptoms,
+                                                ArrayList<String> selectedTriggers) {
+        return containEntryStrings(entrySymptoms, selectedSymptoms) && containEntryStrings(entryTriggers, selectedTriggers);
+    }
+
+    private boolean containEntryStrings(ArrayList<CategoryName> entryValues,
+                                          ArrayList<String> selectedValues){
+        for(String selectedSymptom : selectedValues){
+            for(int j = 0; j < entryValues.size(); j++){
+                CategoryName p = entryValues.get(j);
+                if(p.getCategory().equals(selectedSymptom)){
+                    break;
+                }
+                if(j == entryValues.size()-1){
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     // Callback interfaces

@@ -10,14 +10,16 @@ import java.util.Date;
 import java.util.Locale;
 
 public class EntryLog{
+    private String childUid;
     private String id;
-    private ArrayList<Pair<String, String>> symptoms;
-    private ArrayList<Pair<String, String>> triggers;
+    private ArrayList<CategoryName> symptoms;
+    private ArrayList<CategoryName> triggers;
     private long timestamp;
     //either "Parent" or "Child"
     private String recorder;
 
     public EntryLog(){
+        this.childUid = "";
         this.id = "";
         this.symptoms = new ArrayList<>();
         this.triggers = new ArrayList<>();
@@ -25,7 +27,8 @@ public class EntryLog{
         this.recorder = "";
     }
 
-    public EntryLog(ArrayList<Pair<String, String>> symptoms, ArrayList<Pair<String, String>> triggers, long timestamp, String recorder){
+    public EntryLog(String childId, ArrayList<CategoryName> symptoms, ArrayList<CategoryName> triggers, long timestamp, String recorder){
+        this.childUid = childId;
         this.id = "";
         this.symptoms = symptoms;
         this.triggers = triggers;
@@ -33,15 +36,17 @@ public class EntryLog{
         this.recorder = recorder;
     }
 
+    public String getChildUid() { return childUid; }
+
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 
     //Getters and Setters
-    public ArrayList<Pair<String, String>> getSymptoms() { return symptoms; }
-    public void setSymptoms(ArrayList<Pair<String, String>> symptoms) { this.symptoms = symptoms; }
+    public ArrayList<CategoryName> getSymptoms() { return symptoms; }
+    public void setSymptoms(ArrayList<CategoryName> symptoms) { this.symptoms = symptoms; }
 
-    public ArrayList<Pair<String, String>> getTriggers() { return triggers; }
-    public void setTriggers(ArrayList<Pair<String, String>> triggers) { this.triggers = triggers; }
+    public ArrayList<CategoryName> getTriggers() { return triggers; }
+    public void setTriggers(ArrayList<CategoryName> triggers) { this.triggers = triggers; }
 
     public long getTimestamp() { return timestamp; }
     public void setTimestamp(long timestamp) { this.timestamp = timestamp; }

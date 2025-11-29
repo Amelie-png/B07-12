@@ -26,17 +26,14 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 public class ChildSymptomsFragment extends Fragment {
-
-    private String childUid;
-
     // Symptoms
     protected TextView selectedSymptomsText;
-    protected ArrayList<Pair<String, String>> selectedSymptomsList = new ArrayList<>();
+    protected ArrayList<CategoryName> selectedSymptomsList;
     protected Button buttonSelectSymptoms;
 
     // Triggers
     protected TextView selectedTriggersText;
-    protected ArrayList<Pair<String, String>> selectedTriggersList = new ArrayList<>();
+    protected ArrayList<CategoryName> selectedTriggersList;
     protected Button buttonSelectTriggers;
 
     // Time + Date
@@ -51,6 +48,7 @@ public class ChildSymptomsFragment extends Fragment {
     protected EntryLogRepository entryLogRepository;
 
     private String recorder;
+    private String childUid;
 
     public ChildSymptomsFragment(String recorder){
         this.recorder = recorder;
@@ -69,6 +67,8 @@ public class ChildSymptomsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         entryLogRepository = new EntryLogRepository();
+        selectedSymptomsList = new ArrayList<>();
+        selectedTriggersList = new ArrayList<>();
 
         // Connect views
         // ---- Retrieve UID argument ----
@@ -106,7 +106,7 @@ public class ChildSymptomsFragment extends Fragment {
                                     if (bundleList != null) {
                                         selectedSymptomsList.clear();
                                         for (Bundle b : bundleList) {
-                                            selectedSymptomsList.add(new Pair<>(b.getString("category"), b.getString("name")));
+                                            selectedSymptomsList.add(new CategoryName(b.getString("category"), b.getString("name")));
                                         }
                                         selectedSymptomsText.setText(formatPairList(selectedSymptomsList));
                                     }
@@ -133,7 +133,7 @@ public class ChildSymptomsFragment extends Fragment {
                                     if (bundleList != null) {
                                         selectedTriggersList.clear();
                                         for (Bundle b : bundleList) {
-                                            selectedTriggersList.add(new Pair<>(b.getString("category"), b.getString("name")));
+                                            selectedTriggersList.add(new CategoryName(b.getString("category"), b.getString("name")));
                                         }
                                         selectedTriggersText.setText(formatPairList(selectedTriggersList));
                                     }
@@ -157,11 +157,11 @@ public class ChildSymptomsFragment extends Fragment {
         buttonAddSymptoms.setOnClickListener(v -> saveEntryToFirebase());
     }
 
-    private String formatPairList(ArrayList<Pair<String, String>> list) {
+    private String formatPairList(ArrayList<CategoryName> list) {
         if (list.isEmpty()) return "None selected";
         String formattedStr = "";
-        for (Pair<String, String> p : list) {
-            formattedStr += (p.second + ", ");
+        for (CategoryName p : list) {
+            formattedStr += (p.getName() + ", ");
         }
         return formattedStr.substring(0, formattedStr.length() - 2);
     }
@@ -206,7 +206,7 @@ public class ChildSymptomsFragment extends Fragment {
         }
 
         long timestamp = selectedTime.getTimeInMillis();
-        EntryLog entry = new EntryLog(selectedSymptomsList, selectedTriggersList, timestamp, recorder);
+        EntryLog entry = new EntryLog(childUid, selectedSymptomsList, selectedTriggersList, timestamp, recorder);
 
         buttonAddSymptoms.setEnabled(false);
 
