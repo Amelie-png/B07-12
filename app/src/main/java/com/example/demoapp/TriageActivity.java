@@ -1,5 +1,7 @@
 package com.example.demoapp;
 
+import static java.security.AccessController.getContext;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
@@ -26,6 +28,8 @@ public class TriageActivity extends AppCompatActivity {
     private CheckBox chkCantSpeak, chkRetractions, chkBlueLips;
     private CheckBox chkCough, chkChestTight;
     private EditText inputRescueAttempts, inputPEF;
+    private String lastTriageState; // "GREEN", "YELLOW", "RED"
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +56,9 @@ public class TriageActivity extends AppCompatActivity {
                     if (doc.exists()) {
                         parentId = doc.getString("parentId");
                     }
+                    lastTriageState = doc.getString("lastTriageState");
+                    if (lastTriageState == null) lastTriageState = "GREEN";  // default
+
                 });
 
         bindUI();
@@ -98,39 +105,41 @@ public class TriageActivity extends AppCompatActivity {
         int rescueAttempts = parseIntSafe(inputRescueAttempts.getText().toString());
         int pef = parseIntSafe(inputPEF.getText().toString());
 
-        // RED ZONE
-        if (red1 || red2 || red3) {
-            storeTriageResult("RED", pef, rescueAttempts, red1, red2, red3, mod1, mod2);
-            goToEmergencyCard();
-            return;
+        String newState;
+
+        if (red1 || red2 || red3 || (pef > 0 && pef < 50) || rescueAttempts >= 3) {
+            newState = "RED";
+        } else if (mod1 || mod2 || (pef > 0 && pef < 80)) {
+            newState = "YELLOW";
+        } else {
+            newState = "GREEN";
         }
 
-        if (pef > 0 && pef < 50) {
-            storeTriageResult("RED", pef, rescueAttempts, red1, red2, red3, mod1, mod2);
-            goToEmergencyCard();
-            return;
+        // ⭐ 将结果存到 Firestore (你之前写的方法)
+        storeTriageResult(
+                newState,
+                pef,
+                rescueAttempts,
+                red1, red2, red3,
+                mod1, mod2
+        );
+
+        boolean stateChanged = !newState.equals(lastTriageState);
+
+        if (stateChanged && newState.equals("RED")) {
+            sendParentAlert("triage_escalation",
+                    "Emergency triggered: child entered RED zone.");
         }
 
-        if (rescueAttempts >= 3) {
-            storeTriageResult("RED", pef, rescueAttempts, red1, red2, red3, mod1, mod2);
-            goToEmergencyCard();
-            return;
-        }
+        updateTriageState(newState);
 
-        // YELLOW ZONE
-        if (mod1 || mod2 || (pef > 0 && pef < 80)) {
-            storeTriageResult("YELLOW", pef, rescueAttempts, red1, red2, red3, mod1, mod2);
-            goToHomeStepsCard("YELLOW");
-            return;
-        }
-
-        // GREEN ZONE
-        else {
-            storeTriageResult("GREEN", pef, rescueAttempts, red1, red2, red3, mod1, mod2);
-
-            goToGreenAdviceCard();
+        switch (newState) {
+            case "RED": goToEmergencyCard(); break;
+            case "YELLOW": goToHomeStepsCard("YELLOW"); break;
+            default: goToGreenAdviceCard();
         }
     }
+
 
 
     private int parseIntSafe(String s) {
@@ -138,7 +147,7 @@ public class TriageActivity extends AppCompatActivity {
         catch (Exception e) { return 0; }
     }
 
-    private void sendParentAlertTriageOpened() {
+    private void sendParentAlert(String type, String message) {
         if (parentId == null) return;
 
         Map<String, Object> alert = new HashMap<>();
@@ -205,4 +214,18 @@ public class TriageActivity extends AppCompatActivity {
         startActivity(i);
         finish();
     }
+    private void updateTriageState(String newState) {
+        lastTriageState = newState; // update local copy
+
+        db.collection("children")
+                .document(childId)
+                .update("lastTriageState", newState)
+                .addOnFailureListener(e ->
+                        Toast.makeText(TriageActivity.this,
+                                "Failed to update triage state",
+                                Toast.LENGTH_SHORT).show()
+                );
+    }
+
+
 }
