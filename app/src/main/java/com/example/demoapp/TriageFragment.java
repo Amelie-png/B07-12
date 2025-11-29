@@ -31,6 +31,9 @@ public class TriageFragment extends Fragment {
     private CheckBox chkCough, chkChestTight;
     private EditText inputRescueAttempts, inputPEF;
 
+    private String lastTriageState; // "GREEN", "YELLOW", "RED"
+
+
     public TriageFragment() {}
 
     @Override
@@ -76,6 +79,8 @@ public class TriageFragment extends Fragment {
                         Toast.makeText(getContext(), "Child record missing", Toast.LENGTH_SHORT).show();
                         return;
                     }
+                    lastTriageState = doc.getString("lastTriageState");
+                    if (lastTriageState == null) lastTriageState = "GREEN";  // default
 
                     parentId = doc.getString("parentId");
 
@@ -100,31 +105,43 @@ public class TriageFragment extends Fragment {
         int rescueAttempts = parseIntSafe(inputRescueAttempts.getText().toString());
         int pef = parseIntSafe(inputPEF.getText().toString());
 
-        if (red1 || red2 || red3) {
-            sendParentAlert("triage_escalation", "Emergency triggered by red flags.");
-            goToEmergencyCard();
-            return;
+        String newState;
+
+        // Determine triage state
+        if (red1 || red2 || red3 || (pef > 0 && pef < 50) || rescueAttempts >= 3) {
+            newState = "RED";
+        }
+        else if (mod1 || mod2 || (pef > 0 && pef < 80)) {
+            newState = "YELLOW";
+        }
+        else {
+            newState = "GREEN";
         }
 
-        if (pef > 0 && pef < 50) {
-            sendParentAlert("triage_escalation", "PEF < 50% triggered emergency.");
-            goToEmergencyCard();
-            return;
+        // Compare with last known state
+        boolean stateChanged = !newState.equals(lastTriageState);
+
+        // If escalation to RED and it wasn't RED last time → send alert
+        if (stateChanged && newState.equals("RED")) {
+            sendParentAlert("triage_escalation", "Emergency triggered: child entered RED zone.");
         }
 
-        if (rescueAttempts >= 3) {
-            sendParentAlert("triage_escalation", "Multiple rescue attempts triggered emergency.");
-            goToEmergencyCard();
-            return;
-        }
+        // Save updated state in Firestore
+        updateTriageState(newState);
 
-        if (mod1 || mod2 || (pef > 0 && pef < 80)) {
-            goToHomeStepsCard("YELLOW");
-            return;
+        // Navigate based on newState
+        switch (newState) {
+            case "RED":
+                goToEmergencyCard();
+                break;
+            case "YELLOW":
+                goToHomeStepsCard("YELLOW");
+                break;
+            default:
+                goToGreenAdviceCard();
         }
-
-        goToGreenAdviceCard();
     }
+
 
     // =========================================================================
     // Helpers
@@ -176,4 +193,15 @@ public class TriageFragment extends Fragment {
                 .addToBackStack(null)
                 .commit();
     }
+    private void updateTriageState(String newState) {
+        lastTriageState = newState; // update local copy
+
+        db.collection("children")
+                .document(childId)
+                .update("lastTriageState", newState)
+                .addOnFailureListener(e ->
+                        Toast.makeText(getContext(), "Failed to update triage state", Toast.LENGTH_SHORT).show()
+                );
+    }
+
 }

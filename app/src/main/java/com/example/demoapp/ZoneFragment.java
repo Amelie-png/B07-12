@@ -37,6 +37,8 @@ public class ZoneFragment extends Fragment {
 
     // Passed from HomeFragment
     private String childId;   // child being displayed
+    private String parentId;
+
     private String role;      // "child", "parent", "provider"
 
     private int personalBest = -1;
@@ -75,15 +77,24 @@ public class ZoneFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Retrieve arguments passed from HomeFragment
         Bundle args = requireArguments();
         childId = args.getString("uid");
         role = args.getString("role");
+
+        db.collection("children")
+                .document(childId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (doc.exists()) {
+                        parentId = doc.getString("parentId");
+                    }
+                });
 
         if (childId != null) {
             loadPersonalBest();
         }
     }
+
 
 
     // =========================================================================
@@ -143,18 +154,37 @@ public class ZoneFragment extends Fragment {
         layoutNoPEF.setVisibility(View.GONE);
         layoutHasPEF.setVisibility(View.VISIBLE);
 
-        if (personalBest > 0) {
-            int percent = (int)((pefValue * 100f) / personalBest);
+        int percent = (personalBest > 0)
+                ? (int)((pefValue * 100f) / personalBest)
+                : -1;
+
+        if (percent >= 0) {
             textZonePercent.setText(percent + "%");
-
             moveIndicator(percent);
-
             setPercentColor(percent);
-
         } else {
             textZonePercent.setText(pefValue + " (no PB)");
         }
+
+        // ------------------------------------------------------
+        // ALWAYS send alert if RED zone today
+        if (percent > 0 && percent < 50) {
+            sendParentAlertDailyRed();
+        }
     }
+    private void sendParentAlertDailyRed() {
+        if (parentId == null) return;
+
+        Map<String, Object> alert = new HashMap<>();
+        alert.put("parentId", parentId);
+        alert.put("childId", childId);
+        alert.put("type", "daily_zone_red");
+        alert.put("message", "Today's PEF zone is RED (<50% of PB).");
+        alert.put("timestamp", System.currentTimeMillis());
+
+        db.collection("alerts").document().set(alert);
+    }
+
 
     private void moveIndicator(int percent) {
 

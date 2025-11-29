@@ -102,6 +102,16 @@
             android:text="Check Triage"
             android:layout_marginTop="24dp" />
 
+        <TextView
+            android:id="@+id/textGreenDescription"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Safety Note: This is guidance, not a diagnosis. If in
+doubt, call emergency."
+            android:textSize="12sp"
+            android:gravity="center_horizontal"
+            android:paddingTop="10dp" />
+
         <!-- Result Card -->
         <LinearLayout
             android:id="@+id/resultCard"
@@ -127,6 +137,8 @@
                 android:layout_height="wrap_content"
                 android:text="Details here"
                 android:paddingTop="8dp"/>
+
+
         </LinearLayout>
 
     </LinearLayout>

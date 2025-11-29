@@ -14,6 +14,75 @@
         android:padding="16dp"
         >
 
+        <!-- STREAK CHIP ROW -->
+        <LinearLayout
+            android:id="@+id/streakChipRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal"
+            android:paddingTop="0dp"
+            android:paddingBottom="0dp"
+            android:layout_marginBottom="0dp">
+
+            <!-- MEDICATION CHIP -->
+            <LinearLayout
+                android:id="@+id/chipMedStreak"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:paddingTop="0dp"
+                android:paddingBottom="6dp"
+                android:layout_marginRight="8dp"
+                >
+
+                <ImageView
+                    android:id="@+id/iconChipMed"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/ic_lightning" />
+
+                <TextView
+                    android:id="@+id/textChipMed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="5 days"
+                    android:textSize="18sp"
+                    android:paddingLeft="6dp"/>
+            </LinearLayout>
+
+            <!-- TECHNIQUE CHIP -->
+            <LinearLayout
+                android:id="@+id/chipTechStreak"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:paddingTop="0dp"
+                android:paddingBottom="6dp"
+                >
+
+                <ImageView
+                    android:id="@+id/iconChipTech"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/ic_star" />
+
+                <TextView
+                    android:id="@+id/textChipTech"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="3 days"
+                    android:textSize="18sp"
+                    android:paddingLeft="6dp"/>
+            </LinearLayout>
+
+        </LinearLayout>
 
         <!-- TITLE 1: Emergency Section   -->
         <TextView
