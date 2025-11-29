@@ -1,5 +1,6 @@
 package com.example.demoapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import androidx.annotation.NonNull;
@@ -13,9 +14,14 @@ import android.view.ViewGroup;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class ChildHomeFragment extends Fragment {
 
     private String childId;
+    private String parentId;
+
     private String role;
     private FirebaseFirestore db;
     private boolean popupShown = false;
@@ -41,6 +47,31 @@ public class ChildHomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view,
                               @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+// 1. Find the button
+        View btnEmergencyAction = view.findViewById(R.id.btnResultAction);
+
+// 2. Make it work
+        btnEmergencyAction.setOnClickListener(v -> {
+            sendParentAlertTriageOpenedFromHome();
+
+            Intent i = new Intent(getContext(), TriageActivity.class);
+            i.putExtra("uid", childId);
+            i.putExtra("role", role);
+            startActivity(i);
+
+        });
+
+        db.collection("children")
+                .document(childId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (doc.exists()) {
+                        parentId = doc.getString("parentId");
+                    }
+                });
+
+
+
 
         if (childId != null) {
 
@@ -90,4 +121,16 @@ public class ChildHomeFragment extends Fragment {
         new ChildOnboardingDialog(() -> {})
                 .show(getChildFragmentManager(), "childOnboarding");
     }
+    private void sendParentAlertTriageOpenedFromHome() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        Map<String, Object> alert = new HashMap<>();
+        alert.put("parentId", parentId);
+        alert.put("childId", childId);
+        alert.put("message", "Your child has opened the triage tool.");
+        alert.put("timestamp", System.currentTimeMillis());
+
+        db.collection("alerts").add(alert);
+    }
+
 }
