@@ -572,6 +572,7 @@ public class ParentActivity extends AppCompatActivity {
         map.put("passwordHash", child.getPasswordHash());
         map.put("firstName", child.getFirstName());
         map.put("lastName", child.getLastName());
+        map.put("pb", child.getPb());
 
         Map<String, Map<String, Object>> codesMap = new HashMap<>();
         for (Map.Entry<String, Child.ShareCode> entry : child.getShareCodes().entrySet()) {
