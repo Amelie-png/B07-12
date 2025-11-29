@@ -1,6 +1,7 @@
 package com.example.demoapp;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -69,6 +70,13 @@ public class ZoneFragment extends Fragment {
         // Events
         btnAddPEF.setOnClickListener(v -> showAddPefDialog());
         btnEditPEF.setOnClickListener(v -> showEditPefDialog());
+        Button btnZoneHistory = view.findViewById(R.id.btnZoneHistory);
+
+        btnZoneHistory.setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), ZoneHistoryActivity.class);
+            intent.putExtra("uid", childId);
+            startActivity(intent);
+        });
 
         return view;
     }

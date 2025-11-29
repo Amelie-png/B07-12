@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DemoApp">
         <activity
+            android:name=".ZoneHistoryActivity"
+            android:exported="false" />
+        <activity
             android:name=".GreenAdviceCardActivity"
             android:exported="false" />
         <activity
