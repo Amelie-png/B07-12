@@ -6,11 +6,13 @@ public class Child {
     private String uid;
     private String firestoreId;
     private String username;
+    private String firstName;
+    private String lastName;
     private String dob;
     private String parentId;
     private String notes;
     private Map<String, Boolean> sharing = new HashMap<>();
-    private Set<String> providerIds = new HashSet<>();
+    private List<String> providerIds = new ArrayList<>();
     private Map<String, ShareCode> shareCodes = new HashMap<>();
     private Map<String, String> providerBindings = new HashMap<>(); // providerId → code
     private String passwordHash;
@@ -19,7 +21,7 @@ public class Child {
 
     public Child() {
         this.sharing = new HashMap<>();
-        this.providerIds = new HashSet<>();
+        this.providerIds = new ArrayList<>();
         this.shareCodes = new HashMap<>();
         this.providerBindings = new HashMap<>();
         this.hasSeenOnboardingChild = false;
@@ -32,9 +34,11 @@ public class Child {
         this.sharing.put("triage", false);
     }
 
-    public Child(String username, String dob, String parentId, String notes) {
-        this();
-        this.username = username;
+    public Child(String username, String firstName, String lastName, String dob, String parentId, String notes) {
+        this(); // 调用默认构造函数初始化 Map 等
+        this.username = username; // 原有 username
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.dob = dob;
         this.parentId = parentId;
         this.notes = notes;
@@ -49,6 +53,11 @@ public class Child {
     public void setFirestoreId(String firestoreId) { this.firestoreId = firestoreId; }
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
+    public String getFirstName() { return firstName; }
+    public void setFirstName(String firstName) { this.firstName = firstName; }
+
+    public String getLastName() { return lastName; }
+    public void setLastName(String lastName) { this.lastName = lastName; }
     public String getDob() { return dob; }
     public void setDob(String dob) { this.dob = dob; }
     public String getParentId() { return parentId; }
@@ -57,8 +66,9 @@ public class Child {
     public void setNotes(String notes) { this.notes = notes; }
     public Map<String, Boolean> getSharing() { return sharing; }
     public void setSharing(Map<String, Boolean> sharing) { this.sharing = sharing; }
-    public Set<String> getProviderIds() { return providerIds; }
-    public void setProviderIds(Set<String> providerIds) { this.providerIds = providerIds; }
+    public List<String> getProviderIds() { return providerIds; }
+    public void setProviderIds(List<String> providerIds) { this.providerIds = providerIds; }
+    public Set<String> getProviderIdsSet() { return new HashSet<>(providerIds); } // 转 Set
     public Map<String, ShareCode> getShareCodes() { return shareCodes; }
     public void setShareCodes(Map<String, ShareCode> shareCodes) { this.shareCodes = shareCodes; }
     public Map<String, String> getProviderBindings() { return providerBindings; }
@@ -73,7 +83,6 @@ public class Child {
     // ------------------------
     // ShareCode 操作
     // ------------------------
-
     public String generateOneTimeShareCode(Map<String, Boolean> defaultPermissions) {
         String code = "SC-" + System.currentTimeMillis() + "-" + (int)(Math.random() * 1000);
         ShareCode sc = new ShareCode(code, null, defaultPermissions);
@@ -97,7 +106,9 @@ public class Child {
         if (sc != null && !sc.isRevoked() && sc.getProviderId() == null &&
                 System.currentTimeMillis() - sc.getTimestamp() <= 7L * 24 * 60 * 60 * 1000) {
             sc.setProviderId(providerId);
-            providerIds.add(providerId);
+            if (!providerIds.contains(providerId)) {
+                providerIds.add(providerId);
+            }
             providerBindings.put(providerId, code);
             return true;
         }
@@ -148,7 +159,6 @@ public class Child {
             this.permissions = new HashMap<>(permissions);
         }
 
-        // ✅ 完整 Getter / Setter
         public String getCode() { return code; }
         public void setCode(String code) { this.code = code; }
         public long getTimestamp() { return timestamp; }
