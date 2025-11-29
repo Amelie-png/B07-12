@@ -43,6 +43,16 @@
             android:layout_height="wrap_content"
             android:text="OK"
             android:textAllCaps="false" />
+
+        <TextView
+            android:id="@+id/textGreenDescription"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Safety Note: This is guidance, not a diagnosis. If in
+doubt, call emergency."
+            android:textSize="12sp"
+            android:gravity="center_horizontal"
+            android:paddingTop="10dp" />
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

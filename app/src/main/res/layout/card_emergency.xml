@@ -42,5 +42,17 @@
             android:text="Back to Home"
             android:padding="12dp"/>
 
+        <TextView
+            android:id="@+id/textGreenDescription"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Safety Note: This is guidance, not a diagnosis. If in
+doubt, call emergency."
+            android:textSize="12sp"
+            android:gravity="center_horizontal"
+            android:textColor="@android:color/white"
+
+            android:paddingTop="10dp" />
+
     </LinearLayout>
 </androidx.cardview.widget.CardView>
