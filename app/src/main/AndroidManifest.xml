@@ -12,6 +12,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DemoApp">
         <activity
+            android:name=".ProviderProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".providerProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".providerProfile"
+            android:exported="false" />
+        <activity
+            android:name=".ParentProfileActivity"
+            android:exported="false" />
+        <activity
             android:name=".ZoneHistoryActivity"
             android:exported="false" />
         <activity
