@@ -41,6 +41,7 @@ public class ParentActivity extends AppCompatActivity {
         setContentView(R.layout.add_child);
 
         db = FirebaseFirestore.getInstance();
+        checkParentOnboarding();
 
         RecyclerView recyclerView = findViewById(R.id.rv_children_list);
         FloatingActionButton btnAddChild = findViewById(R.id.btn_add_child);
@@ -85,6 +86,51 @@ public class ParentActivity extends AppCompatActivity {
 
         loadChildren();
     }
+    private void checkParentOnboarding() {
+        String parentUid = UserUtils.getUid();
+
+        db.collection("users")
+                .document(parentUid)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (!doc.exists()) return;
+
+                    Boolean hasSeen = doc.getBoolean("hasSeenOnboardingParent");
+
+                    // Treat null as not seen
+                    if (hasSeen == null || !hasSeen) {
+                        showParentOnboardingPopup(parentUid);
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Log.e("ParentActivity", "Failed to load onboarding flag", e));
+    }
+    private void showParentOnboardingPopup(String parentUid) {
+        View dialogView = LayoutInflater.from(this)
+                .inflate(R.layout.dialog_parent_onboarding, null);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setCancelable(false)
+                .create();
+
+        dialog.show();
+
+        // Get the button from the layout
+        Button btnClose = dialogView.findViewById(R.id.closeParentPopup);
+
+        btnClose.setOnClickListener(v -> {
+            // Update Firestore flag
+            db.collection("users")
+                    .document(parentUid)
+                    .update("hasSeenOnboardingParent", true)
+                    .addOnFailureListener(e ->
+                            Log.e("ParentOnboarding", "Failed updating onboarding flag", e));
+
+            dialog.dismiss();
+        });
+    }
+
 
     private void loadChildren() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();

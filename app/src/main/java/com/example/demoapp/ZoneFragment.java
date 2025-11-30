@@ -124,7 +124,6 @@ public class ZoneFragment extends Fragment {
                     long latestTimestamp = -1;
                     DocumentSnapshot latestDoc = null;
 
-                    // 🔎 手动筛选 “今天的最新一条”
                     for (DocumentSnapshot doc : query.getDocuments()) {
                         Long ts = doc.getLong("timestamp");
                         if (ts == null) continue;
