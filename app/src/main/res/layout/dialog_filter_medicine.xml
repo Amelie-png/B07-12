@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- filter type -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Medicine type"
+        android:textSize="16sp"/>
+
+    <RadioGroup
+        android:id="@+id/rg_filter_type"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp">
+
+        <RadioButton
+            android:id="@+id/radio_controller"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/controller_med" />
+
+        <RadioButton
+            android:id="@+id/radio_rescue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/rescue_med" />
+    </RadioGroup>
+
+    <!-- Date pickers -->
+    <Button
+        android:id="@+id/btn_date_picker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Pick date range"
+        android:layout_marginTop="8dp"/>
+
+    <TextView
+        android:id="@+id/tv_filter_start_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Start Date"
+        android:textSize="16sp"/>
+
+    <TextView
+        android:id="@+id/tv_filter_end_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="End Date"
+        android:textSize="16sp"/>
+
+    <Button
+        android:id="@+id/btn_apply"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Apply"
+        android:layout_marginTop="8dp"/>
+
+    <Button
+        android:id="@+id/btn_clear"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Clear Filters" />
+</LinearLayout>

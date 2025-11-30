@@ -5,4 +5,7 @@
     <color name="light_purple">#CBC3E3</color>
     <color name="bottom_nav_color">#FF6200EE</color>
     <color name="gray">#808080</color>
+    <color name="hyperlink_blue">#0E9CE9</color>
+    <color name="rescue_med">#E49491</color>
+    <color name="controller_med">#57BEE4</color>
 </resources>

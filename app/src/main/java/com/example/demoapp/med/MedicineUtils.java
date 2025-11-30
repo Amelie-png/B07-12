@@ -1,0 +1,93 @@
+package com.example.demoapp.med;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
+public class MedicineUtils {
+
+    /**
+     * Calculates adherence as:
+     *   (number of controller doses actually taken) / (number expected)
+     * Expected = dosesPerDay * number of days between start–end (inclusive)
+     */
+    public static double calculateControllerAdherence(List<MedicineEntry> allEntries,
+                                                      ControllerMed controllerConfig,
+                                                      long startEpoch,
+                                                      long endEpoch) {
+
+        if (controllerConfig == null || controllerConfig.getDosePerDay() <= 0) return 0;
+
+        // Count entries in date range where type = controller
+        int taken = 0;
+        for (MedicineEntry e : allEntries) {
+            if ("controller".equals(e.getMedType())
+                    && e.getTimestampValue() >= startEpoch
+                    && e.getTimestampValue() <= endEpoch) {
+                taken++;
+            }
+        }
+
+        long days = calculateDaysBetween(startEpoch, endEpoch);
+        long expected = days * controllerConfig.getDosePerDay();
+
+        if (expected == 0) return 0;
+
+        return (double) taken / (double) expected;
+    }
+
+    /**
+     * Count rescue usage in a given time range.
+     */
+    public static int countRescueUsage(List<MedicineEntry> entries, long startEpoch, long endEpoch) {
+        int count = 0;
+        for (MedicineEntry e : entries) {
+            if ("rescue".equals(e.getMedType())
+                    && e.getTimestampValue() >= startEpoch
+                    && e.getTimestampValue() <= endEpoch) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Returns timestamp of last rescue usage, or -1 if none.
+     */
+    public static long getLastRescueTime(List<MedicineEntry> entries) {
+        long latest = -1;
+        for (MedicineEntry e : entries) {
+            if ("rescue".equals(e.getMedType())) {
+                if (e.getTimestampValue() > latest) {
+                    latest = e.getTimestampValue();
+                }
+            }
+        }
+        return latest;
+    }
+
+    /**
+     * Returns weekly rescue count starting from now going 7 days back.
+     */
+    public static int getWeeklyRescueCount(List<MedicineEntry> entries) {
+        long now = System.currentTimeMillis();
+        long weekAgo = now - (7L * 24L * 60L * 60L * 1000L);
+        return countRescueUsage(entries, weekAgo, now);
+    }
+
+    /**
+     * Helper: calculate days between timestamps (rounded up)
+     */
+    private static long calculateDaysBetween(long start, long end) {
+        Calendar c1 = Calendar.getInstance();
+        Calendar c2 = Calendar.getInstance();
+        c1.setTimeInMillis(start);
+        c2.setTimeInMillis(end);
+
+        long diff = c2.getTimeInMillis() - c1.getTimeInMillis();
+        long days = diff / (24L * 60L * 60L * 1000L);
+
+        return Math.max(1, days + 1); // inclusive range
+    }
+}
