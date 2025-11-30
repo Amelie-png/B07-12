@@ -37,6 +37,8 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/textNoPEFMessage"
+
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingBottom="12dp"
@@ -102,6 +104,26 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="View History"/>
+
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/layoutNoPB"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="24dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/textNoPBMessage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Your Personal Best (PB) is not set yet.\nPlease ask your parent to set it."
+                android:textAlignment="center"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:paddingTop="12dp"/>
 
         </LinearLayout>
 
