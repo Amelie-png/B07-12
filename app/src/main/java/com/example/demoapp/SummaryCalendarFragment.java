@@ -1,5 +1,6 @@
 package com.example.demoapp;
 
+import com.example.demoapp.DailyEntryDisplayScreen;
 import com.example.demoapp.calendar.CalendarUtils;
 import com.example.demoapp.calendar.CalendarAdapter;
 import android.os.Bundle;
@@ -21,8 +22,14 @@ import java.util.ArrayList;
 
 public class SummaryCalendarFragment extends Fragment implements CalendarAdapter.OnItemListener {
 
+    private String providerUid;
+    private String childUid;
     private TextView monthYearText;
     private RecyclerView calendarRecyclerView;
+
+    Button prevMonthButt;
+    Button nextMonthButt;
+    Button browseHistoryButton;
 
     @Nullable
     @Override
@@ -32,11 +39,16 @@ public class SummaryCalendarFragment extends Fragment implements CalendarAdapter
 
         initWidgets(view);
 
-        Button prevMonthButt = view.findViewById(R.id.prev_month_button);
-        Button nextMonthButt = view.findViewById(R.id.next_month_button);
+        //TODO: replace with correct childUid logic
+        childUid = "oKaNrSiogbRxH5iCxfjS";
 
-        prevMonthButt.setOnClickListener(v -> previousMonthAction());
-        nextMonthButt.setOnClickListener(v -> nextMonthAction());
+        Button prevMonthButton = view.findViewById(R.id.prev_month_button);
+        Button nextMonthButton = view.findViewById(R.id.next_month_button);
+        Button browseHistoryButton = view.findViewById(R.id.browse_history);
+
+        prevMonthButton.setOnClickListener(v -> previousMonthAction());
+        nextMonthButton.setOnClickListener(v -> nextMonthAction());
+        browseHistoryButton.setOnClickListener(v -> browseHistoryAction());
 
         CalendarUtils.selectedDate = LocalDate.now();
         setMonthView();
@@ -71,6 +83,17 @@ public class SummaryCalendarFragment extends Fragment implements CalendarAdapter
         setMonthView();
     }
 
+    public void browseHistoryAction(){
+        Fragment filterFragment = new FilterEntriesScreen();
+
+        requireActivity()
+                .getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, filterFragment)
+                .addToBackStack(null)
+                .commit();
+    }
+
     @Override
     public void onItemClick(int position, String dayText) {
         if (!dayText.equals("")) {
@@ -78,8 +101,27 @@ public class SummaryCalendarFragment extends Fragment implements CalendarAdapter
             CalendarUtils.selectedDate = CalendarUtils.selectedDate.withDayOfMonth(day);
             setMonthView();
 
-            String message = "Selected Date " + CalendarUtils.monthYearFromDate(CalendarUtils.selectedDate) + " " + day;
-            Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+            openDailyEntryScreen(CalendarUtils.selectedDate);
         }
+    }
+
+    private void openDailyEntryScreen(LocalDate date) {
+        DailyEntryDisplayScreen fragment = new DailyEntryDisplayScreen();
+
+        // Pass filter data to DailyEntryDisplayScreen
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("startDate", date);
+        bundle.putSerializable("endDate", date);
+        bundle.putStringArrayList("symptoms", new ArrayList<>());
+        bundle.putStringArrayList("triggers", new ArrayList<>());
+        bundle.putString("childId", childUid);
+        fragment.setArguments(bundle);
+
+        requireActivity()
+                .getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .addToBackStack(null)
+                .commit();
     }
 }
