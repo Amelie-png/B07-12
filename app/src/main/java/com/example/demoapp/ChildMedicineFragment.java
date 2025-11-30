@@ -21,6 +21,8 @@ import com.example.demoapp.med.FilterDialogFragment;
 import com.example.demoapp.med.FilterState;
 import com.example.demoapp.med.MedicineAdapter;
 import com.example.demoapp.med.MedicineEntry;
+import com.example.demoapp.med.MedicineInventoryActivity;
+import com.example.demoapp.med.MedicineLogWizardActivity;
 import com.example.demoapp.med.MedicineRepository;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -36,6 +38,7 @@ public class ChildMedicineFragment extends Fragment {
     private FloatingActionButton btnAddLog;
     private ImageButton btnRefresh;
     private ImageButton btnFilter;
+    private Button btnInventory;
     //Log filters
     private FilterState filterState = new FilterState();
     //IDs
@@ -66,13 +69,14 @@ public class ChildMedicineFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_child_medicine, container, false);
+        View view = inflater.inflate(R.layout.fragment_parent_medicine, container, false);
 
         //Find dynamic items
         rv = view.findViewById(R.id.rv_med_log);
         btnAddLog = view.findViewById(R.id.fab_add_med_entry);
         btnRefresh = view.findViewById(R.id.btn_refresh);
         btnFilter = view.findViewById(R.id.btn_filter);
+        btnInventory = view.findViewById(R.id.btn_to_inventory);
 
         //Set up adapter & repo
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -158,6 +162,15 @@ public class ChildMedicineFragment extends Fragment {
             logWizard.putExtra("childId", childId);
             logWizard.putExtra("author", "child"); //child is log author
             startActivity(logWizard);
+        });
+    }
+
+    //TODO removed after testing
+    private void setupInventoryButton() {
+        btnInventory.setOnClickListener(v -> {
+            Intent inventory = new Intent(getContext(), MedicineInventoryActivity.class);
+            inventory.putExtra("childId", childId);
+            startActivity(inventory);
         });
     }
 

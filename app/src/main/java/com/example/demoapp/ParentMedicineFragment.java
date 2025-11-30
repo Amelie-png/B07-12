@@ -1,6 +1,8 @@
 package com.example.demoapp;
 
 //import from med package
+import com.example.demoapp.med.MedicineInventoryActivity;
+import com.example.demoapp.med.MedicineLogWizardActivity;
 import com.example.demoapp.med.MedicineRepository;
 import com.example.demoapp.med.MedicineAdapter;
 import com.example.demoapp.med.FilterState;

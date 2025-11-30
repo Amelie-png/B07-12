@@ -4,12 +4,12 @@ import android.app.AlertDialog;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,15 +31,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link MedicineLogWizardFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class MedicineLogWizardFragment extends Fragment {
+public class MedicineLogWizardActivity extends AppCompatActivity {
     //vm
     private MedicineLogWizardViewModel vm;
     //layout
+    private View view;
     private FrameLayout container;
     private ImageButton btnClose;
     private Button btnBack;
@@ -59,51 +55,29 @@ public class MedicineLogWizardFragment extends Fragment {
     private static final String ARG_CHILD = "childId";
     private String childId;
 
-    public MedicineLogWizardFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param childId String object.
-     * @param logAuthor String object.
-     * @return A new instance of fragment MedicineLogWizardFragment.
-     */
-    public static MedicineLogWizardFragment newInstance(String childId, String logAuthor) {
-        MedicineLogWizardFragment f = new MedicineLogWizardFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_CHILD, childId);
-        args.putString(ARG_AUTHOR, logAuthor);
-        f.setArguments(args);
-        return f;
-    }
-
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_medicine_log_wizard, container, false);
-    }
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_medicine_log_wizard);
 
-    @Override
-    public void onViewCreated(@NonNull View root, Bundle savedInstanceState) {
-        super.onViewCreated(root, savedInstanceState);
+        //repo
         repo = new MedicineRepository();
-        if (getArguments() != null) {
-            childId = getArguments().getString(ARG_CHILD);
-            logAuthor = getArguments().getString(ARG_AUTHOR);
-        }
-        vm = new ViewModelProvider(requireActivity()).get(MedicineLogWizardViewModel.class);
 
-        container = root.findViewById(R.id.wizard_container);
-        btnClose = root.findViewById(R.id.btn_wizard_close);
-        btnBack = root.findViewById(R.id.btn_wizard_back);
+        //passed in arguments
+        childId = getIntent().getStringExtra("childId");
+        logAuthor = getIntent().getStringExtra("author");
 
-        // close (X) button - confirm cancel
+        //view model
+        vm = new ViewModelProvider(this).get(MedicineLogWizardViewModel.class);
+
+        //UI
+        container = findViewById(R.id.wizard_container);
+        btnClose = findViewById(R.id.btn_wizard_close);
+        btnBack = findViewById(R.id.btn_wizard_back);
+
+        //button setup
         btnClose.setOnClickListener(v -> confirmCancelWizard());
-        btnBack.setOnClickListener(v -> onBackPressed());
+        btnBack.setOnClickListener(v -> onBack());
 
         // Start at select med
         currentStep = STEP_SELECT_MED;
@@ -112,36 +86,33 @@ public class MedicineLogWizardFragment extends Fragment {
 
     private void showCurrentStep() {
         container.removeAllViews();
-        LayoutInflater inflater = LayoutInflater.from(requireContext());
+        LayoutInflater inflater = LayoutInflater.from(this);
         switch (currentStep) {
             case STEP_SELECT_MED:
-                View select = inflater.inflate(R.layout.view_select_medicine, container, false);
-                setupSelectMedView(select);
-                container.addView(select);
+                view = inflater.inflate(R.layout.view_select_medicine, container, false);
+                setupSelectMedView(view);
                 break;
             case STEP_PRECHECK:
-                View pre = inflater.inflate(R.layout.view_precheck, container, false);
-                setupPrecheckView(pre);
-                container.addView(pre);
+                view = inflater.inflate(R.layout.view_precheck, container, false);
+                setupPrecheckView(view);
                 break;
             case STEP_TECHNIQUE_HELPER:
-                View tHelper = inflater.inflate(R.layout.view_technique_helper, container, false);
-                setupTechniqueHelper(tHelper);
-                container.addView(tHelper);
+                view = inflater.inflate(R.layout.view_technique_helper, container, false);
+                setupTechniqueHelper(view);
                 break;
             case STEP_POSTCHECK:
-                View post = inflater.inflate(R.layout.view_postcheck, container, false);
-                setupPostcheckView(post);
-                container.addView(post);
+                view = inflater.inflate(R.layout.view_postcheck, container, false);
+                setupPostcheckView(view);
                 break;
             case STEP_CONFIRM:
-                View confirm = inflater.inflate(R.layout.view_confirmation, container, false);
-                setupConfirmationView(confirm);
-                container.addView(confirm);
+                view = inflater.inflate(R.layout.view_confirmation, container, false);
+                setupConfirmationView(view);
                 break;
         }
+        container.addView(view);
     }
 
+    //Step 1
     private void setupSelectMedView(View select){
         Button next = select.findViewById(R.id.btn_select_next);
         MaterialButtonToggleGroup toggleType = select.findViewById(R.id.tg_med_type);
@@ -151,35 +122,27 @@ public class MedicineLogWizardFragment extends Fragment {
 
         //toggle group action
         toggleType.addOnButtonCheckedListener(
-                new MaterialButtonToggleGroup.OnButtonCheckedListener() {
-                    @Override
-                    public void onButtonChecked(MaterialButtonToggleGroup group, int checkedId, boolean isChecked) {
+                (group, checkedId, isChecked) -> {
+                    // Disable when no selection
+                    boolean hasSelection = group.getCheckedButtonId() != View.NO_ID;
+                    next.setEnabled(hasSelection);
 
-                        // Disable when no selection
-                        boolean hasSelection = group.getCheckedButtonId() != View.NO_ID;
-                        next.setEnabled(hasSelection);
+                    if (!hasSelection) {
+                        vm.setSelectedMedType(null);
+                        return;
+                    }
+                    if (!isChecked) return;
 
-                        if (!hasSelection) {
-                            vm.setSelectedMedType(null);
-                            return;
-                        }
-
-                        if (!isChecked) return;
-
-                        String medType = null;
-                        if (checkedId == R.id.btn_controller) {
-                            medType = "controller";
-                        } else if (checkedId == R.id.btn_rescue) {
-                            medType = "rescue";
-                        }
-
-                        vm.setSelectedMedType(medType);
+                    if (checkedId == R.id.btn_controller) {
+                        vm.setSelectedMedType("controller");
+                    } else if (checkedId == R.id.btn_rescue) {
+                        vm.setSelectedMedType("rescue");
                     }
                 }
         );
 
         //UI save user checked option
-        vm.getSelectedMedType().observe(getViewLifecycleOwner(), type -> {
+        vm.getSelectedMedType().observe(this, type -> {
             if (type == null) {
                 toggleType.clearChecked();
             } else if (type.equals("controller")) {
@@ -216,7 +179,7 @@ public class MedicineLogWizardFragment extends Fragment {
         });
 
         //UI save user set value
-        vm.getPreBreathRating().observe(getViewLifecycleOwner(), rate::setProgress);
+        vm.getPreBreathRating().observe(this, rate::setProgress);
 
         next.setOnClickListener(b -> {
             currentStep = STEP_TECHNIQUE_HELPER;
@@ -242,11 +205,10 @@ public class MedicineLogWizardFragment extends Fragment {
             for (CheckBox cb : allSteps) state.add(cb.isChecked());
             vm.setTechniqueSteps(state);
         };
-
         for (CheckBox cb : allSteps) cb.setOnCheckedChangeListener(listener);
 
         // UI save user checked steps
-        vm.getTechniqueSteps().observe(getViewLifecycleOwner(), state -> {
+        vm.getTechniqueSteps().observe(this, state -> {
             if (state != null && state.size() == allSteps.size()) {
                 for (int i = 0; i < allSteps.size(); i++) {
                     allSteps.get(i).setChecked(state.get(i));
@@ -270,37 +232,30 @@ public class MedicineLogWizardFragment extends Fragment {
 
         //toggle group action
         toggleState.addOnButtonCheckedListener(
-                new MaterialButtonToggleGroup.OnButtonCheckedListener() {
-                    @Override
-                    public void onButtonChecked(MaterialButtonToggleGroup group, int checkedId, boolean isChecked) {
+                (group, checkedId, isChecked) -> {
 
-                        // Disable when no selection
-                        boolean hasSelection = group.getCheckedButtonId() != View.NO_ID;
-                        next.setEnabled(hasSelection);
+                    // Disable when no selection
+                    boolean hasSelection = group.getCheckedButtonId() != View.NO_ID;
+                    next.setEnabled(hasSelection);
 
-                        if (!hasSelection) {
-                            vm.setConditionChange(null);
-                            return;
-                        }
+                    if (!hasSelection) {
+                        vm.setConditionChange(null);
+                        return;
+                    }
+                    if (!isChecked) return;
 
-                        if (!isChecked) return;
-
-                        String state = null;
-                        if (checkedId == R.id.btn_worse) {
-                            state = "worse";
-                        } else if (checkedId == R.id.btn_same) {
-                            state = "same";
-                        } else if (checkedId == R.id.btn_better) {
-                            state = "better";
-                        }
-
-                        vm.setConditionChange(state);
+                    if (checkedId == R.id.btn_worse) {
+                        vm.setConditionChange("worse");
+                    } else if (checkedId == R.id.btn_same) {
+                        vm.setConditionChange("same");
+                    } else if (checkedId == R.id.btn_better) {
+                        vm.setConditionChange("better");
                     }
                 }
         );
 
         //UI save user checked option
-        vm.getConditionChange().observe(getViewLifecycleOwner(), type -> {
+        vm.getConditionChange().observe(this, type -> {
             if (type == null) {
                 toggleState.clearChecked();
             } else if (type.equals("worse")) {
@@ -329,7 +284,7 @@ public class MedicineLogWizardFragment extends Fragment {
         });
 
         //UI save user set value
-        vm.getPostBreathRating().observe(getViewLifecycleOwner(), rate::setProgress);
+        vm.getPostBreathRating().observe(this, rate::setProgress);
 
         next.setOnClickListener(b -> {
             currentStep = STEP_CONFIRM;
@@ -342,6 +297,13 @@ public class MedicineLogWizardFragment extends Fragment {
         TextView displayType = conf.findViewById(R.id.tv_confirm_type);
         EditText dose = conf.findViewById(R.id.et_confirm_dose);
         CheckBox flagLow = conf.findViewById(R.id.cb_flag_low);
+        TextView breathingRating = conf.findViewById(R.id.tv_confirm_breathing_rating);
+        TextView conditionChange = conf.findViewById(R.id.tv_confirm_condition_change);
+
+        displayType.setText(vm.getSelectedMedType().getValue());
+        breathingRating.setText("Breathing rating: " + vm.getPreBreathRating().getValue() +
+                " -> " + vm.getPostBreathRating().getValue());
+        conditionChange.setText("Condition change: " + vm.getConditionChange().getValue());
 
         //edit text action
         dose.addTextChangedListener(new TextWatcher() {
@@ -350,16 +312,9 @@ public class MedicineLogWizardFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                String data = s.toString().trim();
-
-                if (data.isEmpty()) {
-                    vm.setDoseTaken(0);
-                    return;
-                }
                 try {
-                    int value = Integer.parseInt(data);
-                    vm.setDoseTaken(value);
-                } catch (NumberFormatException e) {
+                    vm.setDoseTaken(Integer.parseInt(s.toString().trim()));
+                } catch (Exception e) {
                     // Invalid input → ignore or clear
                     vm.setDoseTaken(0);
                 }
@@ -373,8 +328,6 @@ public class MedicineLogWizardFragment extends Fragment {
         flagLow.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 vm.setFlaggedLowStock(isChecked);
         });
-
-        displayType.setText(vm.getSelectedMedType().getValue());
 
         confirm.setOnClickListener(b -> {
             confirm.setEnabled(false);
@@ -393,15 +346,16 @@ public class MedicineLogWizardFragment extends Fragment {
         entry.setPostBreathRating(vm.getPostBreathRating().getValue() != null ? vm.getPostBreathRating().getValue() : 0);
         entry.setConditionChange(vm.getConditionChange().getValue());
         entry.setLogAuthor(logAuthor);
+
         repo.addMedLog(entry, new MedicineRepository.OnResult<String>() {
             @Override public void onSuccess(String id) {
                 // Success -> dismiss the wizard and return to log list
-                Toast.makeText(getContext(), "Saved!", Toast.LENGTH_SHORT).show();
-                requireActivity().getSupportFragmentManager().popBackStack();
+                Toast.makeText(MedicineLogWizardActivity.this, "Saved!", Toast.LENGTH_SHORT).show();
+                finish();
             }
             @Override public void onFailure(Exception e) {
                 // show error dialog
-                new AlertDialog.Builder(requireContext())
+                new AlertDialog.Builder(MedicineLogWizardActivity.this)
                         .setTitle("Error")
                         .setMessage("Could not save log: " + e.getMessage())
                         .setPositiveButton("OK", null)
@@ -410,7 +364,7 @@ public class MedicineLogWizardFragment extends Fragment {
         });
     }
 
-    private void onBackPressed() {
+    private void onBack() {
         if (currentStep == STEP_SELECT_MED) {
             confirmCancelWizard();
             return;
@@ -429,11 +383,11 @@ public class MedicineLogWizardFragment extends Fragment {
     }
 
     private void confirmCancelWizard() {
-        new AlertDialog.Builder(requireContext())
+        new AlertDialog.Builder(this)
                 .setTitle("Cancel entry?")
                 .setMessage("Are you sure you want to cancel this log? Progress will be lost.")
                 .setPositiveButton("Yes", (d, w) -> {
-                    requireActivity().getSupportFragmentManager().popBackStack();
+                    finish();
                 })
                 .setNegativeButton("No", null)
                 .show();

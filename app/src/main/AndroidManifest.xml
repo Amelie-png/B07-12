@@ -25,7 +25,8 @@
             android:exported="false" />
         <activity
             android:name=".TriageActivity"
-            android:exported="false" /> <!-- Launcher Activity -->
+            android:exported="false" />
+        <!-- Launcher Activity -->
         <activity
             android:name=".CreateAccountActivity"
             android:exported="true">
@@ -34,7 +35,8 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> <!-- 内部使用 Activity -->
+        </activity>
+        <!-- 内部使用 Activity -->
         <activity
             android:name=".ChooseIdentityActivity"
             android:exported="false" />
@@ -55,10 +57,18 @@
             android:exported="false" />
         <activity
             android:name=".HomeScreenActivity"
-            android:exported="false" /> <!-- ParentActivity -->
+            android:exported="false" />
+        <activity
+            android:name=".med.MedicineLogWizardActivity"
+            android:exported="false" />
+        <activity
+            android:name=".med.MedicineInventoryActivity"
+            android:exported="false" />
+        <!-- ParentActivity -->
         <activity
             android:name=".ParentActivity"
-            android:exported="false" /> <!-- NEW: MainNavActivity -->
+            android:exported="false" />
+        <!-- NEW: MainNavActivity -->
         <activity
             android:name=".MainNavActivity"
             android:exported="false" />
