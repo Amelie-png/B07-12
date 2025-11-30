@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -27,29 +28,21 @@ import java.util.Map;
 
 public class ZoneFragment extends Fragment {
 
-    // UI elements
     private LinearLayout layoutNoZone, layoutHasZone;
     private TextView textZonePercent;
     private View zoneIndicator;
     private Button btnAddZone, btnEditZone;
     private ImageView zoneBar;
 
-    // Firestore
     private FirebaseFirestore db;
-
-    // Passed from HomeFragment
     private String childId;
     private String parentId;
-    private String role;  // "child", "parent", "provider"
+    private String role;
 
     private int personalBest = -1;
 
     public ZoneFragment() {}
 
-
-    // =========================================================================
-    // Lifecycle
-    // =========================================================================
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -58,7 +51,6 @@ public class ZoneFragment extends Fragment {
 
         db = FirebaseFirestore.getInstance();
 
-        // Initialize UI
         zoneBar = view.findViewById(R.id.pefBar);
         layoutNoZone = view.findViewById(R.id.layoutNoPEF);
         layoutHasZone = view.findViewById(R.id.layoutHasPEF);
@@ -67,28 +59,27 @@ public class ZoneFragment extends Fragment {
         btnAddZone = view.findViewById(R.id.btnAddPEF);
         btnEditZone = view.findViewById(R.id.btnEditPEF);
 
-        // History button
         Button btnZoneHistory = view.findViewById(R.id.btnZoneHistory);
         btnZoneHistory.setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), ZoneHistoryActivity.class);
-            intent.putExtra("uid", childId);
+            intent.putExtra("uid", childId); // IMPORTANT: use UID (project wide)
             startActivity(intent);
         });
 
-        // Add / Edit zone
         btnAddZone.setOnClickListener(v -> showAddZoneDialog());
         btnEditZone.setOnClickListener(v -> showEditZoneDialog());
 
         return view;
     }
 
-
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view,
+                              @Nullable Bundle savedInstanceState) {
+
         super.onViewCreated(view, savedInstanceState);
 
         Bundle args = requireArguments();
-        childId = args.getString("uid");
+        childId = args.getString("uid"); // IMPORTANT: use uid (project wide)
         role = args.getString("role");
 
         db.collection("children")
@@ -100,16 +91,10 @@ public class ZoneFragment extends Fragment {
                     }
                 });
 
-        if (childId != null) {
-            loadPersonalBest();
-        }
+        loadPersonalBest();
     }
 
 
-
-    // =========================================================================
-    // Load PB + today's ZONE
-    // =========================================================================
     private void loadPersonalBest() {
         db.collection("children")
                 .document(childId)
@@ -117,8 +102,6 @@ public class ZoneFragment extends Fragment {
                 .addOnSuccessListener(doc -> {
                     if (doc.exists() && doc.contains("pb")) {
                         personalBest = doc.getLong("pb").intValue();
-                    } else {
-                        personalBest = -1;
                     }
                     loadTodayZone();
                 });
@@ -126,23 +109,44 @@ public class ZoneFragment extends Fragment {
 
 
     private void loadTodayZone() {
-
         long todayStart = getTodayStartMillis();
 
         db.collection("zone")
-                .whereEqualTo("childId", childId)
-                .whereGreaterThan("timestamp", todayStart)
-                .orderBy("timestamp")
+                .whereEqualTo("childId", childId)   // 单字段 where，不需要 index
                 .get()
                 .addOnSuccessListener(query -> {
 
                     if (query.isEmpty()) {
                         showNoZoneLayout();
-                    } else {
-                        DocumentSnapshot doc = query.getDocuments().get(0);
-                        int pef = doc.getLong("pef").intValue();
-                        updateZoneUI(pef);
+                        return;
                     }
+
+                    long latestTimestamp = -1;
+                    DocumentSnapshot latestDoc = null;
+
+                    // 🔎 手动筛选 “今天的最新一条”
+                    for (DocumentSnapshot doc : query.getDocuments()) {
+                        Long ts = doc.getLong("timestamp");
+                        if (ts == null) continue;
+
+                        if (ts >= todayStart && ts > latestTimestamp) {
+                            latestTimestamp = ts;
+                            latestDoc = doc;
+                        }
+                    }
+
+                    // 今天没有记录
+                    if (latestDoc == null) {
+                        showNoZoneLayout();
+                        return;
+                    }
+
+                    int pefValue = latestDoc.getLong("pef").intValue();
+                    updateZoneUI(pefValue);
+                })
+                .addOnFailureListener(e -> {
+                    e.printStackTrace();
+                    showNoZoneLayout();
                 });
     }
 
@@ -156,17 +160,13 @@ public class ZoneFragment extends Fragment {
     }
 
 
-
-    // =========================================================================
-    // Update UI
-    // =========================================================================
     private void updateZoneUI(int pefValue) {
 
         layoutNoZone.setVisibility(View.GONE);
         layoutHasZone.setVisibility(View.VISIBLE);
 
-        int percent = (personalBest > 0)
-                ? (int)((pefValue * 100f) / personalBest)
+        int percent = personalBest > 0
+                ? (int) ((pefValue * 100f) / personalBest)
                 : -1;
 
         if (percent >= 0) {
@@ -176,53 +176,28 @@ public class ZoneFragment extends Fragment {
         } else {
             textZonePercent.setText(pefValue + " (no PB)");
         }
-
-        // Send RED alert to parent
-        if (percent > 0 && percent < 50) {
-            sendParentAlertDailyRed();
-        }
     }
-
-
-    private void sendParentAlertDailyRed() {
-        if (parentId == null) return;
-
-        Map<String, Object> alert = new HashMap<>();
-        alert.put("parentId", parentId);
-        alert.put("childId", childId);
-        alert.put("type", "daily_zone_red");
-        alert.put("message", "Today's PEF zone is RED (<50% of PB).");
-        alert.put("timestamp", System.currentTimeMillis());
-
-        db.collection("alerts").document().set(alert);
-    }
-
 
 
     private void moveIndicator(int percent) {
-
         zoneBar.post(() -> {
-
             float barWidth = zoneBar.getWidth();
-            float px = (percent / 100f) * barWidth;
-
-            float centerX = px - (zoneIndicator.getWidth() / 2f);
-            zoneIndicator.setX(centerX);
+            float px = percent / 100f * barWidth;
+            zoneIndicator.setX(px - zoneIndicator.getWidth() / 2f);
         });
     }
 
+
     private void setPercentColor(int percent) {
         if (percent >= 80) {
-            textZonePercent.setTextColor(
-                    getResources().getColor(android.R.color.holo_green_dark));
+            textZonePercent.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
         } else if (percent >= 50) {
-            textZonePercent.setTextColor(
-                    getResources().getColor(android.R.color.holo_orange_dark));
+            textZonePercent.setTextColor(getResources().getColor(android.R.color.holo_orange_dark));
         } else {
-            textZonePercent.setTextColor(
-                    getResources().getColor(android.R.color.holo_red_dark));
+            textZonePercent.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
         }
     }
+
 
     private void showNoZoneLayout() {
         layoutNoZone.setVisibility(View.VISIBLE);
@@ -230,16 +205,7 @@ public class ZoneFragment extends Fragment {
     }
 
 
-
-    // =========================================================================
-    // Add Zone Dialog
-    // =========================================================================
     private void showAddZoneDialog() {
-
-        if ("provider".equals(role)) {
-            Toast.makeText(getContext(), "Providers cannot edit", Toast.LENGTH_SHORT).show();
-            return;
-        }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         View view = getLayoutInflater().inflate(R.layout.dialog_add_pef, null);
@@ -251,14 +217,12 @@ public class ZoneFragment extends Fragment {
         AlertDialog dialog = builder.create();
 
         save.setOnClickListener(v -> {
-            String s = input.getText().toString();
-            if (s.isEmpty()) {
+            if (input.getText().toString().isEmpty()) {
                 input.setError("Enter a value");
                 return;
             }
-            int value = Integer.parseInt(s);
 
-            saveZone(value);
+            saveZone(Integer.parseInt(input.getText().toString()));
             dialog.dismiss();
         });
 
@@ -266,15 +230,7 @@ public class ZoneFragment extends Fragment {
     }
 
 
-    // =========================================================================
-    // Edit Zone Dialog
-    // =========================================================================
     private void showEditZoneDialog() {
-
-        if ("provider".equals(role)) {
-            Toast.makeText(getContext(), "Providers cannot edit", Toast.LENGTH_SHORT).show();
-            return;
-        }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         View view = getLayoutInflater().inflate(R.layout.dialog_edit_pef, null);
@@ -283,21 +239,17 @@ public class ZoneFragment extends Fragment {
         EditText input = view.findViewById(R.id.inputEditPef);
         Button save = view.findViewById(R.id.btnSaveEditPef);
 
-        String current = textZonePercent.getText().toString().replace("%", "");
-        input.setText(current);
+        input.setText(textZonePercent.getText().toString().replace("%",""));
 
         AlertDialog dialog = builder.create();
 
         save.setOnClickListener(v -> {
-            String s = input.getText().toString();
-            if (s.isEmpty()) {
+            if (input.getText().toString().isEmpty()) {
                 input.setError("Enter a value");
                 return;
             }
 
-            int value = Integer.parseInt(s);
-
-            saveZone(value);
+            saveZone(Integer.parseInt(input.getText().toString()));
             dialog.dismiss();
         });
 
@@ -305,26 +257,20 @@ public class ZoneFragment extends Fragment {
     }
 
 
-
-    // =========================================================================
-    // Save Zone
-    // =========================================================================
     private void saveZone(int pefValue) {
 
-        // Update PB if needed
         if (personalBest == -1 || pefValue > personalBest) {
             personalBest = pefValue;
-            savePersonalBest(pefValue);
+            db.collection("children").document(childId).update("pb", pefValue);
         }
 
         int percent = (int)((pefValue * 100f) / personalBest);
-        String zoneColor =
-                percent >= 80 ? "GREEN" :
-                        percent >= 50 ? "YELLOW" :
-                                "RED";
+        String zoneColor = percent >= 80 ? "GREEN" :
+                percent >= 50 ? "YELLOW" :
+                        "RED";
 
         Map<String, Object> data = new HashMap<>();
-        data.put("childId", childId);
+        data.put("childId", childId);   // Firestore field
         data.put("pef", pefValue);
         data.put("percent", percent);
         data.put("zone", zoneColor);
@@ -333,22 +279,9 @@ public class ZoneFragment extends Fragment {
         db.collection("zone")
                 .document()
                 .set(data)
-                .addOnSuccessListener(unused -> updateZoneUI(pefValue));
-    }
-
-
-    private void savePersonalBest(int value) {
-        db.collection("children")
-                .document(childId)
-                .update("pb", value)
-                .addOnFailureListener(e -> {
-                    Map<String, Object> data = new HashMap<>();
-                    data.put("pb", value);
-
-                    db.collection("children")
-                            .document(childId)
-                            .set(data);
+                .addOnSuccessListener(unused -> {
+                    updateZoneUI(pefValue);
+                    loadTodayZone();
                 });
     }
-
 }
