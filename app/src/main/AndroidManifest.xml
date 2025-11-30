@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.demoapp">
-
     <!-- 权限 -->
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -12,33 +11,57 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.DemoApp">
-
-        <!-- Launcher Activity -->
+        <activity
+            android:name=".ZoneHistoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".GreenAdviceCardActivity"
+            android:exported="false" />
+        <activity
+            android:name=".HomeStepsCardActivity"
+            android:exported="false" />
+        <activity
+            android:name=".EmergencyCardActivity"
+            android:exported="false" />
+        <activity
+            android:name=".TriageActivity"
+            android:exported="false" /> <!-- Launcher Activity -->
         <activity
             android:name=".CreateAccountActivity"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- 内部使用 Activity -->
-        <activity android:name=".ChooseIdentityActivity" android:exported="false" />
-        <activity android:name=".SelectSymptomsActivity" android:exported="false" />
-        <activity android:name=".SelectTriggersActivity" android:exported="false" />
-        <activity android:name=".PasswordRecoveryActivity" android:exported="false" />
-        <activity android:name=".CardViewHomeScreen" android:exported="false" />
-
-        <activity android:name=".SignInActivity" android:exported="false" />
-        <activity android:name=".HomeScreenActivity" android:exported="false" />
-
-        <!-- ParentActivity -->
-        <activity android:name=".ParentActivity" android:exported="false" />
-
-        <!-- NEW: MainNavActivity -->
-        <activity android:name=".MainNavActivity" android:exported="false" />
-
+        </activity> <!-- 内部使用 Activity -->
+        <activity
+            android:name=".ChooseIdentityActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SelectSymptomsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SelectTriggersActivity"
+            android:exported="false" />
+        <activity
+            android:name=".PasswordRecoveryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CardViewHomeScreen"
+            android:exported="false" />
+        <activity
+            android:name=".SignInActivity"
+            android:exported="false" />
+        <activity
+            android:name=".HomeScreenActivity"
+            android:exported="false" /> <!-- ParentActivity -->
+        <activity
+            android:name=".ParentActivity"
+            android:exported="false" /> <!-- NEW: MainNavActivity -->
+        <activity
+            android:name=".MainNavActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

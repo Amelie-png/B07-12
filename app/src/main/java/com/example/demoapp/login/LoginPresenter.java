@@ -1,5 +1,6 @@
 package com.example.demoapp.login;
 
+import com.example.demoapp.utils.HashUtils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -112,16 +113,18 @@ public class LoginPresenter implements LoginContract.Presenter {
                         // 🔵 CHILD USER FOUND
                         for (QueryDocumentSnapshot childDoc : childTask.getResult()) {
 
-                            String storedPassword = childDoc.getString("password");
+                            // ❗ Now we use passwordHash (SHA-256)
+                            String storedHash = childDoc.getString("passwordHash");
+                            String inputHash = HashUtils.sha256(password);
 
-                            if (!password.equals(storedPassword)) {
+                            if (storedHash == null || inputHash == null || !inputHash.equals(storedHash)) {
                                 view.hideLoading();
                                 view.showError("Incorrect password.");
                                 return;
                             }
 
                             // SUCCESS → Child logged in
-                            String childId = childDoc.getId();
+                            String childId = childDoc.getId();  // Firestore doc ID = child's UID
 
                             view.hideLoading();
                             view.navigateToChildHome(childId);
@@ -160,7 +163,7 @@ public class LoginPresenter implements LoginContract.Presenter {
                                         return;
                                     }
 
-                                    // 3️⃣ Username login → convert username login into EMAIL login
+                                    // 3️⃣ Username login → convert to EMAIL login
                                     firebaseAuth.signInWithEmailAndPassword(email, password)
                                             .addOnCompleteListener(authTask -> {
 
