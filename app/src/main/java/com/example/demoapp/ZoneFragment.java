@@ -16,11 +16,9 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -28,7 +26,7 @@ import java.util.Map;
 
 public class ZoneFragment extends Fragment {
 
-    private LinearLayout layoutNoZone, layoutHasZone;
+    private LinearLayout layoutNoZone, layoutHasZone, layoutNoPB;
     private TextView textZonePercent;
     private View zoneIndicator;
     private Button btnAddZone, btnEditZone;
@@ -54,6 +52,8 @@ public class ZoneFragment extends Fragment {
         zoneBar = view.findViewById(R.id.pefBar);
         layoutNoZone = view.findViewById(R.id.layoutNoPEF);
         layoutHasZone = view.findViewById(R.id.layoutHasPEF);
+        layoutNoPB = view.findViewById(R.id.layoutNoPB);
+
         textZonePercent = view.findViewById(R.id.textZonePercent);
         zoneIndicator = view.findViewById(R.id.pefIndicator);
         btnAddZone = view.findViewById(R.id.btnAddPEF);
@@ -62,7 +62,7 @@ public class ZoneFragment extends Fragment {
         Button btnZoneHistory = view.findViewById(R.id.btnZoneHistory);
         btnZoneHistory.setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), ZoneHistoryActivity.class);
-            intent.putExtra("uid", childId); // IMPORTANT: use UID (project wide)
+            intent.putExtra("uid", childId);
             startActivity(intent);
         });
 
@@ -79,7 +79,7 @@ public class ZoneFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         Bundle args = requireArguments();
-        childId = args.getString("uid"); // IMPORTANT: use uid (project wide)
+        childId = args.getString("uid");
         role = args.getString("role");
 
         db.collection("children")
@@ -95,24 +95,77 @@ public class ZoneFragment extends Fragment {
     }
 
 
+    // ----------------------------------------------------
+    // LOAD PERSONAL BEST
+    // ----------------------------------------------------
     private void loadPersonalBest() {
         db.collection("children")
                 .document(childId)
                 .get()
                 .addOnSuccessListener(doc -> {
+
                     if (doc.exists() && doc.contains("pb")) {
                         personalBest = doc.getLong("pb").intValue();
                     }
+
+                    boolean pbNotSet = (personalBest <= 0);
+
+                    // CHILD + PB NOT SET → Show special layout and STOP
+                    if (role != null && role.equalsIgnoreCase("child") && pbNotSet) {
+                        showNoPBLayout();
+                        return;
+                    }
+
+                    updateButtonStates();
                     loadTodayZone();
                 });
     }
 
 
+    // ----------------------------------------------------
+    // SPECIAL LAYOUT WHEN PB NOT SET (CHILD ONLY)
+    // ----------------------------------------------------
+    private void showNoPBLayout() {
+        layoutNoPB.setVisibility(View.VISIBLE);
+        layoutNoZone.setVisibility(View.GONE);
+        layoutHasZone.setVisibility(View.GONE);
+
+        btnAddZone.setVisibility(View.GONE);
+        btnEditZone.setVisibility(View.GONE);
+    }
+
+
+    // ----------------------------------------------------
+    // ENABLE / DISABLE PEF BUTTONS BASED ON PB
+    // ----------------------------------------------------
+    private void updateButtonStates() {
+        if (role != null && role.equalsIgnoreCase("child")) {
+
+            boolean pbNotSet = (personalBest <= 0);
+
+            btnAddZone.setEnabled(!pbNotSet);
+            btnEditZone.setEnabled(!pbNotSet);
+
+            float alpha = pbNotSet ? 0.4f : 1f;
+            btnAddZone.setAlpha(alpha);
+            btnEditZone.setAlpha(alpha);
+
+            if (pbNotSet) {
+                btnAddZone.setVisibility(View.GONE);
+                btnEditZone.setVisibility(View.GONE);
+            }
+        }
+    }
+
+
+    // ----------------------------------------------------
+    // LOAD TODAY’S ZONE DATA
+    // ----------------------------------------------------
     private void loadTodayZone() {
         long todayStart = getTodayStartMillis();
 
         db.collection("zone")
-                .whereEqualTo("childId", childId)   // 单字段 where，不需要 index
+                .whereEqualTo("childId", childId)
                 .get()
                 .addOnSuccessListener(query -> {
 
@@ -134,7 +187,6 @@ public class ZoneFragment extends Fragment {
                         }
                     }
 
-                    // 今天没有记录
                     if (latestDoc == null) {
                         showNoZoneLayout();
                         return;
@@ -149,6 +201,7 @@ public class ZoneFragment extends Fragment {
                 });
     }
 
+
     private long getTodayStartMillis() {
         Calendar c = Calendar.getInstance();
         c.set(Calendar.HOUR_OF_DAY, 0);
@@ -159,10 +212,24 @@ public class ZoneFragment extends Fragment {
     }
 
 
+    // ----------------------------------------------------
+    // SHOW NO-ZONE LAYOUT
+    // ----------------------------------------------------
+    private void showNoZoneLayout() {
+        layoutNoZone.setVisibility(View.VISIBLE);
+        layoutHasZone.setVisibility(View.GONE);
+        layoutNoPB.setVisibility(View.GONE);
+    }
+
+
+    // ----------------------------------------------------
+    // UPDATE UI FOR TODAY'S ZONE
+    // ----------------------------------------------------
     private void updateZoneUI(int pefValue) {
 
         layoutNoZone.setVisibility(View.GONE);
         layoutHasZone.setVisibility(View.VISIBLE);
+        layoutNoPB.setVisibility(View.GONE);
 
         int percent = personalBest > 0
                 ? (int) ((pefValue * 100f) / personalBest)
@@ -198,20 +265,36 @@ public class ZoneFragment extends Fragment {
     }
 
 
-    private void showNoZoneLayout() {
-        layoutNoZone.setVisibility(View.VISIBLE);
-        layoutHasZone.setVisibility(View.GONE);
+    // ----------------------------------------------------
+    // PB REMINDER DIALOG
+    // ----------------------------------------------------
+    private void showParentReminderDialog() {
+        new AlertDialog.Builder(getContext())
+                .setTitle("Personal Best Not Set")
+                .setMessage("Please remind your parent to set your Personal Best (PB) before logging PEF.")
+                .setPositiveButton("OK", null)
+                .show();
     }
 
 
+    // ----------------------------------------------------
+    // ADD PEF DIALOG
+    // ----------------------------------------------------
     private void showAddZoneDialog() {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        View view = getLayoutInflater().inflate(R.layout.dialog_add_pef, null);
-        builder.setView(view);
+        boolean pbNotSet = (personalBest <= 0);
 
-        EditText input = view.findViewById(R.id.inputPefValue);
-        Button save = view.findViewById(R.id.btnSavePef);
+        if (role != null && role.equalsIgnoreCase("child") && pbNotSet) {
+            showParentReminderDialog();
+            return;
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_pef, null);
+        builder.setView(dialogView);
+
+        EditText input = dialogView.findViewById(R.id.inputPefValue);
+        Button save = dialogView.findViewById(R.id.btnSavePef);
 
         AlertDialog dialog = builder.create();
 
@@ -229,16 +312,26 @@ public class ZoneFragment extends Fragment {
     }
 
 
+    // ----------------------------------------------------
+    // EDIT PEF DIALOG
+    // ----------------------------------------------------
     private void showEditZoneDialog() {
 
+        boolean pbNotSet = (personalBest <= 0);
+
+        if (role != null && role.equalsIgnoreCase("child") && pbNotSet) {
+            showParentReminderDialog();
+            return;
+        }
+
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        View view = getLayoutInflater().inflate(R.layout.dialog_edit_pef, null);
-        builder.setView(view);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_pef, null);
+        builder.setView(dialogView);
 
-        EditText input = view.findViewById(R.id.inputEditPef);
-        Button save = view.findViewById(R.id.btnSaveEditPef);
+        EditText input = dialogView.findViewById(R.id.inputEditPef);
+        Button save = dialogView.findViewById(R.id.btnSaveEditPef);
 
-        input.setText(textZonePercent.getText().toString().replace("%",""));
+        input.setText(textZonePercent.getText().toString().replace("%", ""));
 
         AlertDialog dialog = builder.create();
 
@@ -256,20 +349,25 @@ public class ZoneFragment extends Fragment {
     }
 
 
+    // ----------------------------------------------------
+    // SAVE ZONE ENTRY
+    // ----------------------------------------------------
     private void saveZone(int pefValue) {
 
-        if (personalBest == -1 || pefValue > personalBest) {
+        if (personalBest <= 0 || pefValue > personalBest) {
             personalBest = pefValue;
             db.collection("children").document(childId).update("pb", pefValue);
+            updateButtonStates();
         }
 
         int percent = (int)((pefValue * 100f) / personalBest);
+
         String zoneColor = percent >= 80 ? "GREEN" :
                 percent >= 50 ? "YELLOW" :
                         "RED";
 
         Map<String, Object> data = new HashMap<>();
-        data.put("childId", childId);   // Firestore field
+        data.put("childId", childId);
         data.put("pef", pefValue);
         data.put("percent", percent);
         data.put("zone", zoneColor);
