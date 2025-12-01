@@ -1,15 +1,13 @@
 package com.example.demoapp;
 
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,23 +15,20 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class ProviderProfileFragment extends Fragment {
 
-    private TextView providerName;     // Full name under the title
-    private TextView usernameValue;    // Username displayed beside image
-    private TextView firstNameValue;   // Editable
-    private TextView lastNameValue;    // Editable
-    private TextView emailValue;       // Email display
+    private TextView childNameView;
+    private TextView childUsernameView;
+    private TextView dobValueView;
+    private ImageView childImageView;
+    private Button returnButton;
 
-    private Button editFirstNameButton;
-    private Button editLastNameButton;
-    private Button logoutButton;
+    private String childUid;
+    private String providerUid;
 
     private FirebaseFirestore db;
-    private String providerUid;
 
     public ProviderProfileFragment() {}
 
@@ -41,6 +36,7 @@ public class ProviderProfileFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState) {
+
         return inflater.inflate(R.layout.fragment_provider_profile, container, false);
     }
 
@@ -51,138 +47,70 @@ public class ProviderProfileFragment extends Fragment {
 
         db = FirebaseFirestore.getInstance();
 
+        // Get arguments passed by navigation
         if (getArguments() != null) {
-            providerUid = getArguments().getString("uid");
+            childUid = getArguments().getString("childUid");
+            providerUid = getArguments().getString("providerUid");
         }
 
-        if (providerUid == null) {
-            Toast.makeText(requireContext(), "Missing provider ID", Toast.LENGTH_SHORT).show();
+        if (childUid == null) {
+            Toast.makeText(requireContext(), "Missing child ID", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Bind UI (MATCHING XML IDs EXACTLY)
-        providerName = view.findViewById(R.id.providerName);
-        usernameValue = view.findViewById(R.id.usernameValue);
-        firstNameValue = view.findViewById(R.id.firstNameValue);
-        lastNameValue = view.findViewById(R.id.lastNameValue);
-        emailValue = view.findViewById(R.id.emailValue);
+        // Bind UI
+        childNameView = view.findViewById(R.id.providerChildName);
+        childUsernameView = view.findViewById(R.id.providerChildUsername);
+        dobValueView = view.findViewById(R.id.providerDobValue);
+        childImageView = view.findViewById(R.id.profileImageProviderChild);
+        returnButton = view.findViewById(R.id.returnToProviderButton);
 
-        editFirstNameButton = view.findViewById(R.id.editFirstNameButton);
-        editLastNameButton = view.findViewById(R.id.editLastNameButton);
-        logoutButton = view.findViewById(R.id.providerLogoutButton);
+        loadChildProfile();
 
-        // Load provider data
-        loadProfile();
-
-        // Button listeners
-        editFirstNameButton.setOnClickListener(v -> showEditDialog("firstName"));
-        editLastNameButton.setOnClickListener(v -> showEditDialog("lastName"));
-
-        logoutButton.setOnClickListener(v -> {
-            FirebaseAuth.getInstance().signOut();
-            startActivity(new Intent(requireActivity(), SignInActivity.class));
+        // Return to Provider Home
+        returnButton.setOnClickListener(v -> {
+            Intent intent = new Intent(requireActivity(), ProviderMain.class);
+            intent.putExtra("uid", providerUid);
+            intent.putExtra("role", "provider");
+            startActivity(intent);
             requireActivity().finish();
         });
     }
 
-    // ====================================
-    // Load provider data from Firestore
-    // ====================================
-    private void loadProfile() {
-        db.collection("users")
-                .document(providerUid)
+    // ----------------------------------------------------
+    // Load child's profile from Firestore for provider view
+    // ----------------------------------------------------
+    private void loadChildProfile() {
+
+        db.collection("children")
+                .document(childUid)
                 .get()
                 .addOnSuccessListener(doc -> {
+
                     if (!doc.exists()) {
-                        Toast.makeText(requireContext(),
-                                "Provider profile not found", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), "Child not found", Toast.LENGTH_SHORT).show();
                         return;
                     }
 
+                    // Fetch fields
                     String first = doc.getString("firstName");
                     String last = doc.getString("lastName");
                     String username = doc.getString("username");
-                    String email = doc.getString("email");
+                    String dob = doc.getString("dob");
 
-                    // Update UI
-                    providerName.setText(
-                            (first != null ? first : "") + " " +
-                                    (last != null ? last : "")
-                    );
+                    // Name and username
+                    String fullName = ((first != null) ? first : "") + " " + ((last != null) ? last : "");
+                    childNameView.setText(fullName.trim().isEmpty() ? "Unknown" : fullName);
 
-                    usernameValue.setText(username != null ? username : "-");
-                    firstNameValue.setText(first != null ? first : "-");
-                    lastNameValue.setText(last != null ? last : "-");
-                    emailValue.setText(email != null ? email : "-");
+                    childUsernameView.setText(username != null ? username : "-");
+
+                    // DOB
+                    dobValueView.setText(dob != null ? dob : "-");
+
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(requireContext(),
-                            "Failed to load provider profile", Toast.LENGTH_SHORT).show();
-                    Log.e("ProviderProfile", "Error loading", e);
+                    Toast.makeText(requireContext(), "Failed to load child profile", Toast.LENGTH_SHORT).show();
+                    Log.e("ProviderChildProfile", "Error loading profile", e);
                 });
     }
-
-    // ====================================
-    // Edit dialog for first / last name
-    // ====================================
-    private void showEditDialog(String field) {
-        String title = field.equals("firstName") ?
-                "Edit First Name" : "Edit Last Name";
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle(title);
-
-        final EditText input = new EditText(requireContext());
-        input.setInputType(InputType.TYPE_CLASS_TEXT);
-
-        builder.setView(input);
-
-        builder.setPositiveButton("Save", (dialog, which) -> {
-            String value = input.getText().toString().trim();
-
-            if (value.isEmpty()) {
-                Toast.makeText(requireContext(), "Value cannot be empty",
-                        Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            saveField(field, value);
-        });
-
-        builder.setNegativeButton("Cancel", null);
-        builder.show();
-    }
-
-    // ====================================
-    // Save updated field to Firestore
-    // ====================================
-    private void saveField(String key, String value) {
-        db.collection("users")
-                .document(providerUid)
-                .update(key, value)
-                .addOnSuccessListener(aVoid -> {
-
-                    // Update text fields
-                    if (key.equals("firstName")) {
-                        firstNameValue.setText(value);
-                    } else {
-                        lastNameValue.setText(value);
-                    }
-
-                    // Update combined name
-                    providerName.setText(
-                            firstNameValue.getText().toString() + " " +
-                                    lastNameValue.getText().toString()
-                    );
-
-                    Toast.makeText(requireContext(),
-                            "Updated successfully!", Toast.LENGTH_SHORT).show();
-
-                })
-                .addOnFailureListener(e ->
-                        Toast.makeText(requireContext(),
-                                "Failed to update profile", Toast.LENGTH_SHORT).show()
-                );
-    }
-
 }

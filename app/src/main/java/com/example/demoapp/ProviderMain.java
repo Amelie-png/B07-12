@@ -1,6 +1,5 @@
 package com.example.demoapp;
 
-import com.example.demoapp.card_view.*;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -23,7 +22,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 
-public class ProviderHomeScreen extends Fragment {
+public class ProviderMain extends Fragment {
     private Button addItemButton;
     private RecyclerView recyclerView;
     private ArrayList<CardItem> cardList;
@@ -38,7 +37,7 @@ public class ProviderHomeScreen extends Fragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.provider_home_screen, container, false);
+        View view = inflater.inflate(R.layout.provider_main_screen, container, false);
         db = FirebaseFirestore.getInstance();
 
         // Find button
