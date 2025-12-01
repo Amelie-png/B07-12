@@ -22,6 +22,8 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;import java.util.HashSet;import java.util.List;import android.util.Log;import com.google.firebase.firestore.QueryDocumentSnapshot;import android.widget.ImageView;
+
 import java.util.Map;
 import java.util.HashSet;
 import java.util.List;
@@ -45,6 +47,12 @@ public class ParentActivity extends AppCompatActivity {
 
         RecyclerView recyclerView = findViewById(R.id.rv_children_list);
         FloatingActionButton btnAddChild = findViewById(R.id.btn_add_child);
+
+        ImageView ivUserIcon = findViewById(R.id.iv_user_icon);
+        ivUserIcon.setOnClickListener(v -> {
+            Intent intent = new Intent(ParentActivity.this, ParentProfileActivity.class);
+            startActivity(intent);
+        });
 
         adapter = new ChildAdapter(childrenList, new ChildAdapter.OnItemActionListener() {
             @Override
@@ -131,6 +139,50 @@ public class ParentActivity extends AppCompatActivity {
         });
     }
 
+    private void checkParentOnboarding() {
+        String parentUid = UserUtils.getUid();
+
+        db.collection("users")
+                .document(parentUid)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (!doc.exists()) return;
+
+                    Boolean hasSeen = doc.getBoolean("hasSeenOnboardingParent");
+
+                    // Treat null as not seen
+                    if (hasSeen == null || !hasSeen) {
+                        showParentOnboardingPopup(parentUid);
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Log.e("ParentActivity", "Failed to load onboarding flag", e));
+    }
+    private void showParentOnboardingPopup(String parentUid) {
+        View dialogView = LayoutInflater.from(this)
+                .inflate(R.layout.dialog_parent_onboarding, null);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setCancelable(false)
+                .create();
+
+        dialog.show();
+
+        // Get the button from the layout
+        Button btnClose = dialogView.findViewById(R.id.closeParentPopup);
+
+        btnClose.setOnClickListener(v -> {
+            // Update Firestore flag
+            db.collection("users")
+                    .document(parentUid)
+                    .update("hasSeenOnboardingParent", true)
+                    .addOnFailureListener(e ->
+                            Log.e("ParentOnboarding", "Failed updating onboarding flag", e));
+
+            dialog.dismiss();
+        });
+    }
 
     private void loadChildren() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -141,19 +193,39 @@ public class ParentActivity extends AppCompatActivity {
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        childrenList.clear();
+                        childrenList.clear(); // 先清空旧数据
                         for (QueryDocumentSnapshot doc : task.getResult()) {
                             try {
                                 Child child = doc.toObject(Child.class);
                                 if (child != null) {
+                                    // 核心修改：把 Firestore 文档 ID 赋给 Child 对象
                                     child.setFirestoreId(doc.getId());
 
                                     if (child.getProviderIds() == null) {
                                         child.setProviderIds(new ArrayList<>());
                                     }
+
+                                    // 确保 sharing map 不为 null
                                     if (child.getSharing() == null) {
                                         child.setSharing(new HashMap<>());
                                     }
+
+                                    // 确保 shareCodes 不为 null
+                                    if (child.getShareCodes() == null) {
+                                        child.setShareCodes(new HashMap<>());
+                                    }
+
+                                    // 确保 providerBindings 不为 null
+                                    if (child.getProviderBindings() == null) {
+                                        child.setProviderBindings(new HashMap<>());
+                                    }
+
+                                    Log.d(TAG, "Loaded child: " + child.getUsername() +
+                                            ", UID: " + child.getUid() +
+                                            ", FirestoreId: " + child.getFirestoreId() +
+                                            ", ProviderIds: " + child.getProviderIds() +
+                                            ", ShareCodes: " + child.getShareCodes().keySet() +
+                                            ", ProviderBindings: " + child.getProviderBindings());
 
                                     childrenList.add(child);
                                 }
@@ -168,7 +240,31 @@ public class ParentActivity extends AppCompatActivity {
                 });
     }
 
-    // username uniqueness check
+    private void cleanupExpiredShareCodes() {
+        for (Child child : childrenList) {
+            // 调用 Child 内部方法清理过期且未绑定的分享码
+            child.removeExpiredUnboundShareCodes();
+
+            // 更新 Firestore
+            if (child.getFirestoreId() != null) {
+                db.collection("children")
+                        .document(child.getFirestoreId())
+                        .set(childToMap(child))
+                        .addOnSuccessListener(aVoid -> Log.d(TAG,
+                                "Expired share codes cleaned for " + child.getUsername()))
+                        .addOnFailureListener(e -> Log.e(TAG,
+                                "Failed cleaning share codes for " + child.getUsername(), e));
+            }
+        }
+    }
+
+
+
+
+
+    // ---------------------------
+// Username uniqueness check (for add & edit)
+// ---------------------------
     private void checkUsernameUniqueForChild(String username, String currentChildUid, Runnable onUsernameAvailable) {
         db.collection("users")
                 .whereEqualTo("username", username)
@@ -386,10 +482,14 @@ public class ParentActivity extends AppCompatActivity {
         Button btnCopyCode = dialogView.findViewById(R.id.btn_copy_code);
         Button btnGenerateNew = dialogView.findViewById(R.id.btn_generate_new);
 
-        SwitchMaterial switchSymptoms = dialogView.findViewById(R.id.switch_symptoms);
-        SwitchMaterial switchMedicines = dialogView.findViewById(R.id.switch_medicines);
-        SwitchMaterial switchPEF = dialogView.findViewById(R.id.switch_pef);
-        SwitchMaterial switchTriage = dialogView.findViewById(R.id.switch_triage);
+        // 权限 Switch
+        com.google.android.material.switchmaterial.SwitchMaterial switchRescueLogs = dialogView.findViewById(R.id.switch_rescue_logs);
+        com.google.android.material.switchmaterial.SwitchMaterial switchControllerAdherence = dialogView.findViewById(R.id.switch_controller_adherence);
+        com.google.android.material.switchmaterial.SwitchMaterial switchSymptoms = dialogView.findViewById(R.id.switch_symptoms);
+        com.google.android.material.switchmaterial.SwitchMaterial switchTriggers = dialogView.findViewById(R.id.switch_triggers);
+        com.google.android.material.switchmaterial.SwitchMaterial switchPEF = dialogView.findViewById(R.id.switch_pef);
+        com.google.android.material.switchmaterial.SwitchMaterial switchTriageIncidents = dialogView.findViewById(R.id.switch_triage_incidents);
+        com.google.android.material.switchmaterial.SwitchMaterial switchSummaryCharts = dialogView.findViewById(R.id.switch_summary_charts);
 
         String code = child.generateOneTimeShareCode();
         tvShareCode.setText(code);
@@ -398,10 +498,21 @@ public class ParentActivity extends AppCompatActivity {
         Child.ShareCode shareCode = child.getShareCodes().get(code);
         if (shareCode != null) {
             Map<String, Boolean> perms = shareCode.getPermissions();
+            switchRescueLogs.setChecked(perms.getOrDefault("rescueLogs", false));
+            switchControllerAdherence.setChecked(perms.getOrDefault("controllerAdherence", false));
             switchSymptoms.setChecked(perms.getOrDefault("symptoms", false));
-            switchMedicines.setChecked(perms.getOrDefault("medicines", false));
+            switchTriggers.setChecked(perms.getOrDefault("triggers", false));
             switchPEF.setChecked(perms.getOrDefault("pef", false));
-            switchTriage.setChecked(perms.getOrDefault("triage", false));
+            switchTriageIncidents.setChecked(perms.getOrDefault("triageIncidents", false));
+            switchSummaryCharts.setChecked(perms.getOrDefault("summaryCharts", false));
+        } else {
+            switchRescueLogs.setChecked(false);
+            switchControllerAdherence.setChecked(false);
+            switchSymptoms.setChecked(false);
+            switchTriggers.setChecked(false);
+            switchPEF.setChecked(false);
+            switchTriageIncidents.setChecked(false);
+            switchSummaryCharts.setChecked(false);
         }
 
         db.collection("children")
@@ -420,13 +531,25 @@ public class ParentActivity extends AppCompatActivity {
             tvShareCode.setText(newCode);
             tvCodeExpiry.setText("Valid for 7 days");
 
-            Child.ShareCode sc = child.getShareCodes().get(newCode);
-            if (sc != null) {
-                Map<String, Boolean> perms = sc.getPermissions();
+            // 初始化 Switch 状态
+            Child.ShareCode newShareCode = child.getShareCodes().get(newCode);
+            if (newShareCode != null) {
+                Map<String, Boolean> perms = newShareCode.getPermissions();
+                switchRescueLogs.setChecked(perms.getOrDefault("rescueLogs", false));
+                switchControllerAdherence.setChecked(perms.getOrDefault("controllerAdherence", false));
                 switchSymptoms.setChecked(perms.getOrDefault("symptoms", false));
-                switchMedicines.setChecked(perms.getOrDefault("medicines", false));
+                switchTriggers.setChecked(perms.getOrDefault("triggers", false));
                 switchPEF.setChecked(perms.getOrDefault("pef", false));
-                switchTriage.setChecked(perms.getOrDefault("triage", false));
+                switchTriageIncidents.setChecked(perms.getOrDefault("triageIncidents", false));
+                switchSummaryCharts.setChecked(perms.getOrDefault("summaryCharts", false));
+            } else {
+                switchRescueLogs.setChecked(false);
+                switchControllerAdherence.setChecked(false);
+                switchSymptoms.setChecked(false);
+                switchTriggers.setChecked(false);
+                switchPEF.setChecked(false);
+                switchTriageIncidents.setChecked(false);
+                switchSummaryCharts.setChecked(false);
             }
 
             db.collection("children")
@@ -440,10 +563,13 @@ public class ParentActivity extends AppCompatActivity {
                 .setView(dialogView)
                 .setPositiveButton("Save Permissions", (dialog, which) -> {
                     Map<String, Boolean> perms = new HashMap<>();
+                    perms.put("rescueLogs", switchRescueLogs.isChecked());
+                    perms.put("controllerAdherence", switchControllerAdherence.isChecked());
                     perms.put("symptoms", switchSymptoms.isChecked());
-                    perms.put("medicines", switchMedicines.isChecked());
+                    perms.put("triggers", switchTriggers.isChecked());
                     perms.put("pef", switchPEF.isChecked());
-                    perms.put("triage", switchTriage.isChecked());
+                    perms.put("triageIncidents", switchTriageIncidents.isChecked());
+                    perms.put("summaryCharts", switchSummaryCharts.isChecked());
 
                     Child.ShareCode latest = child.getShareCodes().get(code);
                     if (latest != null) latest.setPermissions(perms);
@@ -463,6 +589,9 @@ public class ParentActivity extends AppCompatActivity {
 
         View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_manage_providers, null);
         RecyclerView rvShareCodes = dialogView.findViewById(R.id.rv_share_codes);
+        EditText etSearch = dialogView.findViewById(R.id.et_search);
+        cleanupExpiredShareCodes();
+
 
         List<Child.ShareCode> codes = new ArrayList<>(finalChild.getShareCodes().values());
         ShareCodeAdapter adapter = new ShareCodeAdapter(codes, updatedCode -> {
@@ -483,6 +612,8 @@ public class ParentActivity extends AppCompatActivity {
 
         rvShareCodes.setLayoutManager(new LinearLayoutManager(this));
         rvShareCodes.setAdapter(adapter);
+
+        adapter.bindSearchBox(etSearch);
 
         new AlertDialog.Builder(this)
                 .setTitle("Manage Providers")
@@ -522,3 +653,4 @@ public class ParentActivity extends AppCompatActivity {
         return map;
     }
 }
+
