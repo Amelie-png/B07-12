@@ -17,7 +17,7 @@
             android:id="@+id/txtMedName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Medication Name"
+            android:text="Medication Log"
             android:textStyle="bold"
             android:textSize="18sp"/>
 
@@ -25,7 +25,7 @@
             android:id="@+id/txtMedUsage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="0 of 1 taken today"
+            android:text="Log your daily controller and rescue usage."
             android:paddingTop="4dp" />
 
         <Button
