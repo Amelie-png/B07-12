@@ -59,7 +59,7 @@ public class ParentMedicineFragment extends Fragment {
     //Log filters
     private FilterState filterState = new FilterState();
     //IDs
-    private String childId = "testChildId"; //TODO link actual value
+    private String childId;
     private String parentUid;
 
     public ParentMedicineFragment() {}
@@ -76,7 +76,8 @@ public class ParentMedicineFragment extends Fragment {
 
         // Unified UID system
         if (getArguments() != null) {
-            parentUid = getArguments().getString("uid"); // <-- Updated
+            parentUid = getArguments().getString("parentUid"); // <-- Updated
+            childId = getArguments().getString("uid"); //link to correct child
         }
 
         Log.d("ParentMedicineFragment", "parentUid = " + parentUid);
@@ -192,6 +193,4 @@ public class ParentMedicineFragment extends Fragment {
             startActivity(inventory);
         });
     }
-
-    //TODO add dialog for edit log
 }

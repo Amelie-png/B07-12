@@ -56,7 +56,7 @@ public class ChildMedicineFragment extends Fragment {
 
         // ---- Retrieve UID from arguments ----
         if (getArguments() != null) {
-            childUid = getArguments().getString("uid");
+            childUid = getArguments().getString("uid"); //Link child to own account
         }
 
         Log.d("ChildMedicineFragment", "childUid = " + childUid);
@@ -160,6 +160,4 @@ public class ChildMedicineFragment extends Fragment {
             startActivity(logWizard);
         });
     }
-
-    //TODO add dialog for edit log
 }

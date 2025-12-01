@@ -1,13 +1,11 @@
 package com.example.demoapp.med;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 
 import com.example.demoapp.R;
 
@@ -37,12 +35,34 @@ public class MedicineInventoryActivity extends AppCompatActivity {
         //Set up repo
         repo = new MedicineRepository();
 
-        //TODO Set up buttons
+        //Set up buttons
         setupBackButton();
+        setupEditController();
+        setupEditRescue();
 
     }
 
     private void setupBackButton() {
         btnBack.setOnClickListener(v -> finish());
+    }
+
+    private void setupEditController() {
+        btnEditController.setOnClickListener(v -> {
+            Intent editController = new Intent(MedicineInventoryActivity.this,
+                    ManageControllerActivity.class);
+            editController.putExtra("childId", childId);
+            editController.putExtra("author", "parent"); //parent is flagging
+            startActivity(editController);
+        });
+    }
+
+    private void setupEditRescue() {
+        btnEditRescue.setOnClickListener(v -> {
+            Intent editRescue = new Intent(MedicineInventoryActivity.this,
+                    ManageRescueActivity.class);
+            editRescue.putExtra("childId", childId);
+            editRescue.putExtra("author", "parent"); //parent is flagging
+            startActivity(editRescue);
+        });
     }
 }

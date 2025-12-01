@@ -1,7 +1,14 @@
 package com.example.demoapp.med;
 
+import static android.content.ContentValues.TAG;
+
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
+import com.example.demoapp.models.Child;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -14,10 +21,12 @@ import java.util.Map;
 
 public class MedicineRepository {
     private final CollectionReference entryRef;
+    private final CollectionReference childRef;
 
     public MedicineRepository() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         entryRef = db.collection("medEntries");
+        childRef = db.collection("children");
     }
 
     public interface OnResult<T> {
@@ -33,13 +42,67 @@ public class MedicineRepository {
                 .addOnFailureListener(cb::onFailure);
     }
 
-    // Update doseCount only (used by edit dose dialog)
-    public void updateDoseCount(String entryId, int newDoseCount, OnResult<Void> cb) {
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("doseCount", newDoseCount);
-        entryRef.document(entryId).update(updates).addOnSuccessListener(a -> cb.onSuccess(null))
+    // Save/update controller med settings given childId
+    public void saveControllerMed(String childId, ControllerMed controller, OnResult<Void> cb) {
+        childRef.document(childId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (!doc.exists()) {
+                        cb.onFailure(new Exception("Child does not exist."));
+                        return;
+                    }
+
+                    // Load existing child
+                    Child child = doc.toObject(Child.class);
+                    if (child == null) {
+                        cb.onFailure(new Exception("Failed to parse child object."));
+                        return;
+                    }
+
+                    // Update controller field
+                    Map<String, Object> controllerMap = controller.toMap();
+                    child.setControllerMed(controllerMap);
+
+                    // Save updated child
+                    childRef.document(childId)
+                            .set(childToMap(child))
+                            .addOnSuccessListener(a -> cb.onSuccess(null))
+                            .addOnFailureListener(cb::onFailure);
+                })
                 .addOnFailureListener(cb::onFailure);
     }
+
+    // Save/update rescue med settings given childId
+    public void saveRescueMed(String childId, RescueMed rescue, OnResult<Void> cb) {
+        childRef.document(childId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (!doc.exists()) {
+                        cb.onFailure(new Exception("Child does not exist."));
+                        return;
+                    }
+
+                    // Load existing child
+                    Child child = doc.toObject(Child.class);
+                    if (child == null) {
+                        cb.onFailure(new Exception("Failed to parse child object."));
+                        return;
+                    }
+
+                    // Update controller field
+                    Map<String, Object> rescueMap = rescue.toMap();
+                    child.setControllerMed(rescueMap);
+
+                    // Save updated child
+                    childRef.document(childId)
+                            .set(childToMap(child))
+                            .addOnSuccessListener(a -> cb.onSuccess(null))
+                            .addOnFailureListener(cb::onFailure);
+                })
+                .addOnFailureListener(cb::onFailure);
+    }
+
+    //TODO get controller & rescue meds
 
     // Fetch logs (query with optional filters)
     public void fetchLogs(String childId, String medicineTypeFilter, long dateFromEpoch, long dateToEpoch, OnResult<List<MedicineEntry>> cb) {
@@ -55,13 +118,11 @@ public class MedicineRepository {
         // Type (rescue vs controller) filter (optional)
         if (medicineTypeFilter != null) {
             q = q.whereEqualTo("medType", medicineTypeFilter);
-            Log.d("DEBUG_FETCH", "Applied filter: medType=" + medicineTypeFilter);
         }
 
         // Timestamp filters given date range (optional)
         q = q.whereGreaterThanOrEqualTo("timestamp", dateFromEpoch)
                 .whereLessThanOrEqualTo("timestamp", dateToEpoch);
-        Log.d("DEBUG_FETCH", "Final query ready. Executing Firestore request.");
 
         // Get all filtered data in descending order (ie latest first)
         q.orderBy("timestamp", Query.Direction.DESCENDING)
@@ -69,7 +130,6 @@ public class MedicineRepository {
                 .addOnCompleteListener(task -> {
                     if (!task.isSuccessful()) {
                         Exception e = task.getException();
-                        Log.e("DEBUG_FETCH", "Fetch FAILED", task.getException());
                         cb.onFailure(task.getException());
                         return;
                     }
@@ -84,7 +144,6 @@ public class MedicineRepository {
                             list.add(entry);
                         }
                     }
-                    Log.d("DEBUG_FETCH", "Fetched logs count=" + list.size());
                     cb.onSuccess(list);
                 });
     }

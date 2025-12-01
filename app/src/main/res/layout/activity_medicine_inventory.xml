@@ -80,7 +80,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:text="@string/date_placeholder"
-                android:textColor="@color/black"
+                android:textColor="@color/dark_grey"
                 android:textSize="16sp"
                 app:layout_constraintStart_toEndOf="@+id/tv_c_purchase_header"
                 app:layout_constraintTop_toTopOf="@+id/tv_c_purchase_header" />
@@ -102,7 +102,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:text="@string/date_placeholder"
-                android:textColor="@color/black"
+                android:textColor="@color/dark_grey"
                 android:textSize="16sp"
                 app:layout_constraintStart_toEndOf="@+id/tv_c_expiry_header"
                 app:layout_constraintTop_toTopOf="@+id/tv_c_expiry_header" />
@@ -124,7 +124,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:text="@string/med_inventory_amount"
-                android:textColor="@color/black"
+                android:textColor="@color/dark_grey"
                 android:textSize="16sp"
                 app:layout_constraintStart_toEndOf="@+id/tv_c_amount_header"
                 app:layout_constraintTop_toTopOf="@+id/tv_c_amount_header" />
@@ -146,7 +146,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:text="@string/med_inventory_amount"
-                android:textColor="@color/black"
+                android:textColor="@color/dark_grey"
                 android:textSize="16sp"
                 app:layout_constraintStart_toEndOf="@+id/tv_c_planned_dose_header"
                 app:layout_constraintTop_toTopOf="@+id/tv_c_planned_dose_header" />
@@ -166,8 +166,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
-                android:text="Monday, Friday"
-                android:textColor="@color/black"
+                android:text="Mon, Tue, Wed, Thu, Fri, Sat, Sun"
+                android:textColor="@color/dark_grey"
                 android:textSize="16sp"
                 app:layout_constraintStart_toEndOf="@+id/tv_c_schedule_header"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -183,7 +183,7 @@
                 android:orientation="horizontal"
                 android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tv_c_amount_header">
+                app:layout_constraintTop_toBottomOf="@+id/tv_c_schedule">
 
                 <ImageView
                     android:id="@+id/iv_c_expired"
@@ -223,6 +223,14 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
                     android:text="@string/med_low_alert" />
+
+                <TextView
+                    android:id="@+id/tv_c_flag_author"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:textColor="@color/hyperlink_blue"
+                    android:text="by parent" />
 
             </LinearLayout>
 
@@ -309,7 +317,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:text="@string/date_placeholder"
-                android:textColor="@color/black"
+                android:textColor="@color/dark_grey"
                 android:textSize="16sp"
                 app:layout_constraintStart_toEndOf="@+id/tv_r_purchase_header"
                 app:layout_constraintTop_toTopOf="@+id/tv_r_purchase_header" />
@@ -331,7 +339,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:text="@string/date_placeholder"
-                android:textColor="@color/black"
+                android:textColor="@color/dark_grey"
                 android:textSize="16sp"
                 app:layout_constraintStart_toEndOf="@+id/tv_r_expiry_header"
                 app:layout_constraintTop_toTopOf="@+id/tv_r_expiry_header" />
@@ -353,7 +361,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:text="@string/med_inventory_amount"
-                android:textColor="@color/black"
+                android:textColor="@color/dark_grey"
                 android:textSize="16sp"
                 app:layout_constraintStart_toEndOf="@+id/tv_r_amount_header"
                 app:layout_constraintTop_toTopOf="@+id/tv_r_amount_header" />
@@ -408,6 +416,14 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
                     android:text="@string/med_low_alert" />
+
+                <TextView
+                    android:id="@+id/tv_r_flag_author"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:textColor="@color/hyperlink_blue"
+                    android:text="by parent" />
 
             </LinearLayout>
 

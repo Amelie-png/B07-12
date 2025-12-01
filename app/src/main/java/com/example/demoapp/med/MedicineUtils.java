@@ -7,10 +7,11 @@ import java.util.List;
 
 public class MedicineUtils {
 
-    /**
+    /*
      * Calculates adherence as:
      *   (number of controller doses actually taken) / (number expected)
      * Expected = dosesPerDay * number of days between start–end (inclusive)
+     * -------- For adherence summary for parents/providers ----------
      */
     public static double calculateControllerAdherence(List<MedicineEntry> allEntries,
                                                       ControllerMed controllerConfig,
@@ -37,8 +38,18 @@ public class MedicineUtils {
         return (double) taken / (double) expected;
     }
 
-    /**
+    //TODO
+    public static int updateControllerStreak(){
+        return 0;
+    }
+
+    public static int updateTechniqueStreak(){
+        return 0;
+    }
+
+    /*
      * Count rescue usage in a given time range.
+     * ------------ For rescue count in last hours ------------
      */
     public static int countRescueUsage(List<MedicineEntry> entries, long startEpoch, long endEpoch) {
         int count = 0;
@@ -52,8 +63,9 @@ public class MedicineUtils {
         return count;
     }
 
-    /**
+    /*
      * Returns timestamp of last rescue usage, or -1 if none.
+     * ----------- For last rescue time data on home page -------------
      */
     public static long getLastRescueTime(List<MedicineEntry> entries) {
         long latest = -1;
@@ -67,16 +79,17 @@ public class MedicineUtils {
         return latest;
     }
 
-    /**
-     * Returns weekly rescue count starting from now going 7 days back.
+    /*
+     * Returns rescue count starting from now going back given days;
+     * ----------- For 7-day/30-day trend on home page ---------------
      */
-    public static int getWeeklyRescueCount(List<MedicineEntry> entries) {
+    public static int getWeeklyRescueCount(List<MedicineEntry> entries, int days) {
         long now = System.currentTimeMillis();
-        long weekAgo = now - (7L * 24L * 60L * 60L * 1000L);
-        return countRescueUsage(entries, weekAgo, now);
+        long daysAgo = now - (days * 24L * 60L * 60L * 1000L);
+        return countRescueUsage(entries, daysAgo, now);
     }
 
-    /**
+    /*
      * Helper: calculate days between timestamps (rounded up)
      */
     private static long calculateDaysBetween(long start, long end) {

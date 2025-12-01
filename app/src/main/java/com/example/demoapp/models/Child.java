@@ -19,9 +19,9 @@ public class Child {
     private List<String> providerIds = new ArrayList<>();
     private Map<String, ShareCode> shareCodes = new HashMap<>();
     private Map<String, String> providerBindings = new HashMap<>(); // providerId → code
-    private Map<String, ControllerMed> controllerMed = new HashMap<>();
-    private Map<String, RescueMed> resscueMed = new HashMap<>();
-    private Map<String, Badge> badges = new HashMap<>();
+    private Map<String, Object> controllerMed = new HashMap<>();
+    private Map<String, Object> rescueMed = new HashMap<>();
+    private Map<String, Object> badges = new HashMap<>();
     private String passwordHash;
     private boolean hasSeenOnboardingChild;
     private double pb;
@@ -31,6 +31,9 @@ public class Child {
         this.providerIds = new ArrayList<>();
         this.shareCodes = new HashMap<>();
         this.providerBindings = new HashMap<>();
+        this.controllerMed = new HashMap<>();
+        this.rescueMed = new HashMap<>();
+        this.badges = new HashMap<>();
         this.hasSeenOnboardingChild = false;
         this.pb = 0.0;
 
@@ -79,6 +82,12 @@ public class Child {
     public Map<String, ShareCode> getShareCodes() { return shareCodes; }
     public void setShareCodes(Map<String, ShareCode> shareCodes) { this.shareCodes = shareCodes; }
     public Map<String, String> getProviderBindings() { return providerBindings; }
+    public Map<String, Object> getControllerMed() { return controllerMed; }
+    public Map<String, Object> getRescueMed() { return rescueMed; }
+    public Map<String, Object> getBadges() { return badges; }
+    public void setControllerMed(Map<String, Object> controllerMed) { this.controllerMed = controllerMed; }
+    public void setRescueMed(Map<String, Object> rescueMed) { this.rescueMed = rescueMed; }
+    public void setBadges(Map<String, Object> badges) { this.badges = badges; }
     public void setProviderBindings(Map<String, String> providerBindings) { this.providerBindings = providerBindings; }
     public String getPasswordHash() { return passwordHash; }
     public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }

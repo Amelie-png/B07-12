@@ -1,5 +1,8 @@
 package com.example.demoapp.med;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class RescueMed extends Medicine {
 
     public RescueMed() {
@@ -7,13 +10,8 @@ public class RescueMed extends Medicine {
         setType("rescue");
     }
 
-    public RescueMed(String childId,
-                     int currentAmount,
-                     int totalAmount,
-                     long purchase,
-                     long expiry,
-                     boolean lowFlag,
-                     int puffsPerDose) {
-        super(childId, "rescue", currentAmount, totalAmount, purchase, expiry, lowFlag);
+    @Override
+    public Map<String,Object> toMap() {
+        return super.toMap();
     }
 }

@@ -1,7 +1,9 @@
 package com.example.demoapp.med;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ControllerMed extends Medicine {
     private long startDate;
@@ -13,25 +15,17 @@ public class ControllerMed extends Medicine {
         setType("controller");
     }
 
-    public ControllerMed(String childId,
-                         int currentAmount,
-                         int totalAmount,
-                         long purchaseDate,
-                         long expiryDate,
-                         boolean lowStockFlag,
-                         long startDate,
-                         int dosePerDay,
-                         List<String> scheduleDays) {
-        super(childId, "controller", currentAmount, totalAmount, purchaseDate, expiryDate, lowStockFlag);
-        this.startDate = startDate;
-        this.dosePerDay = dosePerDay;
-        this.scheduleDays = scheduleDays;
+    @Override
+    public Map<String,Object> toMap() {
+        Map<String,Object> m = super.toMap();;
+        m.put("startDate", startDate);
+        m.put("dosePerDay", dosePerDay);
+        m.put("scheduleDays", scheduleDays);
+        return m;
     }
 
     //Getters
-
     public long getStartDate() { return startDate; }
-
     public int getDosePerDay() { return dosePerDay; }
     public List<String> getScheduleDays() { return scheduleDays; }
 
