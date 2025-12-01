@@ -5,4 +5,10 @@
     <color name="light_purple">#CBC3E3</color>
     <color name="bottom_nav_color">#FF6200EE</color>
     <color name="gray">#808080</color>
+    <color name="hyperlink_blue">#0E9CE9</color>
+    <color name="light_red">#E49491</color>
+    <color name="light_blue">#57BEE4</color>
+    <color name="dark_grey">#6F6F6F</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="purple_200">#CBC3E3</color>
 </resources>

@@ -1,0 +1,190 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="match_parent"
+android:layout_height="match_parent">
+
+<LinearLayout
+    android:id="@+id/technique_steps_container"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="24dp"
+    android:divider="@android:color/darker_gray"
+    android:showDividers="middle">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Technique Helper"
+        android:textSize="20sp"/>
+
+    <!-- STEP 1 -->
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:paddingBottom="24dp">
+
+        <TextView
+            android:id="@+id/tv_step1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1. Seal lips tightly around the inhaler or spacer"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingBottom="8dp" />
+
+        <ImageView
+            android:id="@+id/iv_step1"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:scaleType="centerCrop"
+            android:background="#CCCCCC"
+            android:contentDescription="Step 1 image placeholder" />
+
+        <CheckBox
+            android:id="@+id/cb_step1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="I did it!"
+            android:paddingTop="8dp" />
+    </LinearLayout>
+
+    <!-- STEP 2 -->
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="24dp">
+
+        <TextView
+            android:id="@+id/tv_step2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2. Take a slow, deep breath in"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingBottom="8dp" />
+
+        <ImageView
+            android:id="@+id/iv_step2"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:scaleType="centerCrop"
+            android:background="#CCCCCC"
+            android:contentDescription="Step 2 image placeholder" />
+
+        <CheckBox
+            android:id="@+id/cb_step2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="I did it!"
+            android:paddingTop="8dp" />
+    </LinearLayout>
+
+    <!-- STEP 3 -->
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="24dp">
+
+        <TextView
+            android:id="@+id/tv_step3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="3. Press down once as you begin breathing in"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingBottom="8dp" />
+
+        <ImageView
+            android:id="@+id/iv_step3"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:scaleType="centerCrop"
+            android:background="#CCCCCC"
+            android:contentDescription="Step 3 image placeholder" />
+
+        <CheckBox
+            android:id="@+id/cb_step3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="I did it!"
+            android:paddingTop="8dp" />
+    </LinearLayout>
+
+    <!-- STEP 4 -->
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="24dp">
+
+        <TextView
+            android:id="@+id/tv_step4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="4. Hold your breath for about 10 seconds"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingBottom="8dp" />
+
+        <ImageView
+            android:id="@+id/iv_step4"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:scaleType="centerCrop"
+            android:background="#CCCCCC"
+            android:contentDescription="Step 4 image placeholder" />
+
+        <CheckBox
+            android:id="@+id/cb_step4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="I did it!"
+            android:paddingTop="8dp" />
+    </LinearLayout>
+
+    <!-- STEP 5 -->
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="24dp">
+
+        <TextView
+            android:id="@+id/tv_step5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="5. Wait 30–60 seconds if taking another puff"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingBottom="8dp" />
+
+        <ImageView
+            android:id="@+id/iv_step5"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:scaleType="centerCrop"
+            android:background="#CCCCCC"
+            android:contentDescription="Step 5 image placeholder" />
+
+        <CheckBox
+            android:id="@+id/cb_step5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="I did it!"
+            android:paddingTop="8dp" />
+    </LinearLayout>
+
+    <!-- CONTINUE BUTTON -->
+    <Button
+        android:id="@+id/btn_technique_continue"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Continue"
+        android:enabled="true"
+        android:layout_marginTop="32dp"/>
+</LinearLayout>
+</ScrollView>

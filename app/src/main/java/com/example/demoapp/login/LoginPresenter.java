@@ -12,9 +12,15 @@ public class LoginPresenter implements LoginContract.Presenter {
     private final FirebaseFirestore firestore;
 
     public LoginPresenter(LoginContract.View view) {
+        this(view, FirebaseAuth.getInstance(), FirebaseFirestore.getInstance());
+    }
+
+    public LoginPresenter(LoginContract.View view,
+                          FirebaseAuth firebaseAuth,
+                          FirebaseFirestore firestore) {
         this.view = view;
-        this.firebaseAuth = FirebaseAuth.getInstance();
-        this.firestore = FirebaseFirestore.getInstance();
+        this.firebaseAuth = firebaseAuth;
+        this.firestore = firestore;
     }
 
     @Override
@@ -28,22 +34,14 @@ public class LoginPresenter implements LoginContract.Presenter {
         view.showLoading();
 
         if (identifier.contains("@")) {
-            // ==================================
-            // EMAIL LOGIN (Parent or Provider)
-            // ==================================
             loginWithEmail(identifier, password);
-
         } else {
-            // ==================================
-            // USERNAME LOGIN (Child, Parent, Provider)
-            // ==================================
             loginWithUsername(identifier, password);
         }
     }
 
-    // -------------------------------------------------------
-    // EMAIL LOGIN → Parent or Provider
-    // -------------------------------------------------------
+
+    // EMAIL LOGIN
     private void loginWithEmail(String email, String password) {
 
         firebaseAuth.signInWithEmailAndPassword(email, password)
@@ -57,9 +55,9 @@ public class LoginPresenter implements LoginContract.Presenter {
 
                     String uid = authTask.getResult().getUser().getUid();
 
-                    // Fetch the user's role from Firestore
                     firestore.collection("users").document(uid).get()
                             .addOnSuccessListener(doc -> {
+
                                 view.hideLoading();
 
                                 if (!doc.exists()) {
@@ -91,12 +89,10 @@ public class LoginPresenter implements LoginContract.Presenter {
                 });
     }
 
-    // -------------------------------------------------------
-    // USERNAME LOGIN → Child OR Parent OR Provider
-    // -------------------------------------------------------
+
+    // USERNAME LOGIN
     private void loginWithUsername(String username, String password) {
 
-        // 1️⃣ FIRST: SEARCH IN CHILDREN COLLECTION
         firestore.collection("children")
                 .whereEqualTo("username", username)
                 .get()
@@ -108,23 +104,21 @@ public class LoginPresenter implements LoginContract.Presenter {
                         return;
                     }
 
+                    // CHILD FOUND
                     if (!childTask.getResult().isEmpty()) {
 
-                        // 🔵 CHILD USER FOUND
                         for (QueryDocumentSnapshot childDoc : childTask.getResult()) {
 
-                            // ❗ Now we use passwordHash (SHA-256)
                             String storedHash = childDoc.getString("passwordHash");
                             String inputHash = HashUtils.sha256(password);
 
-                            if (storedHash == null || inputHash == null || !inputHash.equals(storedHash)) {
+                            if (storedHash == null || !storedHash.equals(inputHash)) {
                                 view.hideLoading();
                                 view.showError("Incorrect password.");
                                 return;
                             }
 
-                            // SUCCESS → Child logged in
-                            String childId = childDoc.getId();  // Firestore doc ID = child's UID
+                            String childId = childDoc.getId();
 
                             view.hideLoading();
                             view.navigateToChildHome(childId);
@@ -132,7 +126,7 @@ public class LoginPresenter implements LoginContract.Presenter {
                         }
                     }
 
-                    // 2️⃣ IF NOT A CHILD, CHECK PARENT/PROVIDER IN USERS COLLECTION
+                    // PARENT/PROVIDER
                     firestore.collection("users")
                             .whereEqualTo("username", username)
                             .get()
@@ -145,13 +139,11 @@ public class LoginPresenter implements LoginContract.Presenter {
                                 }
 
                                 if (userTask.getResult().isEmpty()) {
-                                    // No match in either collection → invalid username
                                     view.hideLoading();
                                     view.showError("Invalid username or password.");
                                     return;
                                 }
 
-                                // 🔵 USER FOUND → Parent or Provider
                                 for (QueryDocumentSnapshot userDoc : userTask.getResult()) {
 
                                     String email = userDoc.getString("email");
@@ -163,20 +155,19 @@ public class LoginPresenter implements LoginContract.Presenter {
                                         return;
                                     }
 
-                                    // 3️⃣ Username login → convert to EMAIL login
                                     firebaseAuth.signInWithEmailAndPassword(email, password)
                                             .addOnCompleteListener(authTask -> {
 
-                                                view.hideLoading();
-
                                                 if (!authTask.isSuccessful()) {
+                                                    view.hideLoading();
                                                     view.showError("Incorrect password.");
                                                     return;
                                                 }
 
-                                                String uid = firebaseAuth.getCurrentUser().getUid();
+                                                String uid = authTask.getResult().getUser().getUid();
 
-                                                // SUCCESS → Navigate based on role
+                                                view.hideLoading();
+
                                                 switch (role) {
 
                                                     case "Parent":

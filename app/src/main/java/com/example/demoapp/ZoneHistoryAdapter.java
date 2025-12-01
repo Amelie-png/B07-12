@@ -37,6 +37,7 @@ public class ZoneHistoryAdapter extends RecyclerView.Adapter<ZoneHistoryAdapter.
         holder.textPercent.setText(item.percent + "%");
         holder.textDate.setText(formatDate(item.timestamp));
 
+        // --- Set zone color dot ---
         switch (item.zoneColor) {
             case "GREEN":
                 holder.dot.setBackgroundColor(Color.parseColor("#4CAF50"));
@@ -48,6 +49,18 @@ public class ZoneHistoryAdapter extends RecyclerView.Adapter<ZoneHistoryAdapter.
                 holder.dot.setBackgroundColor(Color.parseColor("#F44336"));
                 break;
         }
+
+        // --- NEW: Show medicine timing ---
+        if (item.beforeMed) {
+            holder.textMed.setText("Before medicine");
+            holder.textMed.setTextColor(Color.parseColor("#2196F3")); // blue
+        } else if (item.afterMed) {
+            holder.textMed.setText("After medicine");
+            holder.textMed.setTextColor(Color.parseColor("#9C27B0")); // purple
+        } else {
+            holder.textMed.setText("Unknown");
+            holder.textMed.setTextColor(Color.GRAY);
+        }
     }
 
     @Override
@@ -57,17 +70,19 @@ public class ZoneHistoryAdapter extends RecyclerView.Adapter<ZoneHistoryAdapter.
 
     static class ZoneViewHolder extends RecyclerView.ViewHolder {
         View dot;
-        TextView textPercent, textDate;
+        TextView textPercent, textDate, textMed;
 
         public ZoneViewHolder(@NonNull View itemView) {
             super(itemView);
             dot = itemView.findViewById(R.id.colorDot);
             textPercent = itemView.findViewById(R.id.textZonePercent);
             textDate = itemView.findViewById(R.id.textZoneDate);
+            textMed = itemView.findViewById(R.id.textZoneMed);   // <-- NEW
         }
     }
 
     private String formatDate(long time) {
-        return new SimpleDateFormat("MMM d, yyyy", Locale.getDefault()).format(new Date(time));
+        return new SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
+                .format(new Date(time));
     }
 }
