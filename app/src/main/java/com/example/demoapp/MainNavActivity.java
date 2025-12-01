@@ -7,7 +7,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
-import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -25,7 +24,7 @@ public class MainNavActivity extends AppCompatActivity {
 
         // Receive uid + role
         uid = getIntent().getStringExtra("uid");
-        role = getIntent().getStringExtra("role"); // "parent" / "child" / "provider"
+        role = getIntent().getStringExtra("role");
 
         if (uid == null || role == null) {
             Toast.makeText(this, "Error: Missing user data", Toast.LENGTH_LONG).show();
@@ -49,10 +48,10 @@ public class MainNavActivity extends AppCompatActivity {
 
         BottomNavigationView bottomNav = findViewById(R.id.main_bottom_nav);
 
-        // VERY IMPORTANT: Clear any existing menu first
+        // Clear old menu
         bottomNav.getMenu().clear();
 
-        // Load correct bottom menu depending on role
+        // Load correct menu
         switch (role) {
             case "child":
                 bottomNav.inflateMenu(R.menu.bottom_nav_menu_child);
@@ -60,18 +59,18 @@ public class MainNavActivity extends AppCompatActivity {
             case "provider":
                 bottomNav.inflateMenu(R.menu.bottom_nav_menu_provider);
                 break;
-            default: // parent
+            default:
                 bottomNav.inflateMenu(R.menu.bottom_nav_menu_parent);
         }
 
-        // Nav Host Setup
+        // Nav Host
         NavHostFragment navHostFragment =
                 (NavHostFragment) getSupportFragmentManager()
                         .findFragmentById(R.id.main_nav_host_fragment);
 
         NavController navController = navHostFragment.getNavController();
 
-        // Choose the correct navigation graph
+        // Choose correct graph
         int graph;
         switch (role) {
             case "child":
@@ -84,14 +83,43 @@ public class MainNavActivity extends AppCompatActivity {
                 graph = R.navigation.nav_graph_parent;
         }
 
-        // Pass uid + role into all fragments
+        // Set initial graph
         Bundle args = new Bundle();
         args.putString("uid", uid);
         args.putString("role", role);
 
         navController.setGraph(graph, args);
 
-        // Attach bottom nav to the nav controller
-        NavigationUI.setupWithNavController(bottomNav, navController);
+        // -------------------------------------------------
+        // FIX: Highlight correct Home tab on screen load
+        // -------------------------------------------------
+        switch (role) {
+            case "child":
+                bottomNav.setSelectedItemId(R.id.childHomeFragment);
+                break;
+            case "provider":
+                bottomNav.setSelectedItemId(R.id.providerHomeFragment);
+                break;
+            default:
+                bottomNav.setSelectedItemId(R.id.parentHomeFragment);
+                break;
+        }
+
+        // ------------ UNIVERSAL NAVIGATION HANDLER -------------
+        bottomNav.setOnItemSelectedListener(item -> {
+
+            int dest = item.getItemId();
+
+            Bundle passArgs = new Bundle();
+            passArgs.putString("uid", uid);
+            passArgs.putString("role", role);
+
+            try {
+                navController.navigate(dest, passArgs);
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        });
     }
 }

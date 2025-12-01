@@ -4,29 +4,78 @@
     android:id="@+id/nav_graph_parent"
     app:startDestination="@id/parentHomeFragment">
 
+    <!-- GLOBAL ARGUMENTS injected from MainNavActivity -->
+    <argument
+        android:name="uid"
+        app:argType="string" />
+
+    <argument
+        android:name="role"
+        app:argType="string" />
+
+    <!-- HOME -->
     <fragment
         android:id="@+id/parentHomeFragment"
         android:name="com.example.demoapp.ParentHomeFragment"
-        android:label="Home"/>
+        android:label="Home">
+        <argument
+            android:name="uid"
+            app:argType="string" />
+        <argument
+            android:name="role"
+            app:argType="string" />
+    </fragment>
 
+    <!-- SYMPTOM -->
     <fragment
         android:id="@+id/parentSymptomFragment"
         android:name="com.example.demoapp.ParentSymptomFragment"
-        android:label="Symptom"/>
+        android:label="Symptom">
+        <argument
+            android:name="uid"
+            app:argType="string" />
+        <argument
+            android:name="role"
+            app:argType="string" />
+    </fragment>
 
+    <!-- MEDICINE -->
     <fragment
         android:id="@+id/parentMedicineFragment"
         android:name="com.example.demoapp.ParentMedicineFragment"
-        android:label="Medicine"/>
+        android:label="Medicine">
+        <argument
+            android:name="uid"
+            app:argType="string" />
+        <argument
+            android:name="role"
+            app:argType="string" />
+    </fragment>
 
+    <!-- BADGES -->
     <fragment
         android:id="@+id/parentBadgesFragment"
         android:name="com.example.demoapp.ParentBadgesFragment"
-        android:label="Badges"/>
+        android:label="Badges">
+        <argument
+            android:name="uid"
+            app:argType="string" />
+        <argument
+            android:name="role"
+            app:argType="string" />
+    </fragment>
 
+    <!-- PROFILE -->
     <fragment
         android:id="@+id/parentProfileFragment"
         android:name="com.example.demoapp.ParentProfileFragment"
-        android:label="Profile"/>
+        android:label="Profile">
+        <argument
+            android:name="uid"
+            app:argType="string" />
+        <argument
+            android:name="role"
+            app:argType="string" />
+    </fragment>
 
 </navigation>
