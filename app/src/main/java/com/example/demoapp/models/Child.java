@@ -83,6 +83,37 @@ public class Child {
     public double getPb() { return pb; }
     public void setPb(double pb) { this.pb = pb; }
 
+    private Map<String, Object> childToMap(Child child) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("uid", child.getUid());
+        map.put("username", child.getUsername());
+        map.put("dob", child.getDob());
+        map.put("parentId", child.getParentId());
+        map.put("notes", child.getNotes());
+        map.put("sharing", child.getSharing());
+        map.put("providerIds", new ArrayList<>(child.getProviderIds()));
+        map.put("providerBindings", child.getProviderBindings());
+        map.put("hasSeenOnboardingChild", child.isHasSeenOnboardingChild());
+        map.put("passwordHash", child.getPasswordHash());
+        map.put("firstName", child.getFirstName());
+        map.put("lastName", child.getLastName());
+        map.put("pb", child.getPb());
+
+        Map<String, Map<String, Object>> codesMap = new HashMap<>();
+        for (Map.Entry<String, Child.ShareCode> entry : child.getShareCodes().entrySet()) {
+            Map<String, Object> codeInfo = new HashMap<>();
+            codeInfo.put("code", entry.getValue().getCode());
+            codeInfo.put("timestamp", entry.getValue().getTimestamp());
+            codeInfo.put("revoked", entry.getValue().isRevoked());
+            codeInfo.put("permissions", entry.getValue().getPermissions());
+            codeInfo.put("providerId", entry.getValue().getProviderId());
+            codesMap.put(entry.getKey(), codeInfo);
+        }
+        map.put("shareCodes", codesMap);
+
+        return map;
+    }
+
     // ------------------------
     // ShareCode 操作
     // ------------------------

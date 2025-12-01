@@ -49,8 +49,14 @@ public class ParentActivity extends AppCompatActivity {
         FloatingActionButton btnAddChild = findViewById(R.id.btn_add_child);
 
         ImageView ivUserIcon = findViewById(R.id.iv_user_icon);
+
         ivUserIcon.setOnClickListener(v -> {
+            Log.d("TEST", "Icon clicked");
+            String id = UserUtils.getUid();
+            Log.d("TEST", "Using UID: " + id);
+
             Intent intent = new Intent(ParentActivity.this, ParentProfileActivity.class);
+            intent.putExtra("uid", id);
             startActivity(intent);
         });
 
@@ -94,7 +100,6 @@ public class ParentActivity extends AppCompatActivity {
 
         loadChildren();
     }
-
 
     private void checkParentOnboarding() {
         String parentUid = UserUtils.getUid();

@@ -18,11 +18,9 @@
             android:name=".ProviderProfileActivity"
             android:exported="false" />
         <activity
-            android:name=".providerProfileActivity"
+            android:name=".ProviderProfileActivity"
             android:exported="false" />
-        <activity
-            android:name=".providerProfile"
-            android:exported="false" />
+
         <activity
             android:name=".ParentProfileActivity"
             android:exported="false" />
@@ -73,7 +71,7 @@
             android:exported="false" /> <!-- ParentActivity -->
         <activity
             android:name=".ParentActivity"
-            android:exported="false" /> <!-- NEW: MainNavActivity -->
+            android:exported="true" /> <!-- NEW: MainNavActivity -->
         <activity
             android:name=".MainNavActivity"
             android:exported="false" />
