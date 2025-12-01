@@ -44,12 +44,12 @@ public class SummaryCalendarFragment extends Fragment implements CalendarAdapter
         //TODO: replace with correct childUid logic
         childUid = "oKaNrSiogbRxH5iCxfjS";
 
-        Button prevMonthButton = view.findViewById(R.id.prev_month_button);
-        Button nextMonthButton = view.findViewById(R.id.next_month_button);
-        Button browseHistoryButton = view.findViewById(R.id.browse_history);
+        prevMonthButt = view.findViewById(R.id.prev_month_button);
+        nextMonthButt = view.findViewById(R.id.next_month_button);
+        browseHistoryButton = view.findViewById(R.id.browse_history);
 
-        prevMonthButton.setOnClickListener(v -> previousMonthAction());
-        nextMonthButton.setOnClickListener(v -> nextMonthAction());
+        prevMonthButt.setOnClickListener(v -> previousMonthAction());
+        nextMonthButt.setOnClickListener(v -> nextMonthAction());
         browseHistoryButton.setOnClickListener(v -> browseHistoryAction());
 
         CalendarUtils.selectedDate = LocalDate.now();
@@ -86,13 +86,12 @@ public class SummaryCalendarFragment extends Fragment implements CalendarAdapter
     }
 
     public void browseHistoryAction() {
-        Intent intent = new Intent(requireActivity(), FilterEntriesScreen.class);
-
-        // Optional: pass data to FilterEntriesScreen
-        intent.putExtra("Uid", childUid);  // or childUid, etc.
-        intent.putExtra("providerUid", providerUid);
-
-        requireActivity().startActivity(intent);
+        if (getActivity() != null) {
+            Intent intent = new Intent(getActivity(), FilterEntriesScreen.class);
+            intent.putExtra("Uid", childUid);
+            intent.putExtra("providerUid", providerUid);
+            getActivity().startActivity(intent);
+        }
     }
 
     @Override

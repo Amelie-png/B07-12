@@ -68,6 +68,12 @@
         <activity
             android:name=".MainActivity"
             android:exported="false" />
+        <activity
+            android:name=".FilterEntriesScreen"
+            android:exported="false"/>
+        <activity
+            android:name=".AddSymptomsActivity"
+            android:exported="false"/>"
     </application>
 
 </manifest>

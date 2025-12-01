@@ -137,20 +137,16 @@ public class FilterEntriesScreen extends AppCompatActivity {
         chipGroupSymptoms.setVisibility(View.GONE);
         chipGroupTriggers.setVisibility(View.GONE);
 
-        // Collect selected symptoms
         ArrayList<String> selectedSymptoms = new ArrayList<>();
         getCheckedChips(chipGroupSymptoms, selectedSymptoms);
 
-        // Collect selected triggers
         ArrayList<String> selectedTriggers = new ArrayList<>();
         getCheckedChips(chipGroupTriggers, selectedTriggers);
 
-        // Collect date range
         LocalDate startDate = (LocalDate) startDateEditText.getTag();
         LocalDate endDate = (LocalDate) endDateEditText.getTag();
 
-        if(validateDateRange(startDate, endDate)){
-            // Pass filter data to DailyEntryDisplayScreen
+        if (validateDateRange(startDate, endDate)) {
             Bundle bundle = new Bundle();
             bundle.putSerializable("startDate", startDate);
             bundle.putSerializable("endDate", endDate);
@@ -158,17 +154,15 @@ public class FilterEntriesScreen extends AppCompatActivity {
             bundle.putStringArrayList("triggers", selectedTriggers);
             bundle.putString("childId", childUid);
 
-            // Add filtered entries
-            filteredEntry.clear();
             DailyEntryDisplayScreen dailyEntryScreen = new DailyEntryDisplayScreen();
             dailyEntryScreen.setArguments(bundle);
+
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.filtered_entry_list, dailyEntryScreen)
                     .commit();
         }
     }
-
 
     private void getCheckedChips(ChipGroup group, ArrayList<String> outputList) {
         for (int i = 0; i < group.getChildCount(); i++) {

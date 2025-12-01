@@ -15,9 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EntryLogRepository {
-    private final CollectionReference entriesCollection = FirebaseFirestore.getInstance().collection("entries");
+    private final CollectionReference entriesCollection;
 
-    public EntryLogRepository() { }
+    public EntryLogRepository() {
+        entriesCollection = FirebaseFirestore.getInstance().collection("entries");
+    }
 
     public void saveEntry(EntryLog entry, android.content.Context context, OnSuccessListener onSuccess, OnFailureListener onFailure) {
         entriesCollection
@@ -73,17 +75,25 @@ public class EntryLogRepository {
         //TODO: fix cached firebase problem
         entriesCollection
                 .whereEqualTo("childUid", childUid)
-                .whereGreaterThanOrEqualTo("date", selectedStartDate)
-                .whereLessThanOrEqualTo("date", selectedEndDate)
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
                     ArrayList<EntryLog> entries = new ArrayList<>();
                     List<DocumentSnapshot> docs =  querySnapshot.getDocuments();
                     for (DocumentSnapshot doc : docs) {
                         EntryLog entry = doc.toObject(EntryLog.class);
+                        String entryDateString = entry.getDate();
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                        LocalDate entryDate = LocalDate.parse(entryDateString, formatter);
+                        LocalDate startDate = LocalDate.parse(selectedStartDate, formatter);
+                        LocalDate endDate = LocalDate.parse(selectedEndDate, formatter);
+
+                        boolean afterStartDate = entryDate.isAfter(startDate) || entryDate.isEqual(startDate);
+                        boolean beforeEndDate = entryDate.isBefore(endDate) || entryDate.isEqual(endDate);
                         if(entry != null && hasMatchingSymptomsTriggers(
                                 entry.getSymptoms(), entry.getTriggers(),
-                                selectedSymptoms, selectedTriggers)) {
+                                selectedSymptoms, selectedTriggers)
+                                && afterStartDate
+                                && beforeEndDate) {
                             entries.add(entry);
                         }
                     }
