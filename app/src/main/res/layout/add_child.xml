@@ -7,6 +7,17 @@
     android:padding="16dp"
     android:background="#FFFFFF">
 
+    <!-- 用户小图标，左上角 -->
+    <ImageView
+        android:id="@+id/iv_user_icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_parent_profile"
+        android:contentDescription="User Icon"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_gravity="top|start"/>
+
     <!-- 标题 -->
     <TextView
         android:id="@+id/tv_parent_home_title"

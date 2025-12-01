@@ -1,5 +1,6 @@
 package com.example.demoapp.models;
 
+import java.security.SecureRandom;
 import java.util.*;
 
 public class Child {
@@ -27,16 +28,19 @@ public class Child {
         this.hasSeenOnboardingChild = false;
         this.pb = 0.0;
 
-        // 默认权限
+        // 默认权限（与新布局对应）
+        this.sharing.put("rescueLogs", false);
+        this.sharing.put("controllerAdherence", false);
         this.sharing.put("symptoms", false);
-        this.sharing.put("medicines", false);
+        this.sharing.put("triggers", false);
         this.sharing.put("pef", false);
-        this.sharing.put("triage", false);
+        this.sharing.put("triageIncidents", false);
+        this.sharing.put("summaryCharts", false);
     }
 
     public Child(String username, String firstName, String lastName, String dob, String parentId, String notes) {
         this(); // 调用默认构造函数初始化 Map 等
-        this.username = username; // 原有 username
+        this.username = username;
         this.firstName = firstName;
         this.lastName = lastName;
         this.dob = dob;
@@ -55,7 +59,6 @@ public class Child {
     public void setUsername(String username) { this.username = username; }
     public String getFirstName() { return firstName; }
     public void setFirstName(String firstName) { this.firstName = firstName; }
-
     public String getLastName() { return lastName; }
     public void setLastName(String lastName) { this.lastName = lastName; }
     public String getDob() { return dob; }
@@ -68,7 +71,7 @@ public class Child {
     public void setSharing(Map<String, Boolean> sharing) { this.sharing = sharing; }
     public List<String> getProviderIds() { return providerIds; }
     public void setProviderIds(List<String> providerIds) { this.providerIds = providerIds; }
-    public Set<String> getProviderIdsSet() { return new HashSet<>(providerIds); } // 转 Set
+    public Set<String> getProviderIdsSet() { return new HashSet<>(providerIds); }
     public Map<String, ShareCode> getShareCodes() { return shareCodes; }
     public void setShareCodes(Map<String, ShareCode> shareCodes) { this.shareCodes = shareCodes; }
     public Map<String, String> getProviderBindings() { return providerBindings; }
@@ -83,8 +86,11 @@ public class Child {
     // ------------------------
     // ShareCode 操作
     // ------------------------
+
+    private static final String CHAR_POOL = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // 避免易混字符
+    private static final SecureRandom random = new SecureRandom();
     public String generateOneTimeShareCode(Map<String, Boolean> defaultPermissions) {
-        String code = "SC-" + System.currentTimeMillis() + "-" + (int)(Math.random() * 1000);
+        String code = "SC-" + generateShortCode(8); // 8 位短码
         ShareCode sc = new ShareCode(code, null, defaultPermissions);
         shareCodes.put(code, sc);
         return code;
@@ -92,6 +98,34 @@ public class Child {
 
     public String generateOneTimeShareCode() {
         return generateOneTimeShareCode(this.sharing);
+    }
+
+    // 生成指定长度短码
+    private String generateShortCode(int length) {
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            int idx = random.nextInt(CHAR_POOL.length());
+            sb.append(CHAR_POOL.charAt(idx));
+        }
+        return sb.toString();
+    }
+
+
+    public void removeExpiredUnboundShareCodes() {
+        long now = System.currentTimeMillis();
+
+        Iterator<Map.Entry<String, ShareCode>> iterator = shareCodes.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, ShareCode> entry = iterator.next();
+            ShareCode sc = entry.getValue();
+
+            boolean isBound = sc.getProviderId() != null && !sc.getProviderId().isEmpty();
+            boolean isExpired = now - sc.getTimestamp() > 7L * 24 * 60 * 60 * 1000; // 7天
+
+            if (!isBound && isExpired) {
+                iterator.remove();
+            }
+        }
     }
 
     public void updateOneTimeShareCodePermissions(String code, Map<String, Boolean> perms) {
@@ -149,7 +183,20 @@ public class Child {
         private Map<String, Boolean> permissions;
         private String providerId;
 
-        public ShareCode() {}
+        // 🔹 新增字段，用于记录 RecyclerView 是否展开权限开关
+        private boolean expanded = false;
+
+        public ShareCode() {
+            this.permissions = new HashMap<>();
+            // 初始化默认 7 个权限
+            permissions.put("rescueLogs", false);
+            permissions.put("controllerAdherence", false);
+            permissions.put("symptoms", false);
+            permissions.put("triggers", false);
+            permissions.put("pef", false);
+            permissions.put("triageIncidents", false);
+            permissions.put("summaryCharts", false);
+        }
 
         public ShareCode(String code, String providerId, Map<String, Boolean> permissions) {
             this.code = code;
@@ -157,6 +204,14 @@ public class Child {
             this.timestamp = System.currentTimeMillis();
             this.revoked = false;
             this.permissions = new HashMap<>(permissions);
+            // 确保 7 个权限都有默认值
+            this.permissions.putIfAbsent("rescueLogs", false);
+            this.permissions.putIfAbsent("controllerAdherence", false);
+            this.permissions.putIfAbsent("symptoms", false);
+            this.permissions.putIfAbsent("triggers", false);
+            this.permissions.putIfAbsent("pef", false);
+            this.permissions.putIfAbsent("triageIncidents", false);
+            this.permissions.putIfAbsent("summaryCharts", false);
         }
 
         public String getCode() { return code; }
@@ -170,5 +225,10 @@ public class Child {
         public void setPermissions(Map<String, Boolean> permissions) { this.permissions = permissions; }
         public String getProviderId() { return providerId; }
         public void setProviderId(String providerId) { this.providerId = providerId; }
+
+        // 🔹 新增 getter/setter
+        public boolean isExpanded() { return expanded; }
+        public void setExpanded(boolean expanded) { this.expanded = expanded; }
     }
+
 }

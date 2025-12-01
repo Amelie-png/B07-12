@@ -52,6 +52,22 @@
         <!-- Permissions Switches -->
         <TextView android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="Rescue Logs"/>
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switch_rescue_logs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Controller Adherence"/>
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switch_controller_adherence"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="Share Symptoms"/>
         <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/switch_symptoms"
@@ -60,9 +76,9 @@
 
         <TextView android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Share Medicines"/>
+            android:text="Share Triggers"/>
         <com.google.android.material.switchmaterial.SwitchMaterial
-            android:id="@+id/switch_medicines"
+            android:id="@+id/switch_triggers"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
@@ -76,9 +92,17 @@
 
         <TextView android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Share Triage"/>
+            android:text="Triage Incidents"/>
         <com.google.android.material.switchmaterial.SwitchMaterial
-            android:id="@+id/switch_triage"
+            android:id="@+id/switch_triage_incidents"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Summary Charts"/>
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switch_summary_charts"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
