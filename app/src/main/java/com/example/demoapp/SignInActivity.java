@@ -98,7 +98,7 @@ public class SignInActivity extends AppCompatActivity implements LoginContract.V
     @Override
     public void navigateToProviderHome(String providerUid) {
         // We will later replace this with ProviderNavActivity
-        Intent intent = new Intent(this, MainNavActivity.class);
+        Intent intent = new Intent(this, ProviderMain.class);
         intent.putExtra("uid", providerUid);
         intent.putExtra("role", "provider");
         startActivity(intent);

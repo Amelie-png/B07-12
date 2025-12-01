@@ -1,12 +1,7 @@
 package com.example.demoapp;
 
 import android.os.Bundle;
-
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -21,8 +16,9 @@ public class ZoneHistoryActivity extends AppCompatActivity {
 
     private FirebaseFirestore db;
     private RecyclerView recycler;
-    private List<ZoneHistoryItem> historyList = new ArrayList<>();
     private String childId;
+
+    private List<ZoneHistoryItem> historyList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,33 +29,43 @@ public class ZoneHistoryActivity extends AppCompatActivity {
         recycler = findViewById(R.id.recyclerZoneHistory);
         recycler.setLayoutManager(new LinearLayoutManager(this));
 
-        // Get childId from intent
-        childId = getIntent().getStringExtra("uid");
+        childId = getIntent().getStringExtra("uid"); // use uid
 
-        // Back button
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
 
         loadZoneHistory();
     }
 
     private void loadZoneHistory() {
+
         db.collection("zone")
-                .whereEqualTo("childId", childId)
-                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .whereEqualTo("childId", childId)   // 单字段查询，不会要求 index
                 .get()
                 .addOnSuccessListener(query -> {
 
                     historyList.clear();
+                    List<DocumentSnapshot> docs = query.getDocuments();
 
-                    for (DocumentSnapshot doc : query.getDocuments()) {
+                    // 🔽 手动按 timestamp 降序排序（不需要 Firestore 排序）
+                    docs.sort((a, b) -> {
+                        long t1 = a.getLong("timestamp");
+                        long t2 = b.getLong("timestamp");
+                        return Long.compare(t2, t1); // DESC
+                    });
+
+                    // 🔄 转换为 ZoneHistoryItem
+                    for (DocumentSnapshot doc : docs) {
+
                         int percent = doc.getLong("percent").intValue();
-                        String color = doc.getString("zone");
+                        String zone = doc.getString("zone");
                         long timestamp = doc.getLong("timestamp");
 
-                        historyList.add(new ZoneHistoryItem(percent, color, timestamp));
+                        historyList.add(new ZoneHistoryItem(percent, zone, timestamp));
                     }
 
                     recycler.setAdapter(new ZoneHistoryAdapter(historyList));
-                });
+                })
+                .addOnFailureListener(e -> e.printStackTrace());
     }
+
 }
