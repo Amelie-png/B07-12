@@ -9,4 +9,6 @@
     <color name="light_red">#E49491</color>
     <color name="light_blue">#57BEE4</color>
     <color name="dark_grey">#6F6F6F</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="purple_200">#CBC3E3</color>
 </resources>

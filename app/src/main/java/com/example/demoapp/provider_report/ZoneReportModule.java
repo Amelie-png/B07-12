@@ -26,7 +26,7 @@ public class ZoneReportModule {
         List<ZoneReading> list = new ArrayList<>();
 
         long startMillis = start.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        long endMillis = end.atTime(23,59).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        long endMillis = end.atTime(23, 59).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 
         try {
             QuerySnapshot snap = db.collection("zone")
@@ -47,7 +47,11 @@ public class ZoneReportModule {
                 String zone = doc.getString("zone");
                 if (zone == null) zone = "UNKNOWN";
 
-                list.add(new ZoneReading(date, zone));
+                // NEW — Medicine timing flags
+                boolean beforeMed = doc.contains("beforeMed") && Boolean.TRUE.equals(doc.getBoolean("beforeMed"));
+                boolean afterMed = doc.contains("afterMed") && Boolean.TRUE.equals(doc.getBoolean("afterMed"));
+
+                list.add(new ZoneReading(date, zone, beforeMed, afterMed));
             }
 
         } catch (Exception e) {

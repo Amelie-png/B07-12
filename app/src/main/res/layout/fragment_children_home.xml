@@ -187,52 +187,27 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="20dp">
 
+                <!-- NOTE TEXT -->
+                <TextView
+                    android:id="@+id/textMedNote"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Log your daily controller and rescue usages"
+                    android:textSize="16sp"
+                    android:textColor="@android:color/black"
+                    android:paddingBottom="12dp" />
 
-                <!-- CASE: No Medications Added -->
-                <LinearLayout
-                    android:id="@+id/layoutNoMeds"
+                <!-- LOG DOSE BUTTON -->
+                <Button
+                    android:id="@+id/btnLogDose"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:visibility="visible"
-                    android:gravity="center_horizontal">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="No Medications Added Yet"
-                        android:textSize="18sp"
-                        android:paddingBottom="10dp"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/add_medication_message"
-                        android:textSize="14sp"
-                        android:textColor="@android:color/darker_gray"
-
-                        android:paddingBottom="10dp"/>
-
-
-
-                </LinearLayout>
-
-
-                <!-- CASE: Medications Exist -->
-                <LinearLayout
-                    android:id="@+id/layoutMedList"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:visibility="gone">
-
-
-                </LinearLayout>
-
+                    android:text="Log Dose" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
+
 
 
 

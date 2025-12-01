@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -39,6 +40,14 @@ public class ChildHomeFragment extends Fragment {
         // Retrieve child ID & role from Navigation args
         childId = requireArguments().getString("uid");
         role = requireArguments().getString("role");
+        Button btnLogDose = view.findViewById(R.id.btnLogDose);
+//TODO: Replace the real madication activity name
+        btnLogDose.setOnClickListener(v -> {
+            //Intent intent = new Intent(getContext(), MedicationActivity.class);
+            //intent.putExtra("uid", childId);
+            //intent.putExtra("role", role);
+            //startActivity(intent);
+        });
 
         return view;
     }

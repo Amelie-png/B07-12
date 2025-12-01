@@ -1,17 +1,25 @@
 package com.example.demoapp;
 
 public class ZoneHistoryItem {
+
     public int percent;
     public String zoneColor;
     public long timestamp;
 
-    // Required empty constructor for Firestore deserialization
+    public boolean beforeMed;
+    public boolean afterMed;
+
+    // Required empty constructor for Firestore
     public ZoneHistoryItem() {}
 
-    public ZoneHistoryItem(int percent, String zoneColor, long timestamp) {
+    // New constructor including medicine flags
+    public ZoneHistoryItem(int percent, String zoneColor, long timestamp,
+                           boolean beforeMed, boolean afterMed) {
         this.percent = percent;
         this.zoneColor = zoneColor;
         this.timestamp = timestamp;
+        this.beforeMed = beforeMed;
+        this.afterMed = afterMed;
     }
 
     public int getPercent() {
@@ -24,5 +32,13 @@ public class ZoneHistoryItem {
 
     public long getTimestamp() {
         return timestamp;
+    }
+
+    public boolean isBeforeMed() {
+        return beforeMed;
+    }
+
+    public boolean isAfterMed() {
+        return afterMed;
     }
 }
