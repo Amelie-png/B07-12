@@ -11,17 +11,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class ProviderSymptomsFragment extends Fragment {
+public class ProviderHomeFragment extends Fragment {
 
     private String providerUid;
 
-    public ProviderSymptomsFragment() {}
+    public ProviderHomeFragment() {}
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_provider_symptoms, container, false);
+        return inflater.inflate(R.layout.fragment_provider_home, container, false);
     }
 
     @Override
@@ -33,16 +33,6 @@ public class ProviderSymptomsFragment extends Fragment {
             providerUid = getArguments().getString("uid");
         }
 
-        Log.d("ProviderSymptomsFragment", "providerUid = " + providerUid);
-        SummaryCalendarFragment summaryFragment = new SummaryCalendarFragment();
-
-        Bundle bundle = new Bundle();
-        bundle.putString("uid", providerUid);
-        summaryFragment.setArguments(bundle);
-
-        getChildFragmentManager()
-                .beginTransaction()
-                .replace(R.id.summary_calendar_container, summaryFragment)
-                .commit();
+        Log.d("ProviderHomeFragment", "providerUid = " + providerUid);
     }
 }

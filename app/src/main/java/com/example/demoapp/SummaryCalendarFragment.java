@@ -3,6 +3,8 @@ package com.example.demoapp;
 import com.example.demoapp.DailyEntryDisplayScreen;
 import com.example.demoapp.calendar.CalendarUtils;
 import com.example.demoapp.calendar.CalendarAdapter;
+
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -83,15 +85,14 @@ public class SummaryCalendarFragment extends Fragment implements CalendarAdapter
         setMonthView();
     }
 
-    public void browseHistoryAction(){
-        Fragment filterFragment = new FilterEntriesScreen();
+    public void browseHistoryAction() {
+        Intent intent = new Intent(requireActivity(), FilterEntriesScreen.class);
 
-        requireActivity()
-                .getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, filterFragment)
-                .addToBackStack(null)
-                .commit();
+        // Optional: pass data to FilterEntriesScreen
+        intent.putExtra("Uid", childUid);  // or childUid, etc.
+        intent.putExtra("providerUid", providerUid);
+
+        requireActivity().startActivity(intent);
     }
 
     @Override
@@ -106,22 +107,13 @@ public class SummaryCalendarFragment extends Fragment implements CalendarAdapter
     }
 
     private void openDailyEntryScreen(LocalDate date) {
-        DailyEntryDisplayScreen fragment = new DailyEntryDisplayScreen();
-
-        // Pass filter data to DailyEntryDisplayScreen
-        Bundle bundle = new Bundle();
-        bundle.putSerializable("startDate", date);
-        bundle.putSerializable("endDate", date);
-        bundle.putStringArrayList("symptoms", new ArrayList<>());
-        bundle.putStringArrayList("triggers", new ArrayList<>());
-        bundle.putString("childId", childUid);
-        fragment.setArguments(bundle);
-
-        requireActivity()
-                .getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, fragment)
-                .addToBackStack(null)
-                .commit();
+        Intent intent = new Intent(requireActivity(), ViewDailyEntryActivity.class);
+        // Pass the filter data as extras
+        intent.putExtra("startDate", date.toString());
+        intent.putExtra("endDate", date.toString());
+        intent.putStringArrayListExtra("symptoms", new ArrayList<String>());
+        intent.putStringArrayListExtra("triggers", new ArrayList<String>());
+        intent.putExtra("childId", childUid);
+        startActivity(intent);
     }
 }

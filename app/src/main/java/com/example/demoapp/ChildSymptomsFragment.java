@@ -2,8 +2,6 @@ package com.example.demoapp;
 
 import com.example.demoapp.entry_db.*;
 
-import android.app.DatePickerDialog;
-import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -13,7 +11,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import android.util.Pair;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,8 +19,10 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 public class ChildSymptomsFragment extends Fragment {
     // Symptoms
@@ -37,8 +36,8 @@ public class ChildSymptomsFragment extends Fragment {
     protected Button buttonSelectTriggers;
 
     // Time + Date
-    protected TextView timeValue, dateValue;
-    protected Calendar selectedTime = Calendar.getInstance();
+    protected TextView dateValue;
+    protected String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
     protected Button buttonAddSymptoms;
 
     // Launchers for results
@@ -48,10 +47,17 @@ public class ChildSymptomsFragment extends Fragment {
     protected EntryLogRepository entryLogRepository;
 
     private String recorder;
-    private String childUid;
+    //TODO: replace with correct Uid logic
+    private String childUid = "oKaNrSiogbRxH5iCxfjS";
 
-    public ChildSymptomsFragment(String recorder){
-        this.recorder = recorder;
+    public ChildSymptomsFragment() { }
+    public static ChildSymptomsFragment newInstance(String recorder, String childUid) {
+        ChildSymptomsFragment fragment = new ChildSymptomsFragment();
+        Bundle args = new Bundle();
+        args.putString("role", recorder);
+        args.putString("uid", childUid);
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
@@ -86,8 +92,6 @@ public class ChildSymptomsFragment extends Fragment {
         selectedTriggersText = view.findViewById(R.id.selectedTriggersText);
 
         // Time + Date UI
-        timeValue = view.findViewById(R.id.timeValue);
-        dateValue = view.findViewById(R.id.dateValue);
         buttonAddSymptoms = view.findViewById(R.id.buttonAddSymptoms);
 
         // Initialize TextViews
@@ -147,12 +151,6 @@ public class ChildSymptomsFragment extends Fragment {
             selectTriggersLauncher.launch(intent);
         });
 
-        // Time picker
-        timeValue.setOnClickListener(v -> openTimePicker());
-
-        // Date picker
-        dateValue.setOnClickListener(v -> openDatePicker());
-
         // Add entry
         buttonAddSymptoms.setOnClickListener(v -> saveEntryToFirebase());
     }
@@ -166,53 +164,14 @@ public class ChildSymptomsFragment extends Fragment {
         return formattedStr.substring(0, formattedStr.length() - 2);
     }
 
-    private void openTimePicker() {
-        Calendar c = Calendar.getInstance();
-        new TimePickerDialog(requireContext(),
-                (view, hour, minute) -> {
-                    timeValue.setText(String.format("%02d:%02d", hour, minute));
-                    selectedTime.set(Calendar.HOUR_OF_DAY, hour);
-                    selectedTime.set(Calendar.MINUTE, minute);
-                },
-                c.get(Calendar.HOUR_OF_DAY),
-                c.get(Calendar.MINUTE),
-                true
-        ).show();
-    }
-
-    private void openDatePicker() {
-        Calendar c = Calendar.getInstance();
-        new DatePickerDialog(requireContext(),
-                (view, year, month, day) -> {
-                    dateValue.setText(String.format("%02d.%02d.%04d", day, month + 1, year));
-                    selectedTime.set(Calendar.YEAR, year);
-                    selectedTime.set(Calendar.MONTH, month);
-                    selectedTime.set(Calendar.DAY_OF_MONTH, day);
-                },
-                c.get(Calendar.YEAR),
-                c.get(Calendar.MONTH),
-                c.get(Calendar.DAY_OF_MONTH)
-        ).show();
-    }
-
     private void saveEntryToFirebase() {
-        if (selectedSymptomsList.isEmpty()) {
-            Toast.makeText(requireContext(), "Please select at least one symptom", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (selectedTriggersList.isEmpty()) {
-            Toast.makeText(requireContext(), "Please select at least one trigger", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        long timestamp = selectedTime.getTimeInMillis();
-        EntryLog entry = new EntryLog(childUid, selectedSymptomsList, selectedTriggersList, timestamp, recorder);
+        EntryLog entry = new EntryLog(childUid, selectedSymptomsList, selectedTriggersList, today, recorder);
 
         buttonAddSymptoms.setEnabled(false);
 
         entryLogRepository.saveEntry(entry,
-                id -> {
-                    Toast.makeText(requireContext(), "Entry saved successfully!", Toast.LENGTH_SHORT).show();
+                requireContext(),
+                id-> {
                     clearForm();
                     buttonAddSymptoms.setEnabled(true);
                 },
@@ -226,13 +185,10 @@ public class ChildSymptomsFragment extends Fragment {
         selectedSymptomsList.clear();
         selectedTriggersList.clear();
         setNoSelectionText();
-        selectedTime = Calendar.getInstance();
     }
 
     private void setNoSelectionText(){
         selectedSymptomsText.setText("None selected");
         selectedTriggersText.setText("None selected");
-        timeValue.setText("Tap to select time");
-        dateValue.setText("Tap to select date");
     }
 }

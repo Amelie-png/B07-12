@@ -31,8 +31,8 @@ public class DailyEntryDisplayScreen extends Fragment implements EntryLogReposit
     private EntryLogRepository entryRepo;
     private FirebaseFirestore db;
     private String childId;
-    private LocalDate startDate;
-    private LocalDate endDate;
+    private String startDate;
+    private String endDate;
     private ArrayList<String> selectedSymptoms;
     private ArrayList<String> selectedTriggers;
 
@@ -52,8 +52,8 @@ public class DailyEntryDisplayScreen extends Fragment implements EntryLogReposit
 
         // Get Filter Arguments
         Bundle args = getArguments();
-        startDate = (LocalDate) args.getSerializable("startDate");
-        endDate = (LocalDate) args.getSerializable("endDate");
+        startDate = args.getString("startDate");
+        endDate = args.getString("endDate");
         // TODO: replace with actual get childId logic
         childId = args.getString("childId");
         childId = "oKaNrSiogbRxH5iCxfjS";

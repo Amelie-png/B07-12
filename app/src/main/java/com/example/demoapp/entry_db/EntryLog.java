@@ -1,7 +1,5 @@
 package com.example.demoapp.entry_db;
 
-import android.util.Pair;
-
 import com.google.firebase.firestore.Exclude;
 
 import java.text.SimpleDateFormat;
@@ -14,7 +12,7 @@ public class EntryLog{
     private String id;
     private ArrayList<CategoryName> symptoms;
     private ArrayList<CategoryName> triggers;
-    private long timestamp;
+    private String date;
     //either "Parent" or "Child"
     private String recorder;
 
@@ -23,16 +21,16 @@ public class EntryLog{
         this.id = "";
         this.symptoms = new ArrayList<>();
         this.triggers = new ArrayList<>();
-        this.timestamp = System.currentTimeMillis();
+        date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
         this.recorder = "";
     }
 
-    public EntryLog(String childId, ArrayList<CategoryName> symptoms, ArrayList<CategoryName> triggers, long timestamp, String recorder){
+    public EntryLog(String childId, ArrayList<CategoryName> symptoms, ArrayList<CategoryName> triggers, String date, String recorder){
         this.childUid = childId;
         this.id = "";
         this.symptoms = symptoms;
         this.triggers = triggers;
-        this.timestamp = timestamp;
+        this.date = date;
         this.recorder = recorder;
     }
 
@@ -48,28 +46,22 @@ public class EntryLog{
     public ArrayList<CategoryName> getTriggers() { return triggers; }
     public void setTriggers(ArrayList<CategoryName> triggers) { this.triggers = triggers; }
 
-    public long getTimestamp() { return timestamp; }
-    public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
+    public String getDate() { return date; }
+    public void setDate(String date) { this.date = date; }
 
     public String getRecorder(){ return recorder; }
     public void setRecorder(String r){ recorder = r; }
 
     @Exclude
-    public String getDate() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        return dateFormat.format(new Date(timestamp));
-    }
-
-    @Exclude
     public String getTime() {
         SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
-        return timeFormat.format(new Date(timestamp));
+        return timeFormat.format(new Date(date));
     }
 
     @Exclude
     public String getDateTime() {
         SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
-        return dateTimeFormat.format(new Date(timestamp));
+        return dateTimeFormat.format(new Date(date));
     }
 
 }

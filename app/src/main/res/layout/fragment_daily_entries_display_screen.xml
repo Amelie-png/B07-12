@@ -8,8 +8,7 @@
         android:id="@+id/entry_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:scrollbars="vertical"
-        android:fadeScrollbars="false">
-    </ListView>
+        android:fadeScrollbars="false"
+        android:scrollbars="vertical"></ListView>
 
 </LinearLayout>

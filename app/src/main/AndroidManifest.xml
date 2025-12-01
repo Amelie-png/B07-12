@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DemoApp">
         <activity
+            android:name=".ViewDailyEntryActivity"
+            android:exported="false" />
+        <activity
             android:name=".ZoneHistoryActivity"
             android:exported="false" />
         <activity
@@ -27,7 +30,7 @@
             android:name=".TriageActivity"
             android:exported="false" /> <!-- Launcher Activity -->
         <activity
-            android:name=".CreateAccountActivity"
+            android:name=".ProviderMain"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -61,6 +64,9 @@
             android:exported="false" /> <!-- NEW: MainNavActivity -->
         <activity
             android:name=".MainNavActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MainActivity"
             android:exported="false" />
     </application>
 
