@@ -90,7 +90,7 @@ public class ManageControllerActivity extends AppCompatActivity {
         setupDate();
 
         //Set up edit texts
-        //setEditText();
+        setEditText();
 
         //Set up schedule days
         setDays();
@@ -244,6 +244,7 @@ public class ManageControllerActivity extends AppCompatActivity {
     }
 
     //Chip group
+    //TODO fix button toggle issue
     private void setDays(){
         cgDays = findViewById(R.id.cg_schedule_days);
 

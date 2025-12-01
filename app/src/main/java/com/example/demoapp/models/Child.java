@@ -99,7 +99,7 @@ public class Child {
     public double getPb() { return pb; }
     public void setPb(double pb) { this.pb = pb; }
 
-    private Map<String, Object> childToMap(Child child) {
+    public Map<String, Object> childToMap(Child child) {
         Map<String, Object> map = new HashMap<>();
         map.put("uid", child.getUid());
         map.put("username", child.getUsername());
@@ -114,6 +114,9 @@ public class Child {
         map.put("firstName", child.getFirstName());
         map.put("lastName", child.getLastName());
         map.put("pb", child.getPb());
+        map.put("controller", child.getControllerMed());
+        map.put("rescue", child.getRescueMed());
+        map.put("badges", child.getBadges());
 
         Map<String, Map<String, Object>> codesMap = new HashMap<>();
         for (Map.Entry<String, Child.ShareCode> entry : child.getShareCodes().entrySet()) {

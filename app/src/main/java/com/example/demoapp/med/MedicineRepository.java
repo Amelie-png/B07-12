@@ -65,7 +65,7 @@ public class MedicineRepository {
 
                     // Save updated child
                     childRef.document(childId)
-                            .set(childToMap(child))
+                            .set(child.childToMap(child))
                             .addOnSuccessListener(a -> cb.onSuccess(null))
                             .addOnFailureListener(cb::onFailure);
                 })
@@ -91,11 +91,11 @@ public class MedicineRepository {
 
                     // Update controller field
                     Map<String, Object> rescueMap = rescue.toMap();
-                    child.setControllerMed(rescueMap);
+                    child.setRescueMed(rescueMap);
 
                     // Save updated child
                     childRef.document(childId)
-                            .set(childToMap(child))
+                            .set(child.childToMap(child))
                             .addOnSuccessListener(a -> cb.onSuccess(null))
                             .addOnFailureListener(cb::onFailure);
                 })
