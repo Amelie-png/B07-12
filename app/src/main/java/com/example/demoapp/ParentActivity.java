@@ -359,7 +359,9 @@ public class ParentActivity extends AppCompatActivity {
         EditText etLastName = dialogView.findViewById(R.id.et_child_last_name);
         EditText etDob = dialogView.findViewById(R.id.et_child_dob);
         EditText etNotes = dialogView.findViewById(R.id.et_child_notes);
+        EditText etPassword = dialogView.findViewById(R.id.et_child_password); // 新增密码输入框
 
+        // 填充原有值
         etUsername.setText(child.getUsername());
         etFirstName.setText(child.getFirstName());
         etLastName.setText(child.getLastName());
@@ -375,6 +377,7 @@ public class ParentActivity extends AppCompatActivity {
                     String newLastName = etLastName.getText().toString().trim();
                     String newDob = etDob.getText().toString().trim();
                     String newNotes = etNotes.getText().toString().trim();
+                    String newPassword = etPassword.getText().toString().trim();
 
                     if (TextUtils.isEmpty(newUsername) || TextUtils.isEmpty(newFirstName)
                             || TextUtils.isEmpty(newLastName) || TextUtils.isEmpty(newDob)) {
@@ -382,13 +385,21 @@ public class ParentActivity extends AppCompatActivity {
                         return;
                     }
 
+                    // 检查用户名是否唯一
                     checkUsernameUniqueForChild(newUsername, child.getUid(), () -> {
+                        // 更新 Child 对象
                         child.setUsername(newUsername);
                         child.setFirstName(newFirstName);
                         child.setLastName(newLastName);
                         child.setDob(newDob);
                         child.setNotes(newNotes);
 
+                        // 如果输入了新密码，则更新 passwordHash
+                        if (!TextUtils.isEmpty(newPassword)) {
+                            child.setPasswordHash(hashPassword(newPassword));
+                        }
+
+                        // 保存到 Firestore
                         db.collection("children")
                                 .document(child.getFirestoreId())
                                 .set(childToMap(child))
@@ -404,6 +415,7 @@ public class ParentActivity extends AppCompatActivity {
                 .setNegativeButton("Cancel", null)
                 .show();
     }
+
 
     private void showDeleteChildDialog(int position) {
         if (position < 0 || position >= childrenList.size()) return;
