@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingHorizontal="40dp">
+
+    <Button
+        android:id="@+id/btn_inventory_back"
+        style="@style/hyperlink_text_style"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:background="@android:color/transparent"
+        android:padding="0dp"
+        android:text="Back to Medicine Log"
+        android:textAlignment="viewStart" />
+
+    <TextView
+        android:id="@+id/tv_med_inventory_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="@string/med_inventory_header"
+        android:textColor="@color/black"
+        android:textSize="32sp" />
+
+    <!-- Controller card -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:cardCornerRadius="4dp"
+        app:cardElevation="2dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Header row -->
+            <TextView
+                android:id="@+id/tv_controller_card_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/controller_med"
+                android:textColor="@color/black"
+                android:textSize="24sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageButton
+                android:id="@+id/btn_c_edit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_settings"
+                app:layout_constraintBottom_toBottomOf="@+id/tv_controller_card_header"
+                app:layout_constraintStart_toEndOf="@+id/tv_controller_card_header"
+                app:layout_constraintTop_toTopOf="@+id/tv_controller_card_header" />
+
+            <!-- Purchase date -->
+            <TextView
+                android:id="@+id/tv_c_purchase_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Purchase date:"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_controller_card_header" />
+
+            <TextView
+                android:id="@+id/tv_c_purchase_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:text="@string/date_placeholder"
+                android:textColor="@color/dark_grey"
+                android:textSize="16sp"
+                app:layout_constraintStart_toEndOf="@+id/tv_c_purchase_header"
+                app:layout_constraintTop_toTopOf="@+id/tv_c_purchase_header" />
+
+            <!-- Expiry date -->
+            <TextView
+                android:id="@+id/tv_c_expiry_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Expiry date:"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_c_purchase_header" />
+
+            <TextView
+                android:id="@+id/tv_c_expiry_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:text="@string/date_placeholder"
+                android:textColor="@color/dark_grey"
+                android:textSize="16sp"
+                app:layout_constraintStart_toEndOf="@+id/tv_c_expiry_header"
+                app:layout_constraintTop_toTopOf="@+id/tv_c_expiry_header" />
+
+            <!-- Amount remaining -->
+            <TextView
+                android:id="@+id/tv_c_amount_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Remaining amount"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_c_expiry_header" />
+
+            <TextView
+                android:id="@+id/tv_c_amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:text="@string/med_inventory_amount"
+                android:textColor="@color/dark_grey"
+                android:textSize="16sp"
+                app:layout_constraintStart_toEndOf="@+id/tv_c_amount_header"
+                app:layout_constraintTop_toTopOf="@+id/tv_c_amount_header" />
+
+            <!-- Controller Schedule -->
+            <TextView
+                android:id="@+id/tv_c_planned_dose_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Dose per day:"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_c_amount_header" />
+
+            <TextView
+                android:id="@+id/tv_c_planned_dose"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:text="@string/med_inventory_amount"
+                android:textColor="@color/dark_grey"
+                android:textSize="16sp"
+                app:layout_constraintStart_toEndOf="@+id/tv_c_planned_dose_header"
+                app:layout_constraintTop_toTopOf="@+id/tv_c_planned_dose_header" />
+
+            <TextView
+                android:id="@+id/tv_c_schedule_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Scheduled days:"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_c_planned_dose_header" />
+
+            <TextView
+                android:id="@+id/tv_c_schedule"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:text="Mon, Tue, Wed, Thu, Fri, Sat, Sun"
+                android:textColor="@color/dark_grey"
+                android:textSize="16sp"
+                app:layout_constraintStart_toEndOf="@+id/tv_c_schedule_header"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tv_c_schedule_header" />
+
+            <!-- Alerts -->
+            <LinearLayout
+                android:id="@+id/alert_c_expired"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_c_schedule">
+
+                <ImageView
+                    android:id="@+id/iv_c_expired"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_clock_red" />
+
+                <TextView
+                    android:id="@+id/tv_c_expired"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="@string/med_expired_alert" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/alert_c_low"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/alert_c_expired">
+
+                <ImageView
+                    android:id="@+id/iv_c_low"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_trending_down_red" />
+
+                <TextView
+                    android:id="@+id/tv_c_low"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="@string/med_low_alert" />
+
+                <TextView
+                    android:id="@+id/tv_c_flag_author"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:textColor="@color/hyperlink_blue"
+                    android:text="by parent" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/alert_c_replace"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/alert_c_low">
+
+                <ImageView
+                    android:id="@+id/iv_c_replace"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_change_circle_red" />
+
+                <TextView
+                    android:id="@+id/tv_c_replace"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="@string/med_replace_alert" />
+
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Rescue card -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:cardCornerRadius="4dp"
+        app:cardElevation="2dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Header row -->
+            <TextView
+                android:id="@+id/tv_rescue_card_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/rescue_med"
+                android:textColor="@color/black"
+                android:textSize="24sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageButton
+                android:id="@+id/btn_r_edit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_settings"
+                app:layout_constraintBottom_toBottomOf="@+id/tv_rescue_card_header"
+                app:layout_constraintStart_toEndOf="@+id/tv_rescue_card_header"
+                app:layout_constraintTop_toTopOf="@+id/tv_rescue_card_header" />
+
+            <!-- Purchase date -->
+            <TextView
+                android:id="@+id/tv_r_purchase_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Purchase date:"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_rescue_card_header" />
+
+            <TextView
+                android:id="@+id/tv_r_purchase_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:text="@string/date_placeholder"
+                android:textColor="@color/dark_grey"
+                android:textSize="16sp"
+                app:layout_constraintStart_toEndOf="@+id/tv_r_purchase_header"
+                app:layout_constraintTop_toTopOf="@+id/tv_r_purchase_header" />
+
+            <!-- Expiry date -->
+            <TextView
+                android:id="@+id/tv_r_expiry_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Expiry date:"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_r_purchase_header" />
+
+            <TextView
+                android:id="@+id/tv_r_expiry_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:text="@string/date_placeholder"
+                android:textColor="@color/dark_grey"
+                android:textSize="16sp"
+                app:layout_constraintStart_toEndOf="@+id/tv_r_expiry_header"
+                app:layout_constraintTop_toTopOf="@+id/tv_r_expiry_header" />
+
+            <!-- Amount remaining -->
+            <TextView
+                android:id="@+id/tv_r_amount_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Remaining amount"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_r_expiry_header" />
+
+            <TextView
+                android:id="@+id/tv_r_amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:text="@string/med_inventory_amount"
+                android:textColor="@color/dark_grey"
+                android:textSize="16sp"
+                app:layout_constraintStart_toEndOf="@+id/tv_r_amount_header"
+                app:layout_constraintTop_toTopOf="@+id/tv_r_amount_header" />
+
+            <!-- Alerts -->
+            <LinearLayout
+                android:id="@+id/alert_r_expired"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_r_amount_header">
+
+                <ImageView
+                    android:id="@+id/iv_r_expired"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_clock_red" />
+
+                <TextView
+                    android:id="@+id/tv_r_expired"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="@string/med_expired_alert" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/alert_r_low"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/alert_r_expired">
+
+                <ImageView
+                    android:id="@+id/iv_r_low"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_trending_down_red" />
+
+                <TextView
+                    android:id="@+id/tv_r_low"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="@string/med_low_alert" />
+
+                <TextView
+                    android:id="@+id/tv_r_flag_author"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:textColor="@color/hyperlink_blue"
+                    android:text="by parent" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/alert_r_replace"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/alert_r_low">
+
+                <ImageView
+                    android:id="@+id/iv_r_replace"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_change_circle_red" />
+
+                <TextView
+                    android:id="@+id/tv_r_replace"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="@string/med_replace_alert" />
+
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+</LinearLayout>
