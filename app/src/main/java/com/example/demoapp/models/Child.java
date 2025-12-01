@@ -1,5 +1,9 @@
 package com.example.demoapp.models;
 
+import com.example.demoapp.Badge;
+import com.example.demoapp.med.ControllerMed;
+import com.example.demoapp.med.RescueMed;
+
 import java.util.*;
 
 public class Child {
@@ -15,6 +19,9 @@ public class Child {
     private List<String> providerIds = new ArrayList<>();
     private Map<String, ShareCode> shareCodes = new HashMap<>();
     private Map<String, String> providerBindings = new HashMap<>(); // providerId → code
+    private Map<String, ControllerMed> controllerMed = new HashMap<>();
+    private Map<String, RescueMed> resscueMed = new HashMap<>();
+    private Map<String, Badge> badges = new HashMap<>();
     private String passwordHash;
     private boolean hasSeenOnboardingChild;
     private double pb;
