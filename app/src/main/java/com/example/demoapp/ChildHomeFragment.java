@@ -136,8 +136,10 @@ public class ChildHomeFragment extends Fragment {
         Map<String, Object> alert = new HashMap<>();
         alert.put("parentId", parentId);
         alert.put("childId", childId);
-        alert.put("message", "Your child has opened the triage tool.");
+        alert.put("message", "Your child is in severe condition Check now.");
         alert.put("timestamp", System.currentTimeMillis());
+        alert.put("seen", false);  // NEW FIELD
+
 
         db.collection("alerts").add(alert);
     }

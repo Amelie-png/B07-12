@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 
@@ -158,29 +159,32 @@ public class ParentHomeFragment extends Fragment {
 
         alertListener = db.collection("alerts")
                 .whereEqualTo("parentId", parentId)
-                .orderBy("timestamp")  // OK because parentId filter + timestamp is allowed
+                .whereEqualTo("seen", false)   // only unread alerts
                 .addSnapshotListener((snap, e) -> {
+
 
                     if (e != null || snap == null) return;
 
-                    // Only show NEW alerts
                     snap.getDocumentChanges().forEach(change -> {
 
-                        switch (change.getType()) {
+                        if (change.getType() == DocumentChange.Type.ADDED) {
 
-                            case ADDED:
-                                String message = change.getDocument().getString("message");
-                                Long ts = change.getDocument().getLong("timestamp");
+                            String message = change.getDocument().getString("message");
+                            String alertId = change.getDocument().getId();
 
-                                // Optional: prevent older alerts from showing immediately
-                                if (System.currentTimeMillis() - ts < 5000) {
-                                    showAlertPopup(message);
-                                }
-                                break;
+                            // Show popup
+                            showAlertPopup(message);
+
+                            // Mark alert as seen
+                            db.collection("alerts")
+                                    .document(alertId)
+                                    .update("seen", true);
                         }
                     });
+
                 });
     }
+
     private void showAlertPopup(String message) {
         if (!isAdded()) return;
 

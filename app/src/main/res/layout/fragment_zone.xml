@@ -99,11 +99,7 @@
                 android:layout_height="wrap_content"
                 android:text="Edit PEF" />
 
-            <Button
-                android:id="@+id/btnZoneHistory"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="View History"/>
+
 
         </LinearLayout>
         <LinearLayout
@@ -126,6 +122,10 @@
                 android:paddingTop="12dp"/>
 
         </LinearLayout>
-
+        <Button
+            android:id="@+id/btnZoneHistory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="View History"/>
     </LinearLayout>
 </androidx.cardview.widget.CardView>

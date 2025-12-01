@@ -66,11 +66,18 @@ public class ZoneFragment extends Fragment {
         btnEditZone = view.findViewById(R.id.btnEditPEF);
 
         Button btnZoneHistory = view.findViewById(R.id.btnZoneHistory);
+
         btnZoneHistory.setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), ZoneHistoryActivity.class);
             intent.putExtra("uid", childId);
             startActivity(intent);
         });
+
+// Hide from children
+        if ("child".equalsIgnoreCase(role)) {
+            btnZoneHistory.setVisibility(View.GONE);
+        }
+
 
         btnAddZone.setOnClickListener(v -> showAddZoneDialog());
         btnEditZone.setOnClickListener(v -> showEditZoneDialog());
