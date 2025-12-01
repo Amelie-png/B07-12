@@ -11,17 +11,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class ParentSymptomFragment extends Fragment {
+public class ProviderHomeFragment extends Fragment {
 
-    private String parentUid;
+    private String providerUid;
 
-    public ParentSymptomFragment() {}
+    public ProviderHomeFragment() {}
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_parent_symptom, container, false);
+        return inflater.inflate(R.layout.fragment_provider_home, container, false);
     }
 
     @Override
@@ -29,11 +29,10 @@ public class ParentSymptomFragment extends Fragment {
                               @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Updated to use unified argument key "uid"
         if (getArguments() != null) {
-            parentUid = getArguments().getString("uid");
+            providerUid = getArguments().getString("uid");
         }
 
-        Log.d("ParentSymptomFragment", "parentUid = " + parentUid);
+        Log.d("ProviderHomeFragment", "providerUid = " + providerUid);
     }
 }

@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp">
@@ -77,7 +79,7 @@
                 style="@style/Widget.MaterialComponents.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Cough"
+                android:text="Night waking"
                 app:chipBackgroundColor="@color/chip_color_selector"/>
 
             <com.google.android.material.chip.Chip
@@ -85,7 +87,7 @@
                 style="@style/Widget.MaterialComponents.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Wheezing"
+                android:text="activity limits"
                 app:chipBackgroundColor="@color/chip_color_selector"/>
 
             <com.google.android.material.chip.Chip
@@ -93,143 +95,7 @@
                 style="@style/Widget.MaterialComponents.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Shortness of Breath"
-                app:chipBackgroundColor="@color/chip_color_selector"/>
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_symptom_chest_tightness"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Chest Tightness"
-                app:chipBackgroundColor="@color/chip_color_selector"/>
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_symptom_difficulty_breathing"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Difficulty Breathing"
-                app:chipBackgroundColor="@color/chip_color_selector"/>
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_symptom_rapid_breathing"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Rapid Breathing"
-                app:chipBackgroundColor="@color/chip_color_selector"/>
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_symptom_fatigue"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Fatigue"
-                app:chipBackgroundColor="@color/chip_color_selector"/>
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_symptom_lightheadedness"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Lightheadedness"
-                app:chipBackgroundColor="@color/chip_color_selector"/>
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_symptom_throat_irritation"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Throat Irritation"
-                app:chipBackgroundColor="@color/chip_color_selector"/>
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_symptom_chest_discomfort"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Chest Discomfort"
-                app:chipBackgroundColor="@color/chip_color_selector"/>
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_symptom_nasal_congestion"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Nasal Congestion"
-                app:chipBackgroundColor="@color/chip_color_selector"/>
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_symptom_runny_nose"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Runny Nose"
-                app:chipBackgroundColor="@color/chip_color_selector"/>
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_symptom_sneezing"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Sneezing"
-                app:chipBackgroundColor="@color/chip_color_selector"/>
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_symptom_itchy_eyes"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Itchy Eyes"
-                app:chipBackgroundColor="@color/chip_color_selector"/>
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_symptom_sore_throat"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Sore Throat"
-                app:chipBackgroundColor="@color/chip_color_selector"/>
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_symptom_headache"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Headache"
-                app:chipBackgroundColor="@color/chip_color_selector"/>
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_symptom_trouble_sleeping"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Trouble Sleeping"
-                app:chipBackgroundColor="@color/chip_color_selector"/>
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_symptom_reduced_exercise_tolerance"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Reduced Exercise Tolerance"
-                app:chipBackgroundColor="@color/chip_color_selector"/>
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_symptom_increased_mucus"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Increased Mucus"
-                app:chipBackgroundColor="@color/chip_color_selector"/>
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_symptom_other"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Other"
+                android:text="Cough/Wheeze"
                 app:chipBackgroundColor="@color/chip_color_selector"/>
 
         </com.google.android.material.chip.ChipGroup>
@@ -327,14 +193,14 @@
             android:layout_marginTop="24dp"/>
 
         <!--FILTERED ENTRIES-->
-        <LinearLayout
+        <FrameLayout
             android:id="@+id/filtered_entry_list"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:layout_marginTop="16dp">
-        </LinearLayout>
+        </FrameLayout>
 
     </LinearLayout>
 
-</ScrollView>
+</LinearLayout>

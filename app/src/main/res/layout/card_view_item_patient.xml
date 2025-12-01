@@ -5,8 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-<androidx.cardview.widget.CardView
-    android:layout_width="match_parent"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_root"
+        android:layout_width="match_parent"
     android:layout_height="wrap_content"
     app:cardCornerRadius="24sp"
     android:clickable="true"

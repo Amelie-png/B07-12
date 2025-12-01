@@ -3,65 +3,77 @@ package com.example.demoapp;
 import com.example.demoapp.entry_list.*;
 
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
-import android.widget.LinearLayout;
+import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-public class FilterEntriesScreen extends Fragment {
-
+public class FilterEntriesScreen extends AppCompatActivity {
+    private String providerUid;
     private TextInputEditText startDateEditText, endDateEditText;
     private ChipGroup chipGroupSymptoms, chipGroupTriggers;
     private Button btnSymptomsToggle, btnTriggersToggle, btnApplyFilter;
-    private LinearLayout filteredEntryContainer;
-
     private ArrayList<Entry> filteredEntry;
+    private String childUid;
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.fragment_filter_entries_screen); // change layout file name if needed
 
-        View view = inflater.inflate(R.layout.fragment_filter_entries_screen, container, false);
+        initViews();
+        // TODO: replace with actual childUid logic
+        Bundle getExtras = getIntent().getExtras();
+        childUid = getExtras.getString("Uid");
+        childUid = "oKaNrSiogbRxH5iCxfjS";
 
-        initViews(view);
         setupDatePickers();
         setupChipGroupControls();
         setupListView();
         setupApplyButton();
 
-        return view;
+        // If you need providerUid passed from previous screen
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            providerUid = extras.getString("uid");
+        }
+
+        Log.d("FilterEntriesActivity", "providerUid = " + providerUid);
     }
 
-    private void initViews(View view) {
 
-        startDateEditText = view.findViewById(R.id.startDateEditText);
-        endDateEditText = view.findViewById(R.id.endDateEditText);
+    private void initViews() {
+        startDateEditText = findViewById(R.id.startDateEditText);
+        endDateEditText = findViewById(R.id.endDateEditText);
 
-        chipGroupSymptoms = view.findViewById(R.id.chipGroupSymptoms);
-        chipGroupTriggers = view.findViewById(R.id.chipGroupTriggers);
+        chipGroupSymptoms = findViewById(R.id.chipGroupSymptoms);
+        chipGroupTriggers = findViewById(R.id.chipGroupTriggers);
 
-        btnSymptomsToggle = view.findViewById(R.id.filter_by_symptoms_button);
-        btnTriggersToggle = view.findViewById(R.id.filter_by_trigger_button);
-        btnApplyFilter = view.findViewById(R.id.btnApplyFilter);
-
-        filteredEntryContainer = view.findViewById(R.id.filtered_entry_list);
+        btnSymptomsToggle = findViewById(R.id.filter_by_symptoms_button);
+        btnTriggersToggle = findViewById(R.id.filter_by_trigger_button);
+        btnApplyFilter = findViewById(R.id.btnApplyFilter);
 
         // Hide chip groups on start
         chipGroupSymptoms.setVisibility(View.GONE);
@@ -75,18 +87,16 @@ public class FilterEntriesScreen extends Fragment {
 
     private void showDatePicker(TextInputEditText targetEditText) {
         Calendar calendar = Calendar.getInstance();
-
         DatePickerDialog dialog = new DatePickerDialog(
-                requireContext(),
+                this,
                 (DatePicker view, int year, int month, int dayOfMonth) -> {
-                    String date = (month + 1) + "/" + dayOfMonth + "/" + year;
-                    targetEditText.setText(date);
+                    targetEditText.setText((month + 1) + "/" + dayOfMonth + "/" + year);
+                    targetEditText.setTag(LocalDate.of(year, month + 1, dayOfMonth));
                 },
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.DAY_OF_MONTH)
         );
-
         dialog.show();
     }
 
@@ -124,26 +134,33 @@ public class FilterEntriesScreen extends Fragment {
     }
 
     private void applyFilters() {
-        //filteredEntry.clear();
-        filteredEntryContainer.removeAllViews();
-        // Collect selected symptoms
+        chipGroupSymptoms.setVisibility(View.GONE);
+        chipGroupTriggers.setVisibility(View.GONE);
+
         ArrayList<String> selectedSymptoms = new ArrayList<>();
         getCheckedChips(chipGroupSymptoms, selectedSymptoms);
 
-        // Collect selected triggers
         ArrayList<String> selectedTriggers = new ArrayList<>();
         getCheckedChips(chipGroupTriggers, selectedTriggers);
 
-        // Add filtered entries
-        filteredEntry.clear();
-        // TODO: Replace this with real filter logic - DB
-        filteredEntry.add(new Entry("Entry #1", "08:30 AM", "A", "Cough, Wheezing", "Dust, Pollen"));
+        LocalDate startDate = (LocalDate) startDateEditText.getTag();
+        LocalDate endDate = (LocalDate) endDateEditText.getTag();
 
-        // Inflate and add each entry view
-        for (Entry entry : filteredEntry) {
-            View entryView = getLayoutInflater().inflate(R.layout.entry, filteredEntryContainer, false);
-            // Bind data to entryView here (set TextViews, etc.)
-            filteredEntryContainer.addView(entryView);
+        if (validateDateRange(startDate, endDate)) {
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("startDate", startDate);
+            bundle.putSerializable("endDate", endDate);
+            bundle.putStringArrayList("symptoms", selectedSymptoms);
+            bundle.putStringArrayList("triggers", selectedTriggers);
+            bundle.putString("childId", childUid);
+
+            DailyEntryDisplayScreen dailyEntryScreen = new DailyEntryDisplayScreen();
+            dailyEntryScreen.setArguments(bundle);
+
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.filtered_entry_list, dailyEntryScreen)
+                    .commit();
         }
     }
 
@@ -158,5 +175,25 @@ public class FilterEntriesScreen extends Fragment {
 
     private void setupListView() {
         filteredEntry = new ArrayList<>();
+    }
+
+    private boolean validateDateRange(LocalDate startDate, LocalDate endDate) {
+        if (startDate == null) {
+            Toast.makeText(this, "Please select a start date", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (endDate == null) {
+            Toast.makeText(this, "Please select an end date", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (startDate.isAfter(endDate)) {
+            Toast.makeText(this, "End date must be after start date", Toast.LENGTH_SHORT).show();
+            startDateEditText.setText("");
+            endDateEditText.setText("");
+            startDateEditText.setTag(null);
+            endDateEditText.setTag(null);
+            return false;
+        }
+        return true;
     }
 }

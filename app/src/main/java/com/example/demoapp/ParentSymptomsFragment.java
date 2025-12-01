@@ -11,17 +11,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class ProviderSymptomsFragment extends Fragment {
+public class ParentSymptomsFragment extends Fragment {
 
-    private String providerUid;
+    private String parentUid;
 
-    public ProviderSymptomsFragment() {}
+    public ParentSymptomsFragment() {
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_provider_symptoms, container, false);
+        return inflater.inflate(R.layout.fragment_parent_symptom, container, false);
     }
 
     @Override
@@ -29,20 +30,21 @@ public class ProviderSymptomsFragment extends Fragment {
                               @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // Updated to use unified argument key "uid"
         if (getArguments() != null) {
-            providerUid = getArguments().getString("uid");
+            parentUid = getArguments().getString("uid");
         }
 
-        Log.d("ProviderSymptomsFragment", "providerUid = " + providerUid);
-        SummaryCalendarFragment summaryFragment = new SummaryCalendarFragment();
+        Log.d("ParentSymptomFragment", "parentUid = " + parentUid);
+        ParentSymptomContentFragment parentAddSymptomScreen = new ParentSymptomContentFragment();
 
         Bundle bundle = new Bundle();
-        bundle.putString("uid", providerUid);
-        summaryFragment.setArguments(bundle);
+        bundle.putString("uid", parentUid);
+        parentAddSymptomScreen.setArguments(bundle);
 
         getChildFragmentManager()
                 .beginTransaction()
-                .replace(R.id.summary_calendar_container, summaryFragment)
+                .replace(R.id.fragment_container, parentAddSymptomScreen)
                 .commit();
     }
 }
