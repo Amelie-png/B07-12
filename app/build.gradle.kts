@@ -1,15 +1,11 @@
 plugins {
     alias(libs.plugins.android.application)
-
-    // Add the Google services Gradle plugin
     id("com.google.gms.google-services")
 }
 
 android {
     namespace = "com.example.demoapp"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.demoapp"
@@ -30,50 +26,72 @@ android {
             )
         }
     }
+
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5");
+
+    // -------------------------------------
+    // Android / UI dependencies
+    // -------------------------------------
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
     implementation(libs.recyclerview)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.ext.junit)
-    androidTestImplementation(libs.espresso.core)
 
-    // Import the Firebase BoM
-    implementation(platform("com.google.firebase:firebase-bom:34.5.0"))
-
-    // When using the BoM, you don't specify versions in Firebase library dependencies
-
-    // Add the dependency for the Firebase SDK for Google Analytics
-    implementation("com.google.firebase:firebase-analytics")
-
-    // TODO: Add the dependencies for any other Firebase products you want to use
-    // See https://firebase.google.com/docs/android/setup#available-libraries
-    // For example, add the dependencies for Firebase Authentication and Cloud Firestore
-    implementation("com.google.firebase:firebase-auth")
-    implementation("com.google.firebase:firebase-firestore")
-
-    // ----------------------------
-    // AndroidX Navigation Component
-    // ----------------------------
+    // Navigation
     implementation("androidx.navigation:navigation-fragment:2.7.5")
     implementation("androidx.navigation:navigation-ui:2.7.5")
 
-    //for chip
+    // Chips
     implementation("com.google.android.material:material:1.12.0")
 
-    // For Line graph
+    // GraphView library
     implementation("com.jjoe64:graphview:4.2.2") {
         exclude(group = "com.android.support", module = "support-compat")
     }
+
+    // -------------------------------------
+    // Firebase
+    // -------------------------------------
+    implementation(platform("com.google.firebase:firebase-bom:34.5.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
+
+    // -------------------------------------
+    // Unit Tests (These are what you need!)
+    // -------------------------------------
+    testImplementation("junit:junit:4.13.2")
+
+    // Mockito Core
+    testImplementation("org.mockito:mockito-core:5.7.0")
+
+    // Required to mock Firebase final classes (Task, AuthResult, DocumentSnapshot)
+    testImplementation("org.mockito:mockito-inline:5.2.0")
+
+    // Mockito Android (helps with Firebase Task behavior)
+    testImplementation("org.mockito:mockito-android:5.2.0")
+
+    // Hamcrest matchers
+    testImplementation("org.hamcrest:hamcrest-all:1.3")
+
+    // -------------------------------------------------
+    // Android Instrumented Tests
+    // -------------------------------------------------
+    androidTestImplementation(libs.ext.junit)
+    androidTestImplementation(libs.espresso.core)
 }
