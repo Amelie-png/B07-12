@@ -105,14 +105,27 @@ public class ShareCodeAdapter extends RecyclerView.Adapter<ShareCodeAdapter.Shar
         setSwitch(holder.switchRescueLogs, perms, "rescueLogs", sc);
         setSwitch(holder.switchControllerAdherence, perms, "controllerAdherence", sc);
         setSwitch(holder.switchSummaryCharts, perms, "summaryCharts", sc);
-
         // 撤销开关
         holder.switchRevoked.setOnCheckedChangeListener(null);
         holder.switchRevoked.setChecked(sc.isRevoked());
         holder.switchRevoked.setOnCheckedChangeListener((buttonView, isChecked) -> {
             sc.setRevoked(isChecked);
             listener.onShareCodeUpdated(sc);
+            // 更新 UI，禁用其他权限开关
+            notifyItemChanged(position);
         });
+
+// 🔹 如果撤销，则禁用权限开关，UI 显示灰色
+        boolean isRevoked = sc.isRevoked();
+        holder.permissionsContainer.setAlpha(isRevoked ? 0.5f : 1f);
+        holder.switchSymptoms.setEnabled(!isRevoked);
+        holder.switchMedicines.setEnabled(!isRevoked);
+        holder.switchPEF.setEnabled(!isRevoked);
+        holder.switchTriage.setEnabled(!isRevoked);
+        holder.switchRescueLogs.setEnabled(!isRevoked);
+        holder.switchControllerAdherence.setEnabled(!isRevoked);
+        holder.switchSummaryCharts.setEnabled(!isRevoked);
+
     }
 
     private void setSwitch(SwitchMaterial sw, Map<String, Boolean> perms, String key, Child.ShareCode sc) {

@@ -49,8 +49,14 @@ public class ParentActivity extends AppCompatActivity {
         FloatingActionButton btnAddChild = findViewById(R.id.btn_add_child);
 
         ImageView ivUserIcon = findViewById(R.id.iv_user_icon);
+
         ivUserIcon.setOnClickListener(v -> {
+            Log.d("TEST", "Icon clicked");
+            String id = UserUtils.getUid();
+            Log.d("TEST", "Using UID: " + id);
+
             Intent intent = new Intent(ParentActivity.this, ParentProfileActivity.class);
+            intent.putExtra("uid", id);
             startActivity(intent);
         });
 
@@ -93,50 +99,6 @@ public class ParentActivity extends AppCompatActivity {
         btnAddChild.setOnClickListener(v -> showAddChildDialog());
 
         loadChildren();
-    }
-    private void checkParentOnboarding() {
-        String parentUid = UserUtils.getUid();
-
-        db.collection("users")
-                .document(parentUid)
-                .get()
-                .addOnSuccessListener(doc -> {
-                    if (!doc.exists()) return;
-
-                    Boolean hasSeen = doc.getBoolean("hasSeenOnboardingParent");
-
-                    // Treat null as not seen
-                    if (hasSeen == null || !hasSeen) {
-                        showParentOnboardingPopup(parentUid);
-                    }
-                })
-                .addOnFailureListener(e ->
-                        Log.e("ParentActivity", "Failed to load onboarding flag", e));
-    }
-    private void showParentOnboardingPopup(String parentUid) {
-        View dialogView = LayoutInflater.from(this)
-                .inflate(R.layout.dialog_parent_onboarding, null);
-
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setView(dialogView)
-                .setCancelable(false)
-                .create();
-
-        dialog.show();
-
-        // Get the button from the layout
-        Button btnClose = dialogView.findViewById(R.id.closeParentPopup);
-
-        btnClose.setOnClickListener(v -> {
-            // Update Firestore flag
-            db.collection("users")
-                    .document(parentUid)
-                    .update("hasSeenOnboardingParent", true)
-                    .addOnFailureListener(e ->
-                            Log.e("ParentOnboarding", "Failed updating onboarding flag", e));
-
-            dialog.dismiss();
-        });
     }
 
     private void checkParentOnboarding() {
