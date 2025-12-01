@@ -20,6 +20,27 @@
         android:hint="Enter new PEF"
         android:inputType="number" />
 
+    <!-- NEW: Medicine timing section -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="When was this measurement taken?"
+        android:paddingTop="16dp"
+        android:textSize="16sp"
+        android:textStyle="bold"/>
+
+    <CheckBox
+        android:id="@+id/checkboxBeforeMedEdit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Before medicine" />
+
+    <CheckBox
+        android:id="@+id/checkboxAfterMedEdit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="After medicine" />
+
     <Button
         android:id="@+id/btnSaveEditPef"
         android:layout_width="match_parent"

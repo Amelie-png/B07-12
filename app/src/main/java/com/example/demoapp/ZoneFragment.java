@@ -12,10 +12,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -38,6 +40,10 @@ public class ZoneFragment extends Fragment {
     private String role;
 
     private int personalBest = -1;
+
+    // Store latest zone doc info for edit dialog
+    private boolean lastBeforeMed = false;
+    private boolean lastAfterMed = false;
 
     public ZoneFragment() {}
 
@@ -110,7 +116,6 @@ public class ZoneFragment extends Fragment {
 
                     boolean pbNotSet = (personalBest <= 0);
 
-                    // CHILD + PB NOT SET → Show special layout and STOP
                     if (role != null && role.equalsIgnoreCase("child") && pbNotSet) {
                         showNoPBLayout();
                         return;
@@ -122,9 +127,9 @@ public class ZoneFragment extends Fragment {
     }
 
 
-    // ----------------------------------------------------
-    // SPECIAL LAYOUT WHEN PB NOT SET (CHILD ONLY)
-    // ----------------------------------------------------
+    // ----------------------
+    // NO PB LAYOUT
+    // ----------------------
     private void showNoPBLayout() {
         layoutNoPB.setVisibility(View.VISIBLE);
         layoutNoZone.setVisibility(View.GONE);
@@ -135,9 +140,9 @@ public class ZoneFragment extends Fragment {
     }
 
 
-    // ----------------------------------------------------
-    // ENABLE / DISABLE PEF BUTTONS BASED ON PB
-    // ----------------------------------------------------
+    // ----------------------
+    // BUTTON STATE
+    // ----------------------
     private void updateButtonStates() {
         if (role != null && role.equalsIgnoreCase("child")) {
 
@@ -159,7 +164,7 @@ public class ZoneFragment extends Fragment {
 
 
     // ----------------------------------------------------
-    // LOAD TODAY’S ZONE DATA
+    // LOAD TODAY ZONE (also loads medicine flags)
     // ----------------------------------------------------
     private void loadTodayZone() {
         long todayStart = getTodayStartMillis();
@@ -192,6 +197,10 @@ public class ZoneFragment extends Fragment {
                         return;
                     }
 
+                    // store medicine flags for edit dialog
+                    lastBeforeMed = latestDoc.contains("beforeMed") && latestDoc.getBoolean("beforeMed");
+                    lastAfterMed = latestDoc.contains("afterMed") && latestDoc.getBoolean("afterMed");
+
                     int pefValue = latestDoc.getLong("pef").intValue();
                     updateZoneUI(pefValue);
                 })
@@ -212,9 +221,6 @@ public class ZoneFragment extends Fragment {
     }
 
 
-    // ----------------------------------------------------
-    // SHOW NO-ZONE LAYOUT
-    // ----------------------------------------------------
     private void showNoZoneLayout() {
         layoutNoZone.setVisibility(View.VISIBLE);
         layoutHasZone.setVisibility(View.GONE);
@@ -223,7 +229,7 @@ public class ZoneFragment extends Fragment {
 
 
     // ----------------------------------------------------
-    // UPDATE UI FOR TODAY'S ZONE
+    // UPDATE UI
     // ----------------------------------------------------
     private void updateZoneUI(int pefValue) {
 
@@ -266,19 +272,7 @@ public class ZoneFragment extends Fragment {
 
 
     // ----------------------------------------------------
-    // PB REMINDER DIALOG
-    // ----------------------------------------------------
-    private void showParentReminderDialog() {
-        new AlertDialog.Builder(getContext())
-                .setTitle("Personal Best Not Set")
-                .setMessage("Please remind your parent to set your Personal Best (PB) before logging PEF.")
-                .setPositiveButton("OK", null)
-                .show();
-    }
-
-
-    // ----------------------------------------------------
-    // ADD PEF DIALOG
+    // ADD PEF DIALOG (checkbox added)
     // ----------------------------------------------------
     private void showAddZoneDialog() {
 
@@ -294,17 +288,39 @@ public class ZoneFragment extends Fragment {
         builder.setView(dialogView);
 
         EditText input = dialogView.findViewById(R.id.inputPefValue);
+        CheckBox cbBefore = dialogView.findViewById(R.id.checkboxBeforeMed);
+        CheckBox cbAfter = dialogView.findViewById(R.id.checkboxAfterMed);
         Button save = dialogView.findViewById(R.id.btnSavePef);
+
+        // ensure only one can be checked
+        cbBefore.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) cbAfter.setChecked(false);
+        });
+
+        cbAfter.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) cbBefore.setChecked(false);
+        });
 
         AlertDialog dialog = builder.create();
 
         save.setOnClickListener(v -> {
+
             if (input.getText().toString().isEmpty()) {
                 input.setError("Enter a value");
                 return;
             }
 
-            saveZone(Integer.parseInt(input.getText().toString()));
+            if (!cbBefore.isChecked() && !cbAfter.isChecked()) {
+                Toast.makeText(getContext(), "Please select before or after medicine", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            saveZoneWithMedicine(
+                    Integer.parseInt(input.getText().toString()),
+                    cbBefore.isChecked(),
+                    cbAfter.isChecked()
+            );
+
             dialog.dismiss();
         });
 
@@ -313,7 +329,7 @@ public class ZoneFragment extends Fragment {
 
 
     // ----------------------------------------------------
-    // EDIT PEF DIALOG
+    // EDIT PEF DIALOG (loads medicine flags)
     // ----------------------------------------------------
     private void showEditZoneDialog() {
 
@@ -329,19 +345,45 @@ public class ZoneFragment extends Fragment {
         builder.setView(dialogView);
 
         EditText input = dialogView.findViewById(R.id.inputEditPef);
+        CheckBox cbBefore = dialogView.findViewById(R.id.checkboxBeforeMedEdit);
+        CheckBox cbAfter = dialogView.findViewById(R.id.checkboxAfterMedEdit);
         Button save = dialogView.findViewById(R.id.btnSaveEditPef);
+
+        // preload saved values
+        cbBefore.setChecked(lastBeforeMed);
+        cbAfter.setChecked(lastAfterMed);
+
+        // mutual exclusivity
+        cbBefore.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) cbAfter.setChecked(false);
+        });
+
+        cbAfter.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) cbBefore.setChecked(false);
+        });
 
         input.setText(textZonePercent.getText().toString().replace("%", ""));
 
         AlertDialog dialog = builder.create();
 
         save.setOnClickListener(v -> {
+
             if (input.getText().toString().isEmpty()) {
                 input.setError("Enter a value");
                 return;
             }
 
-            saveZone(Integer.parseInt(input.getText().toString()));
+            if (!cbBefore.isChecked() && !cbAfter.isChecked()) {
+                Toast.makeText(getContext(), "Please select before or after medicine", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            saveZoneWithMedicine(
+                    Integer.parseInt(input.getText().toString()),
+                    cbBefore.isChecked(),
+                    cbAfter.isChecked()
+            );
+
             dialog.dismiss();
         });
 
@@ -350,9 +392,9 @@ public class ZoneFragment extends Fragment {
 
 
     // ----------------------------------------------------
-    // SAVE ZONE ENTRY
+    // SAVE ZONE ENTRY WITH MEDICINE FLAGS
     // ----------------------------------------------------
-    private void saveZone(int pefValue) {
+    private void saveZoneWithMedicine(int pefValue, boolean beforeMed, boolean afterMed) {
 
         if (personalBest <= 0 || pefValue > personalBest) {
             personalBest = pefValue;
@@ -372,13 +414,29 @@ public class ZoneFragment extends Fragment {
         data.put("percent", percent);
         data.put("zone", zoneColor);
         data.put("timestamp", System.currentTimeMillis());
+        data.put("beforeMed", beforeMed);
+        data.put("afterMed", afterMed);
 
         db.collection("zone")
                 .document()
                 .set(data)
                 .addOnSuccessListener(unused -> {
+                    lastBeforeMed = beforeMed;
+                    lastAfterMed = afterMed;
                     updateZoneUI(pefValue);
                     loadTodayZone();
                 });
+    }
+
+
+    // ----------------------------------------------------
+    // PARENT REMINDER DIALOG
+    // ----------------------------------------------------
+    private void showParentReminderDialog() {
+        new AlertDialog.Builder(getContext())
+                .setTitle("Personal Best Not Set")
+                .setMessage("Please remind your parent to set your Personal Best (PB) before logging PEF.")
+                .setPositiveButton("OK", null)
+                .show();
     }
 }
