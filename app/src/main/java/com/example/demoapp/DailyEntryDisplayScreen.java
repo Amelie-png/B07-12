@@ -8,19 +8,15 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import java.lang.reflect.Array;
-import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class DailyEntryDisplayScreen extends Fragment implements EntryLogRepository.OnEntriesRetrievedListener{
@@ -30,7 +26,7 @@ public class DailyEntryDisplayScreen extends Fragment implements EntryLogReposit
     private ArrayList<Entry> entryList;
     private EntryLogRepository entryRepo;
     private FirebaseFirestore db;
-    private String childId;
+    private String childUid;
     private String startDate;
     private String endDate;
     private ArrayList<String> selectedSymptoms;
@@ -55,14 +51,13 @@ public class DailyEntryDisplayScreen extends Fragment implements EntryLogReposit
         startDate = args.getString("startDate");
         endDate = args.getString("endDate");
         // TODO: replace with actual get childId logic
-        childId = args.getString("childId");
-        childId = "oKaNrSiogbRxH5iCxfjS";
+        childUid = args.getString("childId");
 
         selectedSymptoms = args.getStringArrayList("symptoms");
         selectedTriggers = args.getStringArrayList("triggers");
 
         adapter = new EntryAdapter(getContext(), entryList);
-        if (startDate != null && endDate != null && childId != null) {
+        if (startDate != null && endDate != null && childUid != null) {
             loadEntryList();
         }
         listView.setAdapter(adapter);
@@ -76,7 +71,7 @@ public class DailyEntryDisplayScreen extends Fragment implements EntryLogReposit
     }
 
     private void loadEntryList(){
-        entryRepo.getFilteredEntries(this, childId, startDate, endDate, selectedSymptoms, selectedTriggers);
+        entryRepo.getFilteredEntries(this, childUid, startDate, endDate, selectedSymptoms, selectedTriggers);
     }
 
     @Override

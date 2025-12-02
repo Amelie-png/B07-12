@@ -67,12 +67,8 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder
             Toast.makeText(v.getContext(), item.name + " selected", Toast.LENGTH_SHORT).show();
 
             Intent intent = new Intent(activity, MainNavActivity.class);
-
-            // ----------------------------------------------------
-            // ⭐ MATCHES PARENT EXACTLY
-            // ----------------------------------------------------
-            intent.putExtra("uid", item.childId);        // CHILD ID becomes uid
-            intent.putExtra("providerUid", providerUid); // Provider identity
+            intent.putExtra("childUid", item.childId);
+            intent.putExtra("uid", activity.getIntent().getExtras().getString("uid"));
             intent.putExtra("role", "provider");
 
             activity.startActivity(intent);

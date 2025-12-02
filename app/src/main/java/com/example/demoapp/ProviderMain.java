@@ -47,16 +47,8 @@ public class ProviderMain extends AppCompatActivity implements AddPatientPopup.O
         db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
 
-        // ----------------------------------------------------
-        // GET PROVIDER UID
-        // ----------------------------------------------------
-        providerUid = getIntent().getStringExtra("providerUid");
-        if (providerUid == null) {
-            providerUid = getIntent().getStringExtra("uid"); // backup
-        }
-        if (providerUid == null && auth.getCurrentUser() != null) {
-            providerUid = auth.getCurrentUser().getUid();
-        }
+        // providerUid passed from login or previous Activity
+        providerUid = getIntent().getStringExtra("uid");
 
         if (providerUid == null) {
             Log.e("ProviderMain", "ERROR: Provider UID is NULL");

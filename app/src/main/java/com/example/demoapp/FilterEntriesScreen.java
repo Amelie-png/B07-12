@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 public class FilterEntriesScreen extends AppCompatActivity {
-    private String providerUid;
     private TextInputEditText startDateEditText, endDateEditText;
     private ChipGroup chipGroupSymptoms, chipGroupTriggers;
     private Button btnSymptomsToggle, btnTriggersToggle, btnApplyFilter, btnBack;
@@ -44,11 +43,6 @@ public class FilterEntriesScreen extends AppCompatActivity {
         setContentView(R.layout.fragment_filter_entries_screen);
 
         initViews();
-        // TODO: replace with actual childUid logic
-        Bundle getExtras = getIntent().getExtras();
-        childUid = getExtras.getString("Uid");
-        childUid = "oKaNrSiogbRxH5iCxfjS";
-
         setupDatePickers();
         setupChipGroupControls();
         setupListView();
@@ -56,11 +50,9 @@ public class FilterEntriesScreen extends AppCompatActivity {
         setupBackButton();
 
         Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            providerUid = extras.getString("uid");
+        if(extras != null){
+            childUid = getIntent().getExtras().getString("childUid");
         }
-
-        Log.d("FilterEntriesActivity", "providerUid = " + providerUid);
     }
 
 
