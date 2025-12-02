@@ -20,7 +20,9 @@
         android:label="Home">
         <argument android:name="uid" app:argType="string" />
         <argument android:name="role" app:argType="string" />
+        <argument android:name="providerUid" app:argType="string" /> <!-- ⭐ REQUIRED -->
     </fragment>
+
 
     <!-- SYMPTOMS -->
     <fragment
