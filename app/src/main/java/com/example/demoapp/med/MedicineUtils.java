@@ -41,15 +41,6 @@ public class MedicineUtils {
         return (double) taken / (double) expected;
     }
 
-    //TODO
-    public static int updateControllerStreak(){
-        return 0;
-    }
-
-    public static int updateTechniqueStreak(){
-        return 0;
-    }
-
     /*
      * Count rescue usage in a given time range.
      * ------------ For rescue count in last hours ------------
@@ -57,8 +48,7 @@ public class MedicineUtils {
     public static int countRescueUsage(List<MedicineEntry> entries, long startEpoch, long endEpoch) {
         int count = 0;
         for (MedicineEntry e : entries) {
-            if ("rescue".equals(e.getMedType())
-                    && e.getTimestampValue() >= startEpoch
+            if (e.getTimestampValue() >= startEpoch
                     && e.getTimestampValue() <= endEpoch) {
                 count++;
             }
@@ -73,11 +63,9 @@ public class MedicineUtils {
     public static long getLastRescueTime(List<MedicineEntry> entries) {
         long latest = -1;
         for (MedicineEntry e : entries) {
-            if ("rescue".equals(e.getMedType())) {
                 if (e.getTimestampValue() > latest) {
                     latest = e.getTimestampValue();
                 }
-            }
         }
         return latest;
     }
@@ -86,7 +74,7 @@ public class MedicineUtils {
      * Returns rescue count starting from now going back given days;
      * ----------- For 7-day/30-day trend on home page ---------------
      */
-    public static int getWeeklyRescueCount(List<MedicineEntry> entries, int days) {
+    public static int getRescueCountByDay(List<MedicineEntry> entries, int days) {
         long now = System.currentTimeMillis();
         long daysAgo = now - (days * 24L * 60L * 60L * 1000L);
         return countRescueUsage(entries, daysAgo, now);
