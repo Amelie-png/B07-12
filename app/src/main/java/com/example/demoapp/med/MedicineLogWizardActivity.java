@@ -341,7 +341,8 @@ public class MedicineLogWizardActivity extends AppCompatActivity {
         entry.setTimestamp(System.currentTimeMillis());
         entry.setDoseCount(vm.getDoseTaken().getValue() != null ? vm.getDoseTaken().getValue() : 1);
         entry.setFlaggedLowStock(vm.getFlaggedLowStock().getValue() != null ? vm.getFlaggedLowStock().getValue() : false);
-        entry.setTechniqueCompleted(Objects.requireNonNull(vm.techniqueSteps.getValue()));
+        boolean completed = entry.isCompleted(vm.techniqueSteps.getValue());
+        entry.setTechniqueCompleted(completed);
         entry.setPreBreathRating(vm.getPreBreathRating().getValue() != null ? vm.getPreBreathRating().getValue() : 0);
         entry.setPostBreathRating(vm.getPostBreathRating().getValue() != null ? vm.getPostBreathRating().getValue() : 0);
         entry.setConditionChange(vm.getConditionChange().getValue());
@@ -349,7 +350,9 @@ public class MedicineLogWizardActivity extends AppCompatActivity {
 
         repo.addMedLog(entry, new MedicineRepository.OnResult<String>() {
             @Override public void onSuccess(String id) {
-                // Success -> dismiss the wizard and return to log list
+                if (entry.getMedType().equals("controller")){
+                    repo.updateStreaksOnNewLog(childId, entry.isTechniqueCompleted());
+                }
                 Toast.makeText(MedicineLogWizardActivity.this, "Saved!", Toast.LENGTH_SHORT).show();
                 finish();
             }

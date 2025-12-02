@@ -16,13 +16,17 @@ import androidx.fragment.app.Fragment;
 import com.example.demoapp.charts.TrendChartView;
 import com.example.demoapp.med.MedicineEntry;
 import com.example.demoapp.med.MedicineRepository;
+import com.example.demoapp.med.MedicineUtils;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 public class ParentHomeFragment extends Fragment {
@@ -30,8 +34,9 @@ public class ParentHomeFragment extends Fragment {
     private String childId;
     private String parentId;
     private FirebaseFirestore db;
+    MedicineRepository repo;
 
-    private TextView emergencyText;
+    private TextView emergencyText, lastRescueTime, weeklyRescueCount;
     private Button btnViewTriageHistory;
     private TrendChartView trendChart;
     private Button btnToggleDays;
@@ -44,8 +49,6 @@ public class ParentHomeFragment extends Fragment {
     public ParentHomeFragment() { }
     // 🔒 Prevent duplicate popups during this session
     private final Set<String> shownAlerts = new HashSet<>();
-
-
 
     public static ParentHomeFragment newInstance(String childId, String parentId) {
         ParentHomeFragment fragment = new ParentHomeFragment();
@@ -75,6 +78,7 @@ public class ParentHomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         db = FirebaseFirestore.getInstance();
+        repo = new MedicineRepository();
 
         if (getArguments() != null) {
             childId = getArguments().getString("uid");
@@ -115,6 +119,8 @@ public class ParentHomeFragment extends Fragment {
         loadLatestTriageState();
         loadZoneFragment();
         loadMedicineLogsAndShowTrend();
+        getLastRescueTime();
+        getWeeklyRescueCount();
     }
 
 
@@ -146,6 +152,10 @@ public class ParentHomeFragment extends Fragment {
             }
             updateTrendChart();
         });
+
+        //Rescue data
+        lastRescueTime = view.findViewById(R.id.tv_last_rescue_time);
+        weeklyRescueCount = view.findViewById(R.id.tv_weekly_rescue_count);
     }
 
 
@@ -249,7 +259,6 @@ public class ParentHomeFragment extends Fragment {
     }
 
     private void loadMedicineLogsAndShowTrend() {
-        MedicineRepository repo = new MedicineRepository();
         long now = System.currentTimeMillis();
         long oneMonthAgo = now - 30L * 24L * 60L * 60L * 1000L; // 拉取 30 天数据
 
@@ -287,5 +296,43 @@ public class ParentHomeFragment extends Fragment {
 
         // 调用 TrendChartView 显示
         trendChart.setTrendData(dailyCounts, "Rescue Medicine", trendDays);
+    }
+
+    private void getLastRescueTime() {
+        repo.fetchLogs(childId, "rescue", 0, Long.MAX_VALUE, new MedicineRepository.OnResult<List<MedicineEntry>>() {
+            @Override
+            public void onSuccess(List<MedicineEntry> result) {
+                long timestamp = MedicineUtils.getLastRescueTime(result);
+
+                if(timestamp == -1){
+                    lastRescueTime.setText("No rescue logs");
+                }
+                else {
+                    lastRescueTime.setText(
+                            new SimpleDateFormat("MMM dd, hh:mm a", Locale.getDefault())
+                                    .format(new Date(timestamp))
+                    );
+
+                }
+            }
+            @Override
+            public void onFailure(Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    private void getWeeklyRescueCount() {
+        repo.fetchLogs(childId, "rescue", 0, Long.MAX_VALUE, new MedicineRepository.OnResult<List<MedicineEntry>>() {
+            @Override
+            public void onSuccess(List<MedicineEntry> result) {
+                int count = MedicineUtils.getRescueCountByDay(result, 7);
+                weeklyRescueCount.setText(String.valueOf(count));
+            }
+            @Override
+            public void onFailure(Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 }

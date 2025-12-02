@@ -1,5 +1,8 @@
 package com.example.demoapp.med;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -38,15 +41,6 @@ public class MedicineUtils {
         return (double) taken / (double) expected;
     }
 
-    //TODO
-    public static int updateControllerStreak(){
-        return 0;
-    }
-
-    public static int updateTechniqueStreak(){
-        return 0;
-    }
-
     /*
      * Count rescue usage in a given time range.
      * ------------ For rescue count in last hours ------------
@@ -54,8 +48,7 @@ public class MedicineUtils {
     public static int countRescueUsage(List<MedicineEntry> entries, long startEpoch, long endEpoch) {
         int count = 0;
         for (MedicineEntry e : entries) {
-            if ("rescue".equals(e.getMedType())
-                    && e.getTimestampValue() >= startEpoch
+            if (e.getTimestampValue() >= startEpoch
                     && e.getTimestampValue() <= endEpoch) {
                 count++;
             }
@@ -70,11 +63,9 @@ public class MedicineUtils {
     public static long getLastRescueTime(List<MedicineEntry> entries) {
         long latest = -1;
         for (MedicineEntry e : entries) {
-            if ("rescue".equals(e.getMedType())) {
                 if (e.getTimestampValue() > latest) {
                     latest = e.getTimestampValue();
                 }
-            }
         }
         return latest;
     }
@@ -83,7 +74,7 @@ public class MedicineUtils {
      * Returns rescue count starting from now going back given days;
      * ----------- For 7-day/30-day trend on home page ---------------
      */
-    public static int getWeeklyRescueCount(List<MedicineEntry> entries, int days) {
+    public static int getRescueCountByDay(List<MedicineEntry> entries, int days) {
         long now = System.currentTimeMillis();
         long daysAgo = now - (days * 24L * 60L * 60L * 1000L);
         return countRescueUsage(entries, daysAgo, now);
@@ -102,5 +93,17 @@ public class MedicineUtils {
         long days = diff / (24L * 60L * 60L * 1000L);
 
         return Math.max(1, days + 1); // inclusive range
+    }
+
+    public static boolean isSameDay(long t1, long t2) {
+        LocalDate d1 = Instant.ofEpochMilli(t1).atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate d2 = Instant.ofEpochMilli(t2).atZone(ZoneId.systemDefault()).toLocalDate();
+        return d1.equals(d2);
+    }
+
+    public static boolean isYesterday(long t1, long t2) {
+        LocalDate d1 = Instant.ofEpochMilli(t1).atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate d2 = Instant.ofEpochMilli(t2).atZone(ZoneId.systemDefault()).toLocalDate();
+        return d1.plusDays(1).equals(d2);
     }
 }
