@@ -33,7 +33,7 @@ public class FilterEntriesScreen extends AppCompatActivity {
     private String providerUid;
     private TextInputEditText startDateEditText, endDateEditText;
     private ChipGroup chipGroupSymptoms, chipGroupTriggers;
-    private Button btnSymptomsToggle, btnTriggersToggle, btnApplyFilter;
+    private Button btnSymptomsToggle, btnTriggersToggle, btnApplyFilter, btnBack;
     private ArrayList<Entry> filteredEntry;
     private String childUid;
 
@@ -41,7 +41,7 @@ public class FilterEntriesScreen extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_filter_entries_screen); // change layout file name if needed
+        setContentView(R.layout.fragment_filter_entries_screen);
 
         initViews();
         // TODO: replace with actual childUid logic
@@ -53,8 +53,8 @@ public class FilterEntriesScreen extends AppCompatActivity {
         setupChipGroupControls();
         setupListView();
         setupApplyButton();
+        setupBackButton();
 
-        // If you need providerUid passed from previous screen
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             providerUid = extras.getString("uid");
@@ -74,6 +74,7 @@ public class FilterEntriesScreen extends AppCompatActivity {
         btnSymptomsToggle = findViewById(R.id.filter_by_symptoms_button);
         btnTriggersToggle = findViewById(R.id.filter_by_trigger_button);
         btnApplyFilter = findViewById(R.id.btnApplyFilter);
+        btnBack = findViewById(R.id.btnBackHome);
 
         // Hide chip groups on start
         chipGroupSymptoms.setVisibility(View.GONE);
@@ -148,8 +149,13 @@ public class FilterEntriesScreen extends AppCompatActivity {
 
         if (validateDateRange(startDate, endDate)) {
             Bundle bundle = new Bundle();
-            bundle.putSerializable("startDate", startDate);
-            bundle.putSerializable("endDate", endDate);
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            String startDateStr = startDate.format(formatter);
+            String endDateStr = endDate.format(formatter);
+
+            bundle.putString("startDate", startDateStr);
+            bundle.putString("endDate", endDateStr);
             bundle.putStringArrayList("symptoms", selectedSymptoms);
             bundle.putStringArrayList("triggers", selectedTriggers);
             bundle.putString("childId", childUid);
@@ -162,6 +168,12 @@ public class FilterEntriesScreen extends AppCompatActivity {
                     .replace(R.id.filtered_entry_list, dailyEntryScreen)
                     .commit();
         }
+    }
+
+    private void setupBackButton() {
+        btnBack.setOnClickListener(v -> {
+            finish();
+        });
     }
 
     private void getCheckedChips(ChipGroup group, ArrayList<String> outputList) {
@@ -188,12 +200,26 @@ public class FilterEntriesScreen extends AppCompatActivity {
         }
         if (startDate.isAfter(endDate)) {
             Toast.makeText(this, "End date must be after start date", Toast.LENGTH_SHORT).show();
-            startDateEditText.setText("");
-            endDateEditText.setText("");
-            startDateEditText.setTag(null);
-            endDateEditText.setTag(null);
+            resetDateSelection();
+            return false;
+        }
+
+        long monthsBetween = java.time.temporal.ChronoUnit.MONTHS.between(startDate, endDate);
+        if (monthsBetween < 3 || monthsBetween > 6) {
+            Toast.makeText(this,
+                    "Date range must be between 3 and 6 months",
+                    Toast.LENGTH_SHORT
+            ).show();
+            resetDateSelection();
             return false;
         }
         return true;
+    }
+
+    private void resetDateSelection () {
+        startDateEditText.setText("");
+        endDateEditText.setText("");
+        startDateEditText.setTag(null);
+        endDateEditText.setTag(null);
     }
 }
