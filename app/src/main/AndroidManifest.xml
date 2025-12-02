@@ -17,9 +17,7 @@
         <activity
             android:name=".ProviderProfileActivity"
             android:exported="false" />
-        <activity
-            android:name=".ProviderProfileActivity"
-            android:exported="false" />
+
 
         <activity
             android:name=".ParentProfileActivity"
