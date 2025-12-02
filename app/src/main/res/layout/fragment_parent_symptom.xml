@@ -3,11 +3,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
+    <FrameLayout
+        android:id="@+id/fragment_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Parent Symptom Page"
-        android:gravity="center"
-        android:textSize="22sp" />
+        android:layout_height="match_parent" />
 
 </FrameLayout>

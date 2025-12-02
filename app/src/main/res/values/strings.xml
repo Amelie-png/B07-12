@@ -12,6 +12,7 @@
     <string name="first_name_field">First Name</string>
     <string name="last_name_field">Last Name</string>
     <string name="username_field">Username</string>
+    <string name="no_permission">You do not have permission to view this data.</string>
 
     <!-- Sign in page -->
     <string name="sign_in">Sign in</string>
@@ -28,6 +29,18 @@
         <item>Parent</item>
         <item>Provider</item>
     </string-array>
+
+    <!-- Medicine log page -->
+    <string name="med_log_header">Medicine Log</string>
+    <string name="med_inventory_header">Inventory</string>
+    <string name="med_log_card_doses"># doses</string>
+    <string name="med_expired_alert">Medicine expired</string>
+    <string name="med_low_alert">Medicine flagged as low stock</string>
+    <string name="med_replace_alert">Medicine need replacement</string>
+    <string name="controller_med">Controller</string>
+    <string name="rescue_med">Rescue</string>
+    <string name="med_inventory_amount">#/# Puffs</string>
+    <string name="date_placeholder">DD/MM/YYYY</string>
 
     <string name="child_popup_message">
         Smart Air helps you take care of your asthma.\n

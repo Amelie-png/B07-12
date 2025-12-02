@@ -22,14 +22,7 @@ public class SelectSymptomsActivity extends AppCompatActivity {
     private SymptomsAdapter adapter;
 
     private static final String[] SYMPTOMS_ARRAY = {
-            "Cough", "Wheezing", "Shortness of Breath",
-            "Chest Tightness", "Difficulty Breathing",
-            "Rapid Breathing", "Fatigue", "Lightheadedness",
-            "Throat Irritation", "Chest Discomfort",
-            "Nasal Congestion", "Runny Nose", "Sneezing",
-            "Itchy Eyes", "Sore Throat", "Headache",
-            "Trouble Sleeping", "Reduced Exercise Tolerance",
-            "Increased Mucus", "Other"
+            "Night waking", "Activity Limits", "Cough/Wheeze", "Other"
     };
 
     @Override

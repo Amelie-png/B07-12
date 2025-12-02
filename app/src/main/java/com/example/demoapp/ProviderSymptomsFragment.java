@@ -34,5 +34,15 @@ public class ProviderSymptomsFragment extends Fragment {
         }
 
         Log.d("ProviderSymptomsFragment", "providerUid = " + providerUid);
+        SummaryCalendarFragment summaryFragment = new SummaryCalendarFragment();
+
+        Bundle bundle = new Bundle();
+        bundle.putString("uid", providerUid);
+        summaryFragment.setArguments(bundle);
+
+        getChildFragmentManager()
+                .beginTransaction()
+                .replace(R.id.summary_calendar_container, summaryFragment)
+                .commit();
     }
 }

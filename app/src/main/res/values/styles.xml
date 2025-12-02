@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="hyperlink_text_style">
+        <item name="android:textColor">@color/hyperlink_blue</item>
+        <item name="android:textColorLink">@color/hyperlink_blue</item>
+        <item name="android:autoLink">web</item>
+    </style>
+
+    <style name="small_chip_style" parent="Widget.MaterialComponents.Chip.Entry">
+        <item name="android:textSize">12sp</item>
+        <item name="chipMinHeight">28dp</item>
+        <item name="chipCornerRadius">8dp</item>
+        <item name="chipStartPadding">6dp</item>
+        <item name="chipEndPadding">6dp</item>
+    </style>
+
+</resources>

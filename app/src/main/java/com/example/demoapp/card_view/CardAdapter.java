@@ -1,5 +1,8 @@
 package com.example.demoapp.card_view;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,8 +10,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.demoapp.MainActivity;
+import com.example.demoapp.MainNavActivity;
 import com.example.demoapp.R;
 import android.widget.Toast;
 
@@ -19,17 +25,21 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder
         TextView name;
         ImageView profilePic;
         ImageView profileBackground;
+        CardView cardRoot;
 
         public CardViewHolder(@NonNull View itemView) {
             super(itemView);
+            cardRoot = itemView.findViewById(R.id.card_root);
             name = itemView.findViewById(R.id.card_view_patient_name);
             profilePic = itemView.findViewById(R.id.card_view_patient_profile_pic);
             profileBackground = itemView.findViewById(R.id.cardview_patient_background);
         }
     }
     private ArrayList<CardItem> list;
+    private Activity activity;
 
-    public CardAdapter(ArrayList<CardItem> list) {
+    public CardAdapter(Activity activity, ArrayList<CardItem> list) {
+        this.activity = activity;
         this.list = list;
     }
 
@@ -49,13 +59,27 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder
         holder.profileBackground.setImageResource(item.profileBackground);
 
         // Handle click
-        holder.itemView.setOnClickListener(v -> {
+        holder.cardRoot.setOnClickListener(v -> {
             Toast.makeText(v.getContext(), item.name + " clicked", Toast.LENGTH_SHORT).show();
+
+            Intent intent = new Intent(activity, MainNavActivity.class);
+            intent.putExtra("uid", item.childId);
+            intent.putExtra("role", "provider");
+
+            activity.startActivity(intent);
         });
     }
 
     @Override
     public int getItemCount() {
-        return list.size();
+        if(list != null){
+            return list.size();
+        }else{
+            return 0;
+        }
+    }
+
+    public void setList(ArrayList<CardItem> list){
+        this.list = list;
     }
 }

@@ -29,7 +29,7 @@
     <!-- SYMPTOM -->
     <fragment
         android:id="@+id/parentSymptomFragment"
-        android:name="com.example.demoapp.ParentSymptomFragment"
+        android:name="com.example.demoapp.ParentSymptomsFragment"
         android:label="Symptom">
         <argument
             android:name="uid"

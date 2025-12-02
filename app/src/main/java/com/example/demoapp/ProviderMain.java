@@ -1,5 +1,18 @@
 package com.example.demoapp;
 
+import android.app.AlertDialog;
+import android.content.Intent;
+import android.os.Bundle;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -18,60 +31,118 @@ import com.example.demoapp.card_view.CardAdapter;
 import com.example.demoapp.card_view.CardItem;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class ProviderMain extends Fragment {
+public class ProviderMain extends AppCompatActivity implements AddPatientPopup.OnDataChangedListener {
+    private String providerUid;
     private Button addItemButton;
+    private ImageButton profileButton;
     private RecyclerView recyclerView;
     private ArrayList<CardItem> cardList;
     private CardAdapter adapter;
 
+    private FirebaseAuth auth;
     private FirebaseFirestore db;
+    private AlertDialog loadingDialog;
 
-
-    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.provider_main_screen);
 
-        View view = inflater.inflate(R.layout.provider_main_screen, container, false);
         db = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
 
-        // Find button
-        addItemButton = view.findViewById(R.id.add_item_button);
-
-        if (addItemButton == null) {
-            Toast.makeText(getContext(), "Button is NULL!", Toast.LENGTH_LONG).show();
-        } else {
-            Toast.makeText(getContext(), "Button found!", Toast.LENGTH_SHORT).show();
-            addItemButton.setOnClickListener(v -> onAddPatientClicked());
+        // providerUid passed from login or previous Activity
+        providerUid = getIntent().getStringExtra("uid");
+        //TODO: replace with args
+        if (providerUid == null) {
+            providerUid = "65eaII6T0dTv20cnH6ZNPGkkHTQ2"; // remove later
         }
 
-        // Find RecyclerView from the inflated view
-        recyclerView = view.findViewById(R.id.patient_list);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        // find buttons
+        addItemButton = findViewById(R.id.add_item_button);
+        profileButton = findViewById(R.id.provider_profile_button);
+        recyclerView = findViewById(R.id.patient_list);
 
-        // Sample data for testing
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        // Card list setup
         cardList = new ArrayList<>();
-        cardList.add(new CardItem("A", R.drawable.profile_default_img, R.color.white, "", "", new ArrayList<String>()));
-        cardList.add(new CardItem("B", R.drawable.profile_default_img, R.color.white,"", "", new ArrayList<String>()));
-        cardList.add(new CardItem("C", R.drawable.profile_default_img, R.color.white, "", "", new ArrayList<String>()));
-        cardList.add(new CardItem("D", R.drawable.profile_default_img, R.color.white, "", "", new ArrayList<String>()));
-
-        // Set adapter
-        adapter = new CardAdapter(cardList);
+        adapter = new CardAdapter(this, cardList);
         recyclerView.setAdapter(adapter);
 
-        return view;
+        addItemButton.setOnClickListener(v -> onAddPatientClicked());
+        profileButton.setOnClickListener(v -> onProfileButtonClicked());
+
+        // Load data
+        loadChildrenList();
     }
+
     private void onAddPatientClicked() {
-        Toast.makeText(getContext(), "Button clicked!", Toast.LENGTH_SHORT).show();
-        AddPatientPopup popup = new AddPatientPopup();
-        popup.show(getParentFragmentManager(), "addPatientPopup");
+        AddPatientPopup popup = new AddPatientPopup(providerUid);
+        popup.setOnDataChangedListener(this);
+        popup.show(getSupportFragmentManager(), "addPatientPopup");
     }
+
+    private void onProfileButtonClicked(){
+        Intent intent = new Intent(ProviderMain.this, ProviderProfileActivity.class);
+        startActivity(intent);
+    }
+
+    private void loadChildrenList(){
+        showLoadingDialog();
+        ArrayList<CardItem> childrenList = new ArrayList<CardItem>();
+        db.collection("children")
+                .whereArrayContains("providerIds", providerUid)
+                .get()
+                .addOnSuccessListener(childrenSnapshot -> {
+                    List<DocumentSnapshot> childrenDocs = childrenSnapshot.getDocuments();
+                    for (DocumentSnapshot individualChildDoc : childrenDocs) {
+                        String childName = individualChildDoc.getString("username");
+                        String childId = individualChildDoc.getString("uid");
+                        String parentId = individualChildDoc.getString("parentId");
+                        childrenList.add(new CardItem(childName, R.drawable.profile_default_img, R.color.white, childId, parentId, new ArrayList<String>()));
+                    }
+                    cardList = childrenList;
+                    adapter.setList(childrenList);
+                    adapter.notifyDataSetChanged();
+                    hideLoadingDialog();
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("FirestoreCheck", "Error fetching children collection", e);
+                    hideLoadingDialog();
+                });
+    }
+
+    private void showLoadingDialog() {
+        if (loadingDialog == null) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setCancelable(false);
+
+            View view = getLayoutInflater().inflate(R.layout.dialog_loading, null);
+            builder.setView(view);
+
+            loadingDialog = builder.create();
+        }
+        loadingDialog.show();
+    }
+
+    private void hideLoadingDialog() {
+        if (loadingDialog != null && loadingDialog.isShowing()) {
+            loadingDialog.dismiss();
+        }
+    }
+
+    @Override
+    public void onDataChanged() {
+        loadChildrenList();
+    }
+
     // ------------------------------------------------------------
     //  onboarding popup
     // ------------------------------------------------------------
@@ -92,10 +163,11 @@ public class ProviderMain extends Fragment {
             if (hasSeen == null || !hasSeen) {
 
                 // ⭐ 显示 Provider Onboarding
-                if (isAdded()) {
+                //TODO: Double check with ChenXin
+                //if (isAdded()) {
                     new ProviderOnboardingDialog()
-                            .show(getChildFragmentManager(), "providerOnboarding");
-                }
+                            .show(getSupportFragmentManager(), "providerOnboarding");
+                //}
 
                 // ⭐ 更新 Firestore，防止下次再弹
                 doc.update("hasSeenOnboardingProvider", true);

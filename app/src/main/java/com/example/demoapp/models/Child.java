@@ -1,5 +1,9 @@
 package com.example.demoapp.models;
 
+import com.example.demoapp.Badge;
+import com.example.demoapp.med.ControllerMed;
+import com.example.demoapp.med.RescueMed;
+
 import java.security.SecureRandom;
 import java.util.*;
 
@@ -16,6 +20,9 @@ public class Child {
     private List<String> providerIds = new ArrayList<>();
     private Map<String, ShareCode> shareCodes = new HashMap<>();
     private Map<String, String> providerBindings = new HashMap<>(); // providerId → code
+    private Map<String, Object> controllerMed = new HashMap<>();
+    private Map<String, Object> rescueMed = new HashMap<>();
+    private Map<String, Object> badges = new HashMap<>();
     private String passwordHash;
     private boolean hasSeenOnboardingChild;
     private double pb;
@@ -25,6 +32,9 @@ public class Child {
         this.providerIds = new ArrayList<>();
         this.shareCodes = new HashMap<>();
         this.providerBindings = new HashMap<>();
+        this.controllerMed = new HashMap<>();
+        this.rescueMed = new HashMap<>();
+        this.badges = new HashMap<>();
         this.hasSeenOnboardingChild = false;
         this.pb = 0.0;
 
@@ -75,6 +85,12 @@ public class Child {
     public Map<String, ShareCode> getShareCodes() { return shareCodes; }
     public void setShareCodes(Map<String, ShareCode> shareCodes) { this.shareCodes = shareCodes; }
     public Map<String, String> getProviderBindings() { return providerBindings; }
+    public Map<String, Object> getControllerMed() { return controllerMed; }
+    public Map<String, Object> getRescueMed() { return rescueMed; }
+    public Map<String, Object> getBadges() { return badges; }
+    public void setControllerMed(Map<String, Object> controllerMed) { this.controllerMed = controllerMed; }
+    public void setRescueMed(Map<String, Object> rescueMed) { this.rescueMed = rescueMed; }
+    public void setBadges(Map<String, Object> badges) { this.badges = badges; }
     public void setProviderBindings(Map<String, String> providerBindings) { this.providerBindings = providerBindings; }
     public String getPasswordHash() { return passwordHash; }
     public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
@@ -83,7 +99,7 @@ public class Child {
     public double getPb() { return pb; }
     public void setPb(double pb) { this.pb = pb; }
 
-    private Map<String, Object> childToMap(Child child) {
+    public Map<String, Object> childToMap(Child child) {
         Map<String, Object> map = new HashMap<>();
         map.put("uid", child.getUid());
         map.put("username", child.getUsername());
@@ -98,6 +114,9 @@ public class Child {
         map.put("firstName", child.getFirstName());
         map.put("lastName", child.getLastName());
         map.put("pb", child.getPb());
+        map.put("controller", child.getControllerMed());
+        map.put("rescue", child.getRescueMed());
+        map.put("badges", child.getBadges());
 
         Map<String, Map<String, Object>> codesMap = new HashMap<>();
         for (Map.Entry<String, Child.ShareCode> entry : child.getShareCodes().entrySet()) {

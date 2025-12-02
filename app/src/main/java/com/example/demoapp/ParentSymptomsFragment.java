@@ -11,11 +11,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class ParentSymptomFragment extends Fragment {
+public class ParentSymptomsFragment extends Fragment {
 
     private String parentUid;
 
-    public ParentSymptomFragment() {}
+    public ParentSymptomsFragment() {
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -35,5 +36,15 @@ public class ParentSymptomFragment extends Fragment {
         }
 
         Log.d("ParentSymptomFragment", "parentUid = " + parentUid);
+        ParentSymptomContentFragment parentAddSymptomScreen = new ParentSymptomContentFragment();
+
+        Bundle bundle = new Bundle();
+        bundle.putString("uid", parentUid);
+        parentAddSymptomScreen.setArguments(bundle);
+
+        getChildFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, parentAddSymptomScreen)
+                .commit();
     }
 }
