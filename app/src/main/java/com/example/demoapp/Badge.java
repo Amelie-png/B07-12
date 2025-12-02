@@ -36,6 +36,7 @@ public class Badge {
         this.controllerStreak = controllerStreak;
         this.techniqueStreak = techniqueStreak;
         this.lastCheckedDate = lastCheckedDate;
+        this.lastTechniqueDate = lastTechniqueDate;
         this.firstPerfectWeek = firstPerfectWeek;
         this.firstTenGoodTechnique = firstTenGoodTechnique;
         this.monthRank = monthRank;

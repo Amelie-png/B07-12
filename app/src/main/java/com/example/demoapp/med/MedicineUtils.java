@@ -1,5 +1,8 @@
 package com.example.demoapp.med;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -105,25 +108,14 @@ public class MedicineUtils {
     }
 
     public static boolean isSameDay(long t1, long t2) {
-        Calendar c1 = Calendar.getInstance();
-        Calendar c2 = Calendar.getInstance();
-        c1.setTimeInMillis(t1);
-        c2.setTimeInMillis(t2);
-
-        return c1.get(Calendar.YEAR) == c2.get(Calendar.YEAR)
-                && c1.get(Calendar.DAY_OF_YEAR) == c2.get(Calendar.DAY_OF_YEAR);
+        LocalDate d1 = Instant.ofEpochMilli(t1).atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate d2 = Instant.ofEpochMilli(t2).atZone(ZoneId.systemDefault()).toLocalDate();
+        return d1.equals(d2);
     }
 
-    public static boolean isYesterday(long previousDay, long today) {
-        Calendar cPrev = Calendar.getInstance();
-        Calendar cToday = Calendar.getInstance();
-        cPrev.setTimeInMillis(previousDay);
-        cToday.setTimeInMillis(today);
-
-        cToday.add(Calendar.DAY_OF_YEAR, -1);
-
-        return cPrev.get(Calendar.YEAR) == cToday.get(Calendar.YEAR)
-                && cPrev.get(Calendar.DAY_OF_YEAR) == cToday.get(Calendar.DAY_OF_YEAR);
+    public static boolean isYesterday(long t1, long t2) {
+        LocalDate d1 = Instant.ofEpochMilli(t1).atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate d2 = Instant.ofEpochMilli(t2).atZone(ZoneId.systemDefault()).toLocalDate();
+        return d1.plusDays(1).equals(d2);
     }
-
 }
