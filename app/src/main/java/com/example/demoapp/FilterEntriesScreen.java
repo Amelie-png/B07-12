@@ -1,44 +1,47 @@
 package com.example.demoapp;
 
-import com.example.demoapp.entry_list.*;
-
-import android.app.DatePickerDialog;
-import android.content.Intent;
-import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.DatePicker;
-import android.widget.FrameLayout;
-import android.widget.Toast;
-
+import com.example.demoapp.entry_list.Entry;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputEditText;
 
+import android.app.DatePickerDialog;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.pdf.PdfDocument;
+import android.os.Bundle;
+import android.widget.Button;
+import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.view.View;
+import android.widget.FrameLayout;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 public class FilterEntriesScreen extends AppCompatActivity {
+
     private TextInputEditText startDateEditText, endDateEditText;
     private ChipGroup chipGroupSymptoms, chipGroupTriggers;
     private Button btnSymptomsToggle, btnTriggersToggle, btnApplyFilter, btnBack;
-    private ArrayList<Entry> filteredEntry;
+    private ArrayList<Entry> lastFilteredEntries = new ArrayList<>();
     private String childUid;
+
+    // ⭐补回丢失的变量
+    private ArrayList<Entry> filteredEntry = new ArrayList<>();
 
     @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_filter_entries_screen);
 
@@ -48,13 +51,13 @@ public class FilterEntriesScreen extends AppCompatActivity {
         setupListView();
         setupApplyButton();
         setupBackButton();
+        setupExportButtons();
 
         Bundle extras = getIntent().getExtras();
-        if(extras != null){
-            childUid = getIntent().getExtras().getString("childUid");
+        if (extras != null) {
+            childUid = extras.getString("childUid");
         }
     }
-
 
     private void initViews() {
         startDateEditText = findViewById(R.id.startDateEditText);
@@ -68,7 +71,6 @@ public class FilterEntriesScreen extends AppCompatActivity {
         btnApplyFilter = findViewById(R.id.btnApplyFilter);
         btnBack = findViewById(R.id.btnBackHome);
 
-        // Hide chip groups on start
         chipGroupSymptoms.setVisibility(View.GONE);
         chipGroupTriggers.setVisibility(View.GONE);
     }
@@ -82,7 +84,7 @@ public class FilterEntriesScreen extends AppCompatActivity {
         Calendar calendar = Calendar.getInstance();
         DatePickerDialog dialog = new DatePickerDialog(
                 this,
-                (DatePicker view, int year, int month, int dayOfMonth) -> {
+                (view, year, month, dayOfMonth) -> {
                     targetEditText.setText((month + 1) + "/" + dayOfMonth + "/" + year);
                     targetEditText.setTag(LocalDate.of(year, month + 1, dayOfMonth));
                 },
@@ -139,44 +141,46 @@ public class FilterEntriesScreen extends AppCompatActivity {
         LocalDate startDate = (LocalDate) startDateEditText.getTag();
         LocalDate endDate = (LocalDate) endDateEditText.getTag();
 
-        if (validateDateRange(startDate, endDate)) {
-            Bundle bundle = new Bundle();
+        if (!validateDateRange(startDate, endDate)) return;
 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            String startDateStr = startDate.format(formatter);
-            String endDateStr = endDate.format(formatter);
+        Bundle bundle = new Bundle();
 
-            bundle.putString("startDate", startDateStr);
-            bundle.putString("endDate", endDateStr);
-            bundle.putStringArrayList("symptoms", selectedSymptoms);
-            bundle.putStringArrayList("triggers", selectedTriggers);
-            bundle.putString("childId", childUid);
-            bundle.putString("role", getIntent().getExtras().getString("role"));
-            bundle.putBoolean("symptomsAllowed", getIntent().getExtras().getBoolean("symptomsAllowed"));
-            bundle.putBoolean("triggersAllowed", getIntent().getExtras().getBoolean("triggersAllowed"));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String startDateStr = startDate.format(formatter);
+        String endDateStr = endDate.format(formatter);
 
-            DailyEntryDisplayScreen dailyEntryScreen = new DailyEntryDisplayScreen();
-            dailyEntryScreen.setArguments(bundle);
+        bundle.putString("startDate", startDateStr);
+        bundle.putString("endDate", endDateStr);
+        bundle.putStringArrayList("symptoms", selectedSymptoms);
+        bundle.putStringArrayList("triggers", selectedTriggers);
+        bundle.putString("childId", childUid);
+        bundle.putString("role", getIntent().getExtras().getString("role"));
+        bundle.putBoolean("symptomsAllowed", getIntent().getExtras().getBoolean("symptomsAllowed"));
+        bundle.putBoolean("triggersAllowed", getIntent().getExtras().getBoolean("triggersAllowed"));
 
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.filtered_entry_list, dailyEntryScreen)
-                    .commit();
-        }
+        DailyEntryDisplayScreen dailyEntryScreen = new DailyEntryDisplayScreen();
+        dailyEntryScreen.setArguments(bundle);
+
+        // ⭐ 正确放在 IF 内部，确保一定被执行！
+        dailyEntryScreen.setOnEntriesAvailableListener(entries -> {
+            lastFilteredEntries = entries;  // 更新 PDF / CSV 数据
+        });
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.filtered_entry_list, dailyEntryScreen)
+                .commit();
     }
 
+
     private void setupBackButton() {
-        btnBack.setOnClickListener(v -> {
-            finish();
-        });
+        btnBack.setOnClickListener(v -> finish());
     }
 
     private void getCheckedChips(ChipGroup group, ArrayList<String> outputList) {
         for (int i = 0; i < group.getChildCount(); i++) {
             Chip chip = (Chip) group.getChildAt(i);
-            if (chip.isChecked()) {
-                outputList.add(chip.getText().toString());
-            }
+            if (chip.isChecked()) outputList.add(chip.getText().toString());
         }
     }
 
@@ -201,20 +205,165 @@ public class FilterEntriesScreen extends AppCompatActivity {
 
         long monthsBetween = java.time.temporal.ChronoUnit.MONTHS.between(startDate, endDate);
         if (monthsBetween < 3 || monthsBetween > 6) {
-            Toast.makeText(this,
-                    "Date range must be between 3 and 6 months",
-                    Toast.LENGTH_SHORT
-            ).show();
+            Toast.makeText(this, "Date range must be between 3 and 6 months", Toast.LENGTH_SHORT).show();
             resetDateSelection();
             return false;
         }
         return true;
     }
 
-    private void resetDateSelection () {
+    private void resetDateSelection() {
         startDateEditText.setText("");
         endDateEditText.setText("");
         startDateEditText.setTag(null);
         endDateEditText.setTag(null);
     }
+
+    // ======================= PDF / CSV 导出 =======================
+
+    private void setupExportButtons() {
+        Button btnExportPdf = findViewById(R.id.btnExportPdf);
+        Button btnExportCsv = findViewById(R.id.btnExportCsv);
+
+        btnExportPdf.setOnClickListener(v -> {
+            if (lastFilteredEntries == null || lastFilteredEntries.isEmpty()) {
+                Toast.makeText(this, "No entries to export.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            generatePdf(lastFilteredEntries);
+        });
+
+        btnExportCsv.setOnClickListener(v -> {
+            if (lastFilteredEntries == null || lastFilteredEntries.isEmpty()) {
+                Toast.makeText(this, "No entries to export.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            generateCsv(lastFilteredEntries);
+        });
+    }
+
+    private void generateCsv(List<Entry> entries) {
+        try {
+            File path = getExternalFilesDir(null);
+            File file = new File(path, "filtered_entries.csv");
+
+            FileWriter writer = new FileWriter(file);
+
+            writer.append("\"Entry Number\",\"Date\",\"Person\",\"Symptoms\",\"Triggers\"\n");
+
+            for (Entry entry : entries) {
+                writer.append("\"").append(entry.getEntryNumber()).append("\",");
+                writer.append("\"").append(entry.getTimeRecorded()).append("\",");
+                writer.append("\"").append(entry.getPerson()).append("\",");
+
+                String symptoms = entry.getSymptoms().replace("\"", "\"\"").replace(",", " | ");
+                String triggers = entry.getTriggers().replace("\"", "\"\"").replace(",", " | ");
+
+                writer.append("\"").append(symptoms).append("\",");
+                writer.append("\"").append(triggers).append("\"\n");
+            }
+
+            writer.flush();
+            writer.close();
+
+            Toast.makeText(this, "CSV saved: " + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
+
+        } catch (Exception e) {
+            Toast.makeText(this, "Error generating CSV: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void generatePdf(List<Entry> entries) {
+        if (entries == null || entries.isEmpty()) {
+            Toast.makeText(this, "No entries to export.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        try {
+            File path = getExternalFilesDir(null);
+            File file = new File(path, "filtered_entries.pdf");
+
+            PdfDocument pdf = new PdfDocument();
+            Paint titlePaint = new Paint();
+            Paint headerPaint = new Paint();
+            Paint contentPaint = new Paint();
+            Paint bgPaint = new Paint();
+
+            titlePaint.setTextSize(22);
+            titlePaint.setFakeBoldText(true);
+
+            headerPaint.setTextSize(16);
+            headerPaint.setFakeBoldText(true);
+
+            contentPaint.setTextSize(14);
+
+            int pageWidth = 595;
+            int pageHeight = 842;
+            int margin = 40;
+            int y;
+            int lineSpacing = 20;
+            boolean alternate = false;
+
+            int pageNumber = 1;
+            PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(pageWidth, pageHeight, pageNumber).create();
+            PdfDocument.Page page = pdf.startPage(pageInfo);
+            Canvas canvas = page.getCanvas();
+            y = 60;
+
+            drawTitleAndHeader(canvas, margin, y, titlePaint, headerPaint);
+            y += 60;
+
+            for (Entry entry : entries) {
+                if (y > pageHeight - margin - 100) {
+                    pdf.finishPage(page);
+                    pageNumber++;
+                    pageInfo = new PdfDocument.PageInfo.Builder(pageWidth, pageHeight, pageNumber).create();
+                    page = pdf.startPage(pageInfo);
+                    canvas = page.getCanvas();
+                    y = 60;
+                    drawTitleAndHeader(canvas, margin, y, titlePaint, headerPaint);
+                    y += 60;
+                }
+
+                if (alternate) {
+                    bgPaint.setColor(0xFFEFEFEF);
+                    canvas.drawRect(margin - 5, y - 15, pageWidth - margin, y + 100, bgPaint);
+                }
+                alternate = !alternate;
+
+                canvas.drawText("Entry #: " + safe(entry.getEntryNumber()), margin, y, contentPaint);
+                y += lineSpacing;
+                canvas.drawText("Date: " + safe(entry.getTimeRecorded()), margin, y, contentPaint);
+                y += lineSpacing;
+                canvas.drawText("Person: " + safe(entry.getPerson()), margin, y, contentPaint);
+                y += lineSpacing;
+                canvas.drawText("Symptoms: " + safe(entry.getSymptoms()).replace(",", " | "), margin, y, contentPaint);
+                y += lineSpacing;
+                canvas.drawText("Triggers: " + safe(entry.getTriggers()).replace(",", " | "), margin, y, contentPaint);
+                y += lineSpacing + 10;
+            }
+
+            pdf.finishPage(page);
+
+            FileOutputStream fos = new FileOutputStream(file);
+            pdf.writeTo(fos);
+            pdf.close();
+
+            Toast.makeText(this, "PDF saved: " + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
+
+        } catch (Exception e) {
+            Toast.makeText(this, "Error generating PDF: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void drawTitleAndHeader(Canvas canvas, int margin, int y, Paint titlePaint, Paint headerPaint) {
+        canvas.drawText("Filtered Daily Entries Report", margin, y, titlePaint);
+        y += 40;
+        canvas.drawText("Entry Details", margin, y, headerPaint);
+    }
+
+    private String safe(String str) {
+        return str == null ? "" : str;
+    }
+
 }

@@ -17,35 +17,44 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import java.time.LocalDate;
 import java.util.Calendar;
-import java.util.Objects;
+import java.util.function.Consumer;
 
 public class ManageRescueActivity extends AppCompatActivity {
-    //repo
     private MedicineRepository repo;
-    //View model
     private MedicineViewModel vm;
-    //UI
-    private Button btnBack;
+
+    private Button btnBack, btnSave, btnCancel;
+    private Button btnPurchase, btnExpiry;
+    private EditText editRemainingDoses, editTotalDoses;
     private SwitchMaterial lowFlag;
-    private Button btnPurchase;
-    private Button btnExpiry;
-    private EditText editRemainingDoses;
-    private EditText editTotalDoses;
-    private Button btnSave;
-    private Button btnCancel;
-    private boolean isUpdating;
-    //ID
+
     private String childId;
 
+    private interface OnDateSelected {
+        void onSelected(LocalDate date);
+    }
+
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manage_rescue);
 
-        // Read intent extras
         childId = getIntent().getStringExtra("childId");
 
-        //Bind dynamic items
+        bindViews();
+        repo = new MedicineRepository();
+        vm = new ViewModelProvider(this).get(MedicineViewModel.class);
+
+        setupButtons();
+        setupObservers();
+        setupDatePickers();
+        setupEditTexts();
+        setupSwitch();
+
+        loadExistingData();
+    }
+
+    private void bindViews() {
         btnBack = findViewById(R.id.btn_r_back_to_inventory);
         btnSave = findViewById(R.id.btn_save_rescue);
         btnCancel = findViewById(R.id.btn_cancel_rescue);
@@ -53,162 +62,142 @@ public class ManageRescueActivity extends AppCompatActivity {
         btnPurchase = findViewById(R.id.btn_purchase_date);
         btnExpiry = findViewById(R.id.btn_expiry_date);
 
-        //Set up repo
-        repo = new MedicineRepository();
+        editRemainingDoses = findViewById(R.id.et_remaining_doses);
+        editTotalDoses = findViewById(R.id.et_total_doses);
 
-        //Set up view model
-        vm = new ViewModelProvider(this).get(MedicineViewModel.class);
+        lowFlag = findViewById(R.id.switch_low_flag);
+    }
 
-        //Set up buttons
+    private void setupButtons() {
         btnBack.setOnClickListener(v -> onCancel());
         btnCancel.setOnClickListener(v -> onCancel());
         btnSave.setOnClickListener(v -> {
             btnSave.setEnabled(false);
             onSave();
         });
+    }
 
-        //Set up date buttons
-        setupDate();
+    private void setupObservers() {
+        vm.getPurchaseDate().observe(this, date ->
+                btnPurchase.setText(date != null ? date.toString() : "Select date")
+        );
+        vm.getExpiryDate().observe(this, date ->
+                btnExpiry.setText(date != null ? date.toString() : "Select date")
+        );
+        vm.getLowStock().observe(this, checked -> {
+            if (checked != null) lowFlag.setChecked(checked);
+        });
+        vm.getRemainingDoses().observe(this, value -> {
+            if (value != null) {
+                String currentText = editRemainingDoses.getText().toString().trim();
+                String newText = String.valueOf(value);
+                if (!currentText.equals(newText)) {
+                    editRemainingDoses.setText(newText);
+                }
+            }
+        });
 
-        //Set up edit texts
-        setEditText();
-
-        //Set up switch
-        setSwitch();
+        vm.getTotalDoses().observe(this, value -> {
+            if (value != null) {
+                String currentText = editTotalDoses.getText().toString().trim();
+                String newText = String.valueOf(value);
+                if (!currentText.equals(newText)) {
+                    editTotalDoses.setText(newText);
+                }
+            }
+        });
     }
 
     //Date
-    private void setupDate(){
-        btnPurchase.setOnClickListener(v -> chooseDate(date -> vm.setPurchaseDate(date)));
-        btnExpiry.setOnClickListener(v -> chooseDate(date -> vm.setExpiryDate(date)));
-
-        vm.getPurchaseDate().observe(this, date -> {
-            if (date != null)
-                btnPurchase.setText(date.toString());
-        });
-
-        vm.getExpiryDate().observe(this, date -> {
-            if (date != null)
-                btnExpiry.setText(date.toString());
-        });
+    private void setupDatePickers() {
+        btnPurchase.setOnClickListener(v -> chooseDate(vm::setPurchaseDate));
+        btnExpiry.setOnClickListener(v -> chooseDate(vm::setExpiryDate));
     }
 
-    private void chooseDate(ManageControllerActivity.OnDateSelected callback){
+    private void chooseDate(ManageRescueActivity.OnDateSelected callback) {
         final Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-
         DatePickerDialog dialog = new DatePickerDialog(
                 this,
-                (view, y, m, d) -> {
-                    LocalDate date = LocalDate.of(y, m + 1, d);
-                    callback.onSelected(date);
-                },
-                year,
-                month,
-                day
+                (view, year, month, dayOfMonth) -> callback.onSelected(LocalDate.of(year, month + 1, dayOfMonth)),
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
         );
-
         dialog.show();
     }
 
+    private void loadExistingData() {
+        repo.loadControllerMed(childId, new MedicineRepository.OnResult<ControllerMed>() {
+            @Override
+            public void onSuccess(ControllerMed med) {
+                if (med != null) {
+                    // Convert stored Strings to LocalDate
+                    vm.setPurchaseDate(med.getPurchaseDate() != null ? LocalDate.parse(med.getPurchaseDate()) : null);
+                    vm.setExpiryDate(med.getExpiryDate() != null ? LocalDate.parse(med.getExpiryDate()) : null);
+
+                    vm.setRemainingDoses(med.getCurrentAmount());
+                    vm.setTotalDoses(med.getTotalAmount());
+                    vm.isLowStock(med.isLowStockFlag());
+                    vm.setFlagAuthor(med.getFlagAuthor());
+                } else {
+                    setDefaults();
+                }
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                setDefaults();
+            }
+        });
+    }
+
+
+    private void setDefaults() {
+        vm.setPurchaseDate(null);
+        vm.setExpiryDate(null);
+        vm.setRemainingDoses(0);
+        vm.setTotalDoses(0);
+        vm.isLowStock(false);
+        vm.setFlagAuthor("");
+    }
+
     //Edit text
-    private void setEditText(){
-        editRemainingDoses = findViewById(R.id.et_remaining_doses);
-        editTotalDoses = findViewById(R.id.et_total_doses);
-
-        editRemainingDoses.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                //if (isUpdating) return;
-                try {
-                    vm.setRemainingDoses(Integer.parseInt(s.toString().trim()));
-                } catch (Exception e) {
-                    // Invalid input → ignore or clear
-                    vm.setRemainingDoses(0);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {}
-        });
-
-        editTotalDoses.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                //if (isUpdating) return;
-                try {
-                    vm.setTotalDoses(Integer.parseInt(s.toString().trim()));
-                } catch (Exception e) {
-                    // Invalid input → ignore or clear
-                    vm.setTotalDoses(0);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {}
-        });
-
-//        vm.getRemainingDoses().observe(this, val -> {
-//            if (val == null) return;
-//
-//            //isUpdating = true;
-//            editRemainingDoses.setText(String.valueOf(val));
-//            //isUpdating = false;
-//        });
-//
-//        vm.getTotalDoses().observe(this, val -> {
-//            if (val == null) return;
-//
-//            //isUpdating = true;
-//            editTotalDoses.setText(String.valueOf(val));
-//            //isUpdating = false;
-//        });
+    private void setupEditTexts() {
+        editRemainingDoses.addTextChangedListener(new ManageRescueActivity.SimpleTextWatcher(value -> vm.setRemainingDoses(value)));
+        editTotalDoses.addTextChangedListener(new ManageRescueActivity.SimpleTextWatcher(value -> vm.setTotalDoses(value)));
     }
 
     //Switch
-    private void setSwitch(){
-        lowFlag = findViewById(R.id.switch_low_flag);
-
-        lowFlag.setOnCheckedChangeListener((btn, checked) ->{
-            vm.isLowStock(checked);
-        });
-
-        vm.getLowStock().observe(this, check -> {
-            if(check != null)
-                lowFlag.setChecked(check);
-        });
+    private void setupSwitch() {
+        lowFlag.setOnCheckedChangeListener((buttonView, isChecked) -> vm.isLowStock(isChecked));
     }
 
     //Save edits
-    private void onSave(){
+    private void onSave() {
         RescueMed rescue = new RescueMed();
         rescue.setChildId(childId);
-        rescue.setPurchaseDate(Objects.requireNonNull(vm.getPurchaseDate().getValue()).toEpochDay());
-        rescue.setExpiryDate(Objects.requireNonNull(vm.getExpiryDate().getValue()).toEpochDay());
+
+        // Save dates as String
+        rescue.setPurchaseDate(vm.getPurchaseDate().getValue() != null ? vm.getPurchaseDate().getValue().toString() : null);
+        rescue.setExpiryDate(vm.getExpiryDate().getValue() != null ? vm.getExpiryDate().getValue().toString() : null);
+
         rescue.setCurrentAmount(vm.getRemainingDoses().getValue() != null ? vm.getRemainingDoses().getValue() : 0);
         rescue.setTotalAmount(vm.getTotalDoses().getValue() != null ? vm.getTotalDoses().getValue() : 0);
         rescue.setLowStockFlag(vm.getLowStock().getValue() != null ? vm.getLowStock().getValue() : false);
-        rescue.setFlagAuthor(vm.getLowStock().getValue() == true ? "parent" : "");
+        rescue.setFlagAuthor(vm.getLowStock().getValue() != null && vm.getLowStock().getValue() ? "parent" : "");
 
         repo.saveRescueMed(childId, rescue, new MedicineRepository.OnResult<Void>() {
             @Override
-            public void onSuccess(Void result) {
+            public void onSuccess(Void ignored) {
                 Toast.makeText(ManageRescueActivity.this, "Saved!", Toast.LENGTH_SHORT).show();
                 finish();
             }
-            @Override public void onFailure(Exception e) {
-                // show error dialog
+
+            @Override
+            public void onFailure(Exception e) {
                 new AlertDialog.Builder(ManageRescueActivity.this)
                         .setTitle("Error")
-                        .setMessage("Could not save rescue settings: " + e.getMessage())
+                        .setMessage("Could not save: " + e.getMessage())
                         .setPositiveButton("OK", null)
                         .show();
             }
@@ -219,10 +208,27 @@ public class ManageRescueActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle("Cancel edit?")
                 .setMessage("Are you sure you want to discard the changes? Progress will be lost.")
-                .setPositiveButton("Yes", (d, w) -> {
-                    finish();
-                })
+                .setPositiveButton("Yes", (d, w) -> finish())
                 .setNegativeButton("No", null)
                 .show();
+    }
+
+    private static class SimpleTextWatcher implements TextWatcher {
+        private final Consumer<Integer> callback;
+
+        public SimpleTextWatcher(Consumer<Integer> callback) {
+            this.callback = callback;
+        }
+
+        @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+        @Override public void afterTextChanged(Editable s) {}
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            try {
+                callback.accept(Integer.parseInt(s.toString().trim()));
+            } catch (Exception e) {
+                callback.accept(0);
+            }
+        }
     }
 }

@@ -20,7 +20,7 @@ import androidx.fragment.app.Fragment;
 
 import java.util.ArrayList;
 
-public class DailyEntryDisplayScreen extends Fragment implements EntryLogRepository.OnEntriesRetrievedListener{
+public class DailyEntryDisplayScreen extends Fragment implements EntryLogRepository.OnEntriesRetrievedListener {
 
     private ListView listView;
     private TextView whenEmpty;
@@ -37,7 +37,21 @@ public class DailyEntryDisplayScreen extends Fragment implements EntryLogReposit
     boolean symptomsAllowed;
     boolean triggersAllowed;
 
+    // ====== 新增：缺失的变量 ======
+    private ArrayList<Entry> convertedEntries = new ArrayList<>();
+    // ============================
 
+    // ================== 新增接口 ==================
+    public interface OnEntriesAvailableListener {
+        void onEntriesAvailable(ArrayList<Entry> entries);
+    }
+
+    private OnEntriesAvailableListener listener;
+
+    public void setOnEntriesAvailableListener(OnEntriesAvailableListener listener) {
+        this.listener = listener;
+    }
+    // ============================================
 
     @Nullable
     @Override
@@ -51,12 +65,13 @@ public class DailyEntryDisplayScreen extends Fragment implements EntryLogReposit
 
         db = FirebaseFirestore.getInstance();
         entryRepo = new EntryLogRepository();
-        entryList = new ArrayList<Entry>();
+        entryList = new ArrayList<>();
 
         // Get Filter Arguments
         Bundle args = getArguments();
         startDate = args.getString("startDate");
         endDate = args.getString("endDate");
+
         childUid = args.getString("childId");
         role = args.getString("role");
         selectedSymptoms = args.getStringArrayList("symptoms");
@@ -65,6 +80,8 @@ public class DailyEntryDisplayScreen extends Fragment implements EntryLogReposit
         triggersAllowed = getArguments().getBoolean("triggersAllowed");
 
         adapter = new EntryAdapter(getContext(), entryList, symptomsAllowed, triggersAllowed);
+        listView.setAdapter(adapter);
+
         if (startDate != null && endDate != null && childUid != null) {
             loadEntryList();
         }
@@ -84,10 +101,11 @@ public class DailyEntryDisplayScreen extends Fragment implements EntryLogReposit
 
     @Override
     public void onEntriesRetrieved(ArrayList<EntryLog> entries) {
+
         entryList.clear();
+
         int numEntry = entries.size();
         if (numEntry == 0) {
-            // Show empty message
             whenEmpty.setVisibility(View.VISIBLE);
             listView.setVisibility(View.GONE);
             return;
@@ -95,16 +113,19 @@ public class DailyEntryDisplayScreen extends Fragment implements EntryLogReposit
             whenEmpty.setVisibility(View.GONE);
             listView.setVisibility(View.VISIBLE);
         }
+
         for (int i=0; i<numEntry; i++) {
             EntryLog e=entries.get(i);
             String symptomStr = null;
             String triggerStr = null;
+
             if(symptomsAllowed){
                 symptomStr = formatSymptomsTriggers(e.getSymptoms());
             }
             if(triggersAllowed){
                 triggerStr = formatSymptomsTriggers(e.getTriggers());
             }
+
             if(symptomStr != null && triggerStr != null){
                 String[] arr = getAppropriateStr(symptomStr, triggerStr);
                 symptomStr = arr[0];
@@ -112,13 +133,19 @@ public class DailyEntryDisplayScreen extends Fragment implements EntryLogReposit
                 entryList.add(new Entry(Integer.toString(i+1), e.getDate(), e.getRecorder(), symptomStr, triggerStr));
             }else if(symptomStr == null && triggerStr == null) {
                 entryList.add(new Entry(Integer.toString(i+1), e.getDate(), e.getRecorder()));
-            }else if (symptomStr == null) {
+            } else if (symptomStr == null) {
                 entryList.add(new Entry(Integer.toString(i+1), e.getDate(), e.getRecorder(), triggerStr, false));
             } else if (triggerStr == null){
                 entryList.add(new Entry(Integer.toString(i+1), e.getDate(), e.getRecorder(), symptomStr, true));
             }
         }
+
         adapter.notifyDataSetChanged();
+
+        // 🟢 正确回传 entryList，而不是 convertedEntries！
+        if (listener != null) {
+            listener.onEntriesAvailable(entryList);
+        }
     }
 
     private String[] getAppropriateStr(String symptomStr, String triggerStr){
@@ -128,16 +155,14 @@ public class DailyEntryDisplayScreen extends Fragment implements EntryLogReposit
             return new String[] {symptomStr, triggerStr};
         }
     }
+
     private String formatSymptomsTriggers(ArrayList<CategoryName> list) {
-        if(list==null || list.isEmpty()){
-            return "";
+        if (list == null || list.isEmpty()) return "";
+        StringBuilder str = new StringBuilder();
+        for (CategoryName s : list) {
+            str.append(s.getName()).append(", ");
         }
-        String str = "";
-        for(CategoryName s : list){
-            str += s.getName() + ", ";
-        }
-        str = str.substring(0, str.length()-2);
-        return str;
+        return str.substring(0, str.length() - 2);
     }
 
     @Override

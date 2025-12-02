@@ -206,6 +206,20 @@
             android:text="Apply Filter"
             android:layout_marginTop="24dp"/>
 
+        <Button
+            android:id="@+id/btnExportPdf"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Export as PDF"
+            android:layout_marginTop="16dp"/>
+
+        <Button
+            android:id="@+id/btnExportCsv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Export as CSV"
+            android:layout_marginTop="8dp"/>
+
         <!--FILTERED ENTRIES-->
         <FrameLayout
             android:id="@+id/filtered_entry_list"

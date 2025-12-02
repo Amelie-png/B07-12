@@ -1,5 +1,6 @@
 package com.example.demoapp;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -21,13 +22,17 @@ import android.widget.Toast;
 
 import com.example.demoapp.med.FilterDialogFragment;
 import com.example.demoapp.med.FilterState;
+import com.example.demoapp.med.ManageRescueActivity;
 import com.example.demoapp.med.MedicineAdapter;
 import com.example.demoapp.med.MedicineEntry;
 import com.example.demoapp.med.MedicineRepository;
+import com.example.demoapp.models.Child;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ProviderMedicineFragment extends Fragment {
     //Repo & adapter
@@ -43,7 +48,7 @@ public class ProviderMedicineFragment extends Fragment {
     private boolean rescueVisible;
     private boolean controllerVisible;
     //IDs
-    private String childId = "testChildId"; //TODO link actual value
+    private String childId = "hrlRXxPFis6MDe6SuK9G"; //TODO link actual value
     private String providerUid;
 
 
@@ -102,9 +107,53 @@ public class ProviderMedicineFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        //TODO check provider permissions
+        hasPermissions();
+    }
 
-        applyFiltersAndRefresh();   // refresh logs
+    private void updateUIAfterPermissionCheck() {
+        if (rescueVisible) {
+            noPermission.setVisibility(View.GONE);
+            rv.setVisibility(View.VISIBLE);
+            applyFiltersAndRefresh();
+        } else {
+            noPermission.setVisibility(View.VISIBLE);
+            rv.setVisibility(View.GONE);
+        }
+    }
+
+    private void hasPermissions(){
+        repo.fetchShareCode(childId, providerUid, new MedicineRepository.OnResult<Map<String, Object>>() {
+            @Override
+            public void onSuccess(Map<String, Object> result) {
+                if (result != null) {
+
+                    Object permissionsObj = result.get("permissions");
+
+                    Map<String, Boolean> permissions =
+                            permissionsObj instanceof Map
+                                    ? (Map<String, Boolean>) permissionsObj
+                                    : new HashMap<>();
+
+                    rescueVisible = Boolean.TRUE.equals(permissions.get("rescueLogs"));
+                }
+
+
+                updateUIAfterPermissionCheck();
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                // show error dialog
+                new AlertDialog.Builder(getContext())
+                        .setTitle("Error")
+                        .setMessage("Could not fetch share code: " + e.getMessage())
+                        .setPositiveButton("OK", null)
+                        .show();
+
+                rescueVisible = false;
+                updateUIAfterPermissionCheck();
+            }
+        });
     }
 
     //Filter feature
