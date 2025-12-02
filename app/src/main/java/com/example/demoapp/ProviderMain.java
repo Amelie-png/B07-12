@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -84,6 +85,7 @@ public class ProviderMain extends AppCompatActivity implements AddPatientPopup.O
         // ----------------------------------------------------
         // LOAD ASSIGNED CHILDREN
         // ----------------------------------------------------
+        checkProviderOnboarding();
         loadChildrenList();
     }
 
@@ -166,7 +168,51 @@ public class ProviderMain extends AppCompatActivity implements AddPatientPopup.O
             loadingDialog.dismiss();
         }
     }
+    private void checkProviderOnboarding() {
+        String providerUid = UserUtils.getUid();
 
+        db.collection("users")
+                .document(providerUid)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (!doc.exists()) return;
+
+                    Boolean hasSeen = doc.getBoolean("hasSeenOnboardingProvider");
+
+                    // Treat null as false
+                    if (hasSeen == null || !hasSeen) {
+                        showProviderOnboardingPopup(providerUid);
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Log.e("ProviderActivity", "Failed to load onboarding flag", e));
+    }
+    private void showProviderOnboardingPopup(String providerUid) {
+
+        View dialogView = LayoutInflater.from(this)
+                .inflate(R.layout.dialog_provider_onboarding, null);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setCancelable(false)
+                .create();
+
+        dialog.show();
+
+        Button btnClose = dialogView.findViewById(R.id.closeProviderPopup);
+
+        btnClose.setOnClickListener(v -> {
+
+            // Mark onboarding as completed
+            db.collection("users")
+                    .document(providerUid)
+                    .update("hasSeenOnboardingProvider", true)
+                    .addOnFailureListener(e ->
+                            Log.e("ProviderOnboarding", "Failed updating onboarding flag", e));
+
+            dialog.dismiss();
+        });
+    }
     // Called when AddPatientPopup updates data
     @Override
     public void onDataChanged() {
