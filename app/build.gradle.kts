@@ -51,6 +51,8 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.constraintlayout)
     implementation(libs.recyclerview)
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
 
     // Navigation
     implementation("androidx.navigation:navigation-fragment:2.7.5")
