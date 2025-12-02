@@ -28,117 +28,122 @@ import java.util.Map;
 
 public class ZoneFragment extends Fragment {
 
+    private FirebaseFirestore db;
+
+    private String childId;
+    private String role;
+    private String parentId;
+
+    // UI
     private LinearLayout layoutNoZone, layoutHasZone, layoutNoPB;
     private TextView textZonePercent;
     private View zoneIndicator;
-    private Button btnAddZone, btnEditZone;
     private ImageView zoneBar;
+    private Button btnAddZone, btnEditZone, btnZoneHistory;
 
-    private FirebaseFirestore db;
-    private String childId;
-    private String parentId;
-    private String role;
-
+    // State
     private int personalBest = -1;
-
-    // Store latest zone doc info for edit dialog
     private boolean lastBeforeMed = false;
     private boolean lastAfterMed = false;
 
     public ZoneFragment() {}
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_zone, container, false);
+        View v = inflater.inflate(R.layout.fragment_zone, container, false);
 
         db = FirebaseFirestore.getInstance();
 
-        zoneBar = view.findViewById(R.id.pefBar);
-        layoutNoZone = view.findViewById(R.id.layoutNoPEF);
-        layoutHasZone = view.findViewById(R.id.layoutHasPEF);
-        layoutNoPB = view.findViewById(R.id.layoutNoPB);
+        // Bind UI
+        layoutNoZone = v.findViewById(R.id.layoutNoPEF);
+        layoutHasZone = v.findViewById(R.id.layoutHasPEF);
+        layoutNoPB = v.findViewById(R.id.layoutNoPB);
 
-        textZonePercent = view.findViewById(R.id.textZonePercent);
-        zoneIndicator = view.findViewById(R.id.pefIndicator);
-        btnAddZone = view.findViewById(R.id.btnAddPEF);
-        btnEditZone = view.findViewById(R.id.btnEditPEF);
+        textZonePercent = v.findViewById(R.id.textZonePercent);
+        zoneIndicator = v.findViewById(R.id.pefIndicator);
+        zoneBar = v.findViewById(R.id.pefBar);
 
-        Button btnZoneHistory = view.findViewById(R.id.btnZoneHistory);
+        btnAddZone = v.findViewById(R.id.btnAddPEF);
+        btnEditZone = v.findViewById(R.id.btnEditPEF);
+        btnZoneHistory = v.findViewById(R.id.btnZoneHistory);
 
-        btnZoneHistory.setOnClickListener(v -> {
-            Intent intent = new Intent(getContext(), ZoneHistoryActivity.class);
-            intent.putExtra("uid", childId);
-            startActivity(intent);
-        });
-
-// Hide from children
-        if ("child".equalsIgnoreCase(role)) {
-            btnZoneHistory.setVisibility(View.GONE);
-        }
-
-
-        btnAddZone.setOnClickListener(v -> showAddZoneDialog());
-        btnEditZone.setOnClickListener(v -> showEditZoneDialog());
-// ROLE-BASED VISIBILITY
-        if (role != null && role.equalsIgnoreCase("parent")) {
-
-            // Parents CAN add/edit PEF
-            btnAddZone.setVisibility(View.VISIBLE);
-            btnEditZone.setVisibility(View.VISIBLE);
-
-            // Parents SHOULD see history
-            btnZoneHistory.setVisibility(View.VISIBLE);
-
-        } else if (role != null && role.equalsIgnoreCase("child")) {
-
-            // Children can add/edit PEF (your original logic handles PB lock)
-            btnAddZone.setVisibility(View.VISIBLE);
-            btnEditZone.setVisibility(View.VISIBLE);
-
-            // Children should NOT see history
-            btnZoneHistory.setVisibility(View.GONE);
-        }
-        if ("provider".equals(role)) {
-            btnAddZone.setVisibility(View.GONE);
-            btnEditZone.setVisibility(View.GONE);
-        }
-
-        return view;
+        return v;
     }
+
 
     @Override
     public void onViewCreated(@NonNull View view,
                               @Nullable Bundle savedInstanceState) {
-
         super.onViewCreated(view, savedInstanceState);
 
+        // LOAD ARGS
         Bundle args = requireArguments();
         childId = args.getString("uid");
         role = args.getString("role");
 
+        applyRoleUI();   // hides or shows things based on role
+
+        btnZoneHistory.setOnClickListener(v -> {
+            Intent i = new Intent(getContext(), ZoneHistoryActivity.class);
+            i.putExtra("uid", childId);
+            startActivity(i);
+        });
+
+        btnAddZone.setOnClickListener(v -> showAddZoneDialog());
+        btnEditZone.setOnClickListener(v -> showEditZoneDialog());
+
+        // Load PB and zone
+        loadPersonalBest();
+
+        // Load parentId if needed later
         db.collection("children")
                 .document(childId)
                 .get()
                 .addOnSuccessListener(doc -> {
-                    if (doc.exists()) {
-                        parentId = doc.getString("parentId");
-                    }
+                    if (doc.exists()) parentId = doc.getString("parentId");
                 });
-
-        loadPersonalBest();
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        loadPersonalBest();   // This triggers loadTodayZone too
+
+    // ---------------------------------------------------------
+    // ROLE UI (single place, no duplicates)
+    // ---------------------------------------------------------
+    private void applyRoleUI() {
+
+        // DEFAULTS — hidden history for non-parents
+        btnZoneHistory.setVisibility(View.GONE);
+
+        if (role == null) return;
+
+        switch (role.toLowerCase()) {
+
+            case "parent":
+                btnAddZone.setVisibility(View.VISIBLE);
+                btnEditZone.setVisibility(View.VISIBLE);
+                btnZoneHistory.setVisibility(View.VISIBLE);
+                break;
+
+            case "child":
+                // Child: no history
+                btnZoneHistory.setVisibility(View.GONE);
+                break;
+
+            case "provider":
+                // Providers cannot add or edit
+                btnAddZone.setVisibility(View.GONE);
+                btnEditZone.setVisibility(View.GONE);
+                btnZoneHistory.setVisibility(View.GONE);
+                break;
+        }
     }
 
-    // ----------------------------------------------------
-    // LOAD PERSONAL BEST
-    // ----------------------------------------------------
+
+    // ---------------------------------------------------------
+    // PERSONAL BEST
+    // ---------------------------------------------------------
     private void loadPersonalBest() {
         db.collection("children")
                 .document(childId)
@@ -149,59 +154,36 @@ public class ZoneFragment extends Fragment {
                         personalBest = doc.getLong("pb").intValue();
                     }
 
-                    boolean pbNotSet = (personalBest <= 0);
+                    boolean pbMissing = (personalBest <= 0);
 
-                    if (role != null && role.equalsIgnoreCase("child") && pbNotSet) {
+                    if ("child".equalsIgnoreCase(role) && pbMissing) {
                         showNoPBLayout();
-                        return;
+                    } else {
+                        loadTodayZone();
                     }
 
-                    updateButtonStates();
-                    loadTodayZone();
                 });
     }
 
 
-    // ----------------------
-    // NO PB LAYOUT
-    // ----------------------
     private void showNoPBLayout() {
         layoutNoPB.setVisibility(View.VISIBLE);
         layoutNoZone.setVisibility(View.GONE);
         layoutHasZone.setVisibility(View.GONE);
 
-        btnAddZone.setVisibility(View.GONE);
-        btnEditZone.setVisibility(View.GONE);
-    }
-
-
-    // ----------------------
-    // BUTTON STATE
-    // ----------------------
-    private void updateButtonStates() {
-        if (role != null && role.equalsIgnoreCase("child")) {
-
-            boolean pbNotSet = (personalBest <= 0);
-
-            btnAddZone.setEnabled(!pbNotSet);
-            btnEditZone.setEnabled(!pbNotSet);
-
-            float alpha = pbNotSet ? 0.4f : 1f;
-            btnAddZone.setAlpha(alpha);
-            btnEditZone.setAlpha(alpha);
-
-            if (pbNotSet) {
-                btnAddZone.setVisibility(View.GONE);
-                btnEditZone.setVisibility(View.GONE);
-            }
+        // Child cannot add/edit until PB exists
+        if ("child".equalsIgnoreCase(role)) {
+            btnAddZone.setVisibility(View.GONE);
+            btnEditZone.setVisibility(View.GONE);
         }
     }
 
 
-    // ----------------------------------------------------
-    // LOAD TODAY ZONE (also loads medicine flags)
-    // ----------------------------------------------------
+    // ---------------------------------------------------------
+    // LOAD TODAY'S LATEST PEF
+    // ---------------------------------------------------------
     private void loadTodayZone() {
+
         long todayStart = getTodayStartMillis();
 
         db.collection("zone")
@@ -209,40 +191,31 @@ public class ZoneFragment extends Fragment {
                 .get()
                 .addOnSuccessListener(query -> {
 
-                    if (query.isEmpty()) {
-                        showNoZoneLayout();
-                        return;
-                    }
-
-                    long latestTimestamp = -1;
-                    DocumentSnapshot latestDoc = null;
+                    DocumentSnapshot latest = null;
+                    long latestTs = -1;
 
                     for (DocumentSnapshot doc : query.getDocuments()) {
                         Long ts = doc.getLong("timestamp");
                         if (ts == null) continue;
-
-                        if (ts >= todayStart && ts > latestTimestamp) {
-                            latestTimestamp = ts;
-                            latestDoc = doc;
+                        if (ts >= todayStart && ts > latestTs) {
+                            latestTs = ts;
+                            latest = doc;
                         }
                     }
 
-                    if (latestDoc == null) {
+                    if (latest == null) {
                         showNoZoneLayout();
                         return;
                     }
 
-                    // store medicine flags for edit dialog
-                    lastBeforeMed = latestDoc.contains("beforeMed") && latestDoc.getBoolean("beforeMed");
-                    lastAfterMed = latestDoc.contains("afterMed") && latestDoc.getBoolean("afterMed");
+                    // load flags for edit dialog
+                    lastBeforeMed = latest.getBoolean("beforeMed") != null && latest.getBoolean("beforeMed");
+                    lastAfterMed = latest.getBoolean("afterMed") != null && latest.getBoolean("afterMed");
 
-                    int pefValue = latestDoc.getLong("pef").intValue();
-                    updateZoneUI(pefValue);
+                    int pef = latest.getLong("pef").intValue();
+                    updateZoneUI(pef);
                 })
-                .addOnFailureListener(e -> {
-                    e.printStackTrace();
-                    showNoZoneLayout();
-                });
+                .addOnFailureListener(e -> showNoZoneLayout());
     }
 
 
@@ -261,12 +234,9 @@ public class ZoneFragment extends Fragment {
         layoutHasZone.setVisibility(View.GONE);
         layoutNoPB.setVisibility(View.GONE);
 
-        // Role fix for buttons
-        if (role != null && role.equalsIgnoreCase("parent")) {
+        if ("parent".equalsIgnoreCase(role)) {
             btnAddZone.setVisibility(View.VISIBLE);
-            btnEditZone.setVisibility(View.GONE);   // no edit when no PEF
-            // history only makes sense when a PEF exists → hide for now
-            // (same as children)
+            btnEditZone.setVisibility(View.GONE);
         } else {
             btnAddZone.setVisibility(View.VISIBLE);
             btnEditZone.setVisibility(View.GONE);
@@ -274,223 +244,170 @@ public class ZoneFragment extends Fragment {
     }
 
 
-
-    // ----------------------------------------------------
-    // UPDATE UI
-    // ----------------------------------------------------
-    private void updateZoneUI(int pefValue) {
+    // ---------------------------------------------------------
+    // UPDATE UI WITH ZONE
+    // ---------------------------------------------------------
+    private void updateZoneUI(int pef) {
 
         layoutNoZone.setVisibility(View.GONE);
         layoutHasZone.setVisibility(View.VISIBLE);
         layoutNoPB.setVisibility(View.GONE);
-// ROLE-BASED ZONE HISTORY VISIBILITY
-        View btnZoneHistory = getView().findViewById(R.id.btnZoneHistory);
 
-        if (role != null && role.equalsIgnoreCase("parent")) {
+        int percent = (int)((pef * 100f) / personalBest);
+
+        // Show history for parents only
+        if ("parent".equalsIgnoreCase(role))
             btnZoneHistory.setVisibility(View.VISIBLE);
-        } else {
+        else
             btnZoneHistory.setVisibility(View.GONE);
-        }
 
-        int percent = personalBest > 0
-                ? (int) ((pefValue * 100f) / personalBest)
-                : -1;
+        textZonePercent.setText(percent + "%");
 
-        if (percent >= 0) {
-            textZonePercent.setText(percent + "%");
-            moveIndicator(percent);
-            setPercentColor(percent);
-        } else {
-            textZonePercent.setText(pefValue + " (no PB)");
-        }
+        moveIndicator(percent);
+        setPercentColor(percent);
     }
 
 
     private void moveIndicator(int percent) {
-
-        // clamp percent
+        // clamp
         if (percent < 0) percent = 0;
         if (percent > 100) percent = 100;
 
-        int finalPercent = percent; // for lambda use
+        int finalPercent = percent;
 
         zoneBar.post(() -> {
-
             float barWidth = zoneBar.getWidth();
-
-            // Adjust if needed for your zone_bar rounded edges
             float leftPadding = barWidth * 0.07f;
             float rightPadding = barWidth * 0.07f;
+            float usable = barWidth - leftPadding - rightPadding;
 
-            float usableWidth = barWidth - leftPadding - rightPadding;
+            float posX = leftPadding + (finalPercent / 100f) * usable;
 
-            // Position inside usable area
-            float px = leftPadding + (finalPercent / 100f) * usableWidth;
-
-            // Horizontal position
-            zoneIndicator.setX(px - zoneIndicator.getWidth() / 2f);
-
-            // Vertical center alignment
-            zoneIndicator.setY(
-                    zoneBar.getY() + (zoneBar.getHeight() / 2f) - (zoneIndicator.getHeight() / 2f)
-            );
+            zoneIndicator.setX(posX - zoneIndicator.getWidth() / 2f);
+            zoneIndicator.setY(zoneBar.getY() +
+                    (zoneBar.getHeight() / 2f) -
+                    (zoneIndicator.getHeight() / 2f));
         });
     }
-
-
 
 
     private void setPercentColor(int percent) {
-        if (percent >= 80) {
+        if (percent >= 80)
             textZonePercent.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
-        } else if (percent >= 50) {
+        else if (percent >= 50)
             textZonePercent.setTextColor(getResources().getColor(android.R.color.holo_orange_dark));
-        } else {
+        else
             textZonePercent.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
-        }
     }
 
 
-    // ----------------------------------------------------
-    // ADD PEF DIALOG (checkbox added)
-    // ----------------------------------------------------
+    // ---------------------------------------------------------
+    // ADD PEF
+    // ---------------------------------------------------------
     private void showAddZoneDialog() {
 
-        boolean pbNotSet = (personalBest <= 0);
+        boolean pbMissing = (personalBest <= 0);
 
-        if (role != null && role.equalsIgnoreCase("child") && pbNotSet) {
+        if ("child".equalsIgnoreCase(role) && pbMissing) {
             showParentReminderDialog();
             return;
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_pef, null);
-        builder.setView(dialogView);
-
-        EditText input = dialogView.findViewById(R.id.inputPefValue);
-        CheckBox cbBefore = dialogView.findViewById(R.id.checkboxBeforeMed);
-        CheckBox cbAfter = dialogView.findViewById(R.id.checkboxAfterMed);
-        Button save = dialogView.findViewById(R.id.btnSavePef);
-
-        // ensure only one can be checked
-        cbBefore.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) cbAfter.setChecked(false);
-        });
-
-        cbAfter.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) cbBefore.setChecked(false);
-        });
-
-        AlertDialog dialog = builder.create();
-
-        save.setOnClickListener(v -> {
-
-            if (input.getText().toString().isEmpty()) {
-                input.setError("Enter a value");
-                return;
-            }
-
-            if (!cbBefore.isChecked() && !cbAfter.isChecked()) {
-                Toast.makeText(getContext(), "Please select before or after medicine", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            saveZoneWithMedicine(
-                    Integer.parseInt(input.getText().toString()),
-                    cbBefore.isChecked(),
-                    cbAfter.isChecked()
-            );
-
-            dialog.dismiss();
-        });
+        AlertDialog dialog = new AlertDialog.Builder(getContext())
+                .setView(buildPefDialog(true))
+                .create();
 
         dialog.show();
     }
 
 
-    // ----------------------------------------------------
-    // EDIT PEF DIALOG (loads medicine flags)
-    // ----------------------------------------------------
+    // ---------------------------------------------------------
+    // EDIT PEF
+    // ---------------------------------------------------------
     private void showEditZoneDialog() {
 
-        boolean pbNotSet = (personalBest <= 0);
+        boolean pbMissing = (personalBest <= 0);
 
-        if (role != null && role.equalsIgnoreCase("child") && pbNotSet) {
+        if ("child".equalsIgnoreCase(role) && pbMissing) {
             showParentReminderDialog();
             return;
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_pef, null);
-        builder.setView(dialogView);
-
-        EditText input = dialogView.findViewById(R.id.inputEditPef);
-        CheckBox cbBefore = dialogView.findViewById(R.id.checkboxBeforeMedEdit);
-        CheckBox cbAfter = dialogView.findViewById(R.id.checkboxAfterMedEdit);
-        Button save = dialogView.findViewById(R.id.btnSaveEditPef);
-
-        // preload saved values
-        cbBefore.setChecked(lastBeforeMed);
-        cbAfter.setChecked(lastAfterMed);
-
-        // mutual exclusivity
-        cbBefore.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) cbAfter.setChecked(false);
-        });
-
-        cbAfter.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) cbBefore.setChecked(false);
-        });
-
-        input.setText(textZonePercent.getText().toString().replace("%", ""));
-
-        AlertDialog dialog = builder.create();
-
-        save.setOnClickListener(v -> {
-
-            if (input.getText().toString().isEmpty()) {
-                input.setError("Enter a value");
-                return;
-            }
-
-            if (!cbBefore.isChecked() && !cbAfter.isChecked()) {
-                Toast.makeText(getContext(), "Please select before or after medicine", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            saveZoneWithMedicine(
-                    Integer.parseInt(input.getText().toString()),
-                    cbBefore.isChecked(),
-                    cbAfter.isChecked()
-            );
-
-            dialog.dismiss();
-        });
+        AlertDialog dialog = new AlertDialog.Builder(getContext())
+                .setView(buildPefDialog(false))
+                .create();
 
         dialog.show();
     }
 
 
-    // ----------------------------------------------------
-    // SAVE ZONE ENTRY WITH MEDICINE FLAGS
-    // ----------------------------------------------------
-    private void saveZoneWithMedicine(int pefValue, boolean beforeMed, boolean afterMed) {
+    // ---------------------------------------------------------
+    // DIALOG BUILDER FOR ADD/EDIT
+    // ---------------------------------------------------------
+    private View buildPefDialog(boolean isAdd) {
 
-        if (personalBest <= 0 || pefValue > personalBest) {
-            personalBest = pefValue;
-            db.collection("children").document(childId).update("pb", pefValue);
-            updateButtonStates();
+        View v = getLayoutInflater().inflate(
+                isAdd ? R.layout.dialog_add_pef : R.layout.dialog_edit_pef,
+                null
+        );
+
+        EditText input = v.findViewById(isAdd ? R.id.inputPefValue : R.id.inputEditPef);
+        CheckBox cbBefore = v.findViewById(isAdd ? R.id.checkboxBeforeMed : R.id.checkboxBeforeMedEdit);
+        CheckBox cbAfter = v.findViewById(isAdd ? R.id.checkboxAfterMed : R.id.checkboxAfterMedEdit);
+        Button save = v.findViewById(isAdd ? R.id.btnSavePef : R.id.btnSaveEditPef);
+
+        if (!isAdd) {
+            input.setText(textZonePercent.getText().toString().replace("%", ""));
+            cbBefore.setChecked(lastBeforeMed);
+            cbAfter.setChecked(lastAfterMed);
         }
 
-        int percent = (int)((pefValue * 100f) / personalBest);
+        cbBefore.setOnCheckedChangeListener((a, checked) -> {
+            if (checked) cbAfter.setChecked(false);
+        });
+        cbAfter.setOnCheckedChangeListener((a, checked) -> {
+            if (checked) cbBefore.setChecked(false);
+        });
 
-        String zoneColor = percent >= 80 ? "GREEN" :
-                percent >= 50 ? "YELLOW" :
-                        "RED";
+        save.setOnClickListener(btn -> {
+
+            if (input.getText().toString().isEmpty()) {
+                input.setError("Enter a value");
+                return;
+            }
+            if (!cbBefore.isChecked() && !cbAfter.isChecked()) {
+                Toast.makeText(getContext(), "Select before/after med", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            int pef = Integer.parseInt(input.getText().toString());
+            saveZoneWithMedicine(pef, cbBefore.isChecked(), cbAfter.isChecked());
+        });
+
+        return v;
+    }
+
+
+    // ---------------------------------------------------------
+    // SAVE ZONE ENTRY
+    // ---------------------------------------------------------
+    private void saveZoneWithMedicine(int pef, boolean beforeMed, boolean afterMed) {
+
+        if (personalBest <= 0 || pef > personalBest) {
+            personalBest = pef;
+            db.collection("children").document(childId).update("pb", pef);
+        }
+
+        int percent = (int)((pef * 100f) / personalBest);
+
+        String zoneColor =
+                percent >= 80 ? "GREEN" :
+                        percent >= 50 ? "YELLOW" :
+                                "RED";
 
         Map<String, Object> data = new HashMap<>();
         data.put("childId", childId);
-        data.put("pef", pefValue);
+        data.put("pef", pef);
         data.put("percent", percent);
         data.put("zone", zoneColor);
         data.put("timestamp", System.currentTimeMillis());
@@ -501,22 +418,42 @@ public class ZoneFragment extends Fragment {
                 .document()
                 .set(data)
                 .addOnSuccessListener(unused -> {
+
+                    // 🔵 Update local
                     lastBeforeMed = beforeMed;
                     lastAfterMed = afterMed;
-                    updateZoneUI(pefValue);
+                    updateZoneUI(pef);
                     loadTodayZone();
+
+                    // 🚨🚨🚨 ZONE RED ALERT LOGIC (NEW)
+                    if ("RED".equals(zoneColor)) {
+                        sendParentRedZoneAlert();
+                    }
                 });
     }
 
 
-    // ----------------------------------------------------
-    // PARENT REMINDER DIALOG
-    // ----------------------------------------------------
+
     private void showParentReminderDialog() {
         new AlertDialog.Builder(getContext())
-                .setTitle("Personal Best Not Set")
-                .setMessage("Please remind your parent to set your Personal Best (PB) before logging PEF.")
+                .setTitle("PB Not Set")
+                .setMessage("Ask your parent to set your Personal Best before logging PEF.")
                 .setPositiveButton("OK", null)
                 .show();
     }
+    private void sendParentRedZoneAlert() {
+
+        if (parentId == null) return;
+
+        Map<String, Object> alert = new HashMap<>();
+        alert.put("parentId", parentId);
+        alert.put("childId", childId);
+        alert.put("message", "Your child's PEF is in the RED zone. Check now.");
+        alert.put("timestamp", System.currentTimeMillis());
+        alert.put("seen", false);
+        alert.put("type", "zone");   // optional metadata
+
+        db.collection("alerts").add(alert);
+    }
+
 }

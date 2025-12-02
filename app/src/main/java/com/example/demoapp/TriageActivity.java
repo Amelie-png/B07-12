@@ -1,10 +1,15 @@
 package com.example.demoapp;
 
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -20,75 +25,160 @@ public class TriageActivity extends AppCompatActivity {
     private String parentId;
     private String role;
 
+    private CheckBox chkCantSpeak, chkRetractions, chkBlueLips;
+    private CheckBox chkCough, chkChestTight;
+    private EditText inputRescue, inputPEF;
+
+    private Button btnCheckTriage, btnBack;
+    private LinearLayout resultCard;
+    private TextView textRiskTitle, textRiskDetails;
+
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_triage);
+
+        // IMPORTANT: Your actual XML file
+        setContentView(R.layout.fragment_triage);
 
         db = FirebaseFirestore.getInstance();
 
         childId = getIntent().getStringExtra("uid");
-        parentId = getIntent().getStringExtra("parentId");  // may or may not be included
+        parentId = getIntent().getStringExtra("parentId");
         role = getIntent().getStringExtra("role");
 
-        Button btnSubmit = findViewById(R.id.btnCheckTriage);
-
-        btnSubmit.setOnClickListener(v -> submitTriage());
+        bindUI();
+        setupListeners();
     }
 
-    /**
-     * 1. Computes the severity (GREEN/YELLOW/RED)
-     * 2. Writes triage entry to Firestore
-     * 3. Updates children/{childId}.lastTriageState = severity
-     * 4. Shows success message
-     */
-    private void submitTriage() {
+    private void bindUI() {
 
-        // TODO: Replace this with your REAL triage logic
-        String severity = calculateSeverity();
+        chkCantSpeak = findViewById(R.id.chkCantSpeak);
+        chkRetractions = findViewById(R.id.chkRetractions);
+        chkBlueLips = findViewById(R.id.chkBlueLips);
 
-        if (severity == null) {
-            Toast.makeText(this, "Could not determine severity", Toast.LENGTH_SHORT).show();
-            return;
+        chkCough = findViewById(R.id.chkCough);
+        chkChestTight = findViewById(R.id.chkChestTight);
+
+        inputRescue = findViewById(R.id.inputRescueAttempts);
+        inputPEF = findViewById(R.id.inputPEF);
+
+        btnCheckTriage = findViewById(R.id.btnCheckTriage);
+        btnBack = findViewById(R.id.btnBackHomeTriage);
+
+        resultCard = findViewById(R.id.resultCard);
+        textRiskTitle = findViewById(R.id.textRiskTitle);
+        textRiskDetails = findViewById(R.id.textRiskDetails);
+    }
+
+    private void setupListeners() {
+
+        btnBack.setOnClickListener(v -> finish());
+
+        btnCheckTriage.setOnClickListener(v -> calculateTriage());
+    }
+
+    private void calculateTriage() {
+
+        boolean red1 = chkCantSpeak.isChecked();
+        boolean red2 = chkRetractions.isChecked();
+        boolean red3 = chkBlueLips.isChecked();
+
+        boolean mod1 = chkCough.isChecked();
+        boolean mod2 = chkChestTight.isChecked();
+
+        int rescue = 0;
+        String pefText = inputPEF.getText().toString().trim();
+        String rescueText = inputRescue.getText().toString().trim();
+
+        if (!rescueText.isEmpty()) {
+            rescue = Integer.parseInt(rescueText);
         }
 
-        long timestamp = System.currentTimeMillis();
+        int pef = 0;
+        if (!pefText.isEmpty()) {
+            pef = Integer.parseInt(pefText);
+        }
 
-        // -----------------------------
-        // Save triage entry
-        // -----------------------------
-        Map<String, Object> entry = new HashMap<>();
-        entry.put("childId", childId);
-        entry.put("parentId", parentId);
-        entry.put("severity", severity);
-        entry.put("timestamp", timestamp);
+        // --------------- Determine severity -----------------
 
-        db.collection("triage")
-                .add(entry)
-                .addOnSuccessListener(doc -> {
+        String severity;
 
-                    // -----------------------------
-                    // Save latest severity to child document
-                    // -----------------------------
+        if (red1 || red2 || red3) {
+            severity = "RED";
+        } else if (mod1 || mod2 || rescue > 0) {
+            severity = "YELLOW";
+        } else {
+            severity = "GREEN";
+        }
+
+        saveTriage(severity, rescue, pef);
+    }
+
+    private void saveTriage(String severity, int rescue, int pef) {
+
+        long now = System.currentTimeMillis();
+
+        Map<String, Object> triageEntry = new HashMap<>();
+        triageEntry.put("childId", childId);
+        triageEntry.put("parentId", parentId);
+        triageEntry.put("severity", severity);
+        triageEntry.put("timestamp", now);
+        triageEntry.put("rescueAttempts", rescue);
+        triageEntry.put("pef", pef);
+        triageEntry.put("cantSpeak", chkCantSpeak.isChecked());
+        triageEntry.put("retractions", chkRetractions.isChecked());
+        triageEntry.put("blueLips", chkBlueLips.isChecked());
+        triageEntry.put("cough", chkCough.isChecked());
+        triageEntry.put("chestTight", chkChestTight.isChecked());
+
+        // --------------- Save triage entry ------------------
+
+        db.collection("triage").document().set(triageEntry)
+                .addOnSuccessListener(unused -> {
+
+                    // 🔥 update lastTriageState (most important)
                     db.collection("children")
                             .document(childId)
                             .update("lastTriageState", severity);
 
-                    Toast.makeText(this, "Triage saved!", Toast.LENGTH_SHORT).show();
-                    finish();
+                    // 🔥 Only send alert for RED, and only when it becomes RED now
+                    if (severity.equals("RED")) {
+                        sendRedAlert();
+                    }
+
+                    showResultCard(severity);
                 })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Failed to save triage", Toast.LENGTH_SHORT).show();
-                });
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Failed to save triage", Toast.LENGTH_SHORT).show()
+                );
     }
 
-    /**
-     * Replace this with your real triage calculation.
-     * This dummy version always returns GREEN.
-     */
-    private String calculateSeverity() {
-        // TODO: Replace with real triage scoring logic
-        return "GREEN";
+    private void sendRedAlert() {
+
+        if (parentId == null || parentId.isEmpty()) return;
+
+        Map<String, Object> alert = new HashMap<>();
+        alert.put("childId", childId);
+        alert.put("parentId", parentId);
+        alert.put("message", "Your child is in severe condition (RED). Check now.");
+        alert.put("timestamp", System.currentTimeMillis());
+        alert.put("seen", false);
+
+        db.collection("alerts").add(alert);
     }
 
+    private void showResultCard(String severity) {
+
+        resultCard.setVisibility(View.VISIBLE);
+
+        textRiskTitle.setText(severity);
+
+        if (severity.equals("RED")) {
+            textRiskDetails.setText("Severe symptoms detected. Seek help immediately.");
+        } else if (severity.equals("YELLOW")) {
+            textRiskDetails.setText("Moderate symptoms. Continue monitoring.");
+        } else {
+            textRiskDetails.setText("Stable condition.");
+        }
+    }
 }
