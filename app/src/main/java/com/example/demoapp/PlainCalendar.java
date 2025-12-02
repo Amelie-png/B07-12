@@ -105,8 +105,13 @@ public class PlainCalendar extends Fragment implements CalendarAdapter.OnItemLis
         intent.putStringArrayListExtra("symptoms", new ArrayList<String>());
         intent.putStringArrayListExtra("triggers", new ArrayList<String>());
         intent.putExtra("childUid", childUid);
-        intent.putExtra("symptomsAllowed", getArguments().getBoolean("symptomsAllowed"));
-        intent.putExtra("triggersAllowed", getArguments().getBoolean("triggersAllowed"));
+        if(role.equals("provider")) {
+            intent.putExtra("symptomsAllowed", getArguments().getBoolean("symptomsAllowed"));
+            intent.putExtra("triggersAllowed", getArguments().getBoolean("triggersAllowed"));
+        }else{
+            intent.putExtra("symptomsAllowed", true);
+            intent.putExtra("triggersAllowed", true);
+        }
         startActivity(intent);
     }
 }
