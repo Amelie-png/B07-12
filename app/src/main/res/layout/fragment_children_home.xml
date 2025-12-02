@@ -126,7 +126,7 @@
                     android:textStyle="bold" />
 
                 <Button
-                    android:id="@+id/btnResultAction"
+                    android:id="@+id/btnCheckTriage"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Click Here!"
