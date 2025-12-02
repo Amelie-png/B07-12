@@ -9,34 +9,48 @@ import android.view.View;
 import android.view.ViewGroup;
 
 /**
- * A simple {@link Fragment} subclass.
- * Use the {@link PrePostCheckDialogFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * Fragment that displays a pre/post-check dialog-style layout.
+ *
+ * <p>This fragment is generated using the default Android Studio
+ * fragment template, which includes optional initialization parameters
+ * (param1, param2). These parameters can be used later if the dialog
+ * requires dynamic text or configuration.</p>
+ *
+ * <p>Currently, the fragment simply inflates the associated layout
+ * and does not perform any additional logic.</p>
  */
 public class PrePostCheckDialogFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+    /** Key for argument 1 passed into newInstance(). */
     private static final String ARG_PARAM1 = "param1";
+
+    /** Key for argument 2 passed into newInstance(). */
     private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
+    /** Optional parameter 1 used to configure the fragment. */
     private String mParam1;
+
+    /** Optional parameter 2 used to configure the fragment. */
     private String mParam2;
 
-    public PrePostCheckDialogFragment() {
-        // Required empty public constructor
-    }
+    /**
+     * Required empty public constructor.
+     * <p>Fragments must always have a no-argument constructor
+     * so the system can recreate them when needed.</p>
+     */
+    public PrePostCheckDialogFragment() { }
 
     /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
+     * Factory method used to create a new instance of this fragment
+     * and pass initialization parameters safely.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment fragment_pre_post_check_dialog.
+     * <p>This is the recommended pattern for fragments because
+     * arguments are preserved across configuration changes (rotation, process recreation).</p>
+     *
+     * @param param1 Optional string parameter for customization.
+     * @param param2 Optional string parameter for customization.
+     * @return A configured instance of {@link PrePostCheckDialogFragment}.
      */
-    // TODO: Rename and change types and number of parameters
     public static PrePostCheckDialogFragment newInstance(String param1, String param2) {
         PrePostCheckDialogFragment fragment = new PrePostCheckDialogFragment();
         Bundle args = new Bundle();
@@ -46,19 +60,44 @@ public class PrePostCheckDialogFragment extends Fragment {
         return fragment;
     }
 
+    /**
+     * Called when the fragment is first created.
+     *
+     * <p>This method retrieves the arguments passed into newInstance()
+     * and assigns them to member variables for later use.</p>
+     *
+     * @param savedInstanceState Saved state (unused in this fragment)
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
 
+    /**
+     * Called to inflate the layout associated with this fragment.
+     *
+     * <p>No additional setup is performed here, but UI elements may
+     * be connected later if required.</p>
+     *
+     * @param inflater Layout inflater used to inflate XML
+     * @param container Parent container the fragment lives inside
+     * @param savedInstanceState Saved state (unused)
+     * @return The inflated root view for this fragment
+     */
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(LayoutInflater inflater,
+                             ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_pre_post_check_dialog, container, false);
+
+        return inflater.inflate(
+                R.layout.fragment_pre_post_check_dialog,
+                container,
+                false
+        );
     }
 }

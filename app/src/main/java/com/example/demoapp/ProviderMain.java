@@ -3,34 +3,20 @@ package com.example.demoapp;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.Toast;
-
 import com.example.demoapp.card_view.CardAdapter;
 import com.example.demoapp.card_view.CardItem;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -38,15 +24,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProviderMain extends AppCompatActivity implements AddPatientPopup.OnDataChangedListener {
+
     private String providerUid;
+
     private Button addItemButton;
     private ImageButton profileButton;
     private RecyclerView recyclerView;
+
     private ArrayList<CardItem> cardList;
     private CardAdapter adapter;
 
     private FirebaseAuth auth;
     private FirebaseFirestore db;
+
     private AlertDialog loadingDialog;
 
     @Override
@@ -60,69 +50,106 @@ public class ProviderMain extends AppCompatActivity implements AddPatientPopup.O
         // providerUid passed from login or previous Activity
         providerUid = getIntent().getStringExtra("uid");
 
-        // find buttons
+        if (providerUid == null) {
+            Log.e("ProviderMain", "ERROR: Provider UID is NULL");
+            finish();
+            return;
+        }
+
+        // ----------------------------------------------------
+        // SET UP UI
+        // ----------------------------------------------------
         addItemButton = findViewById(R.id.add_item_button);
         profileButton = findViewById(R.id.provider_profile_button);
         recyclerView = findViewById(R.id.patient_list);
-
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // Card list setup
         cardList = new ArrayList<>();
-        adapter = new CardAdapter(this, cardList);
+
+        // Pass providerUid to adapter
+        adapter = new CardAdapter(this, cardList, providerUid);
         recyclerView.setAdapter(adapter);
 
+        // BUTTONS
         addItemButton.setOnClickListener(v -> onAddPatientClicked());
-        profileButton.setOnClickListener(v -> onProfileButtonClicked());
+        profileButton.setOnClickListener(v -> onProviderProfileClicked());
 
-        // Load data
+        // ----------------------------------------------------
+        // LOAD ASSIGNED CHILDREN
+        // ----------------------------------------------------
+        checkProviderOnboarding();
         loadChildrenList();
     }
 
+    // ------------------------------------------------------------
+    // Add Patient Popup
+    // ------------------------------------------------------------
     private void onAddPatientClicked() {
         AddPatientPopup popup = new AddPatientPopup(providerUid);
         popup.setOnDataChangedListener(this);
         popup.show(getSupportFragmentManager(), "addPatientPopup");
     }
 
-    private void onProfileButtonClicked(){
+    // ------------------------------------------------------------
+    // Provider’s Own Profile
+    // ------------------------------------------------------------
+    private void onProviderProfileClicked() {
         Intent intent = new Intent(ProviderMain.this, ProviderProfileActivity.class);
+        intent.putExtra("providerUid", providerUid);
         startActivity(intent);
     }
 
-    private void loadChildrenList(){
+    // ------------------------------------------------------------
+    // Load all children assigned to this provider
+    // ------------------------------------------------------------
+    private void loadChildrenList() {
         showLoadingDialog();
-        ArrayList<CardItem> childrenList = new ArrayList<CardItem>();
+
         db.collection("children")
                 .whereArrayContains("providerIds", providerUid)
                 .get()
                 .addOnSuccessListener(childrenSnapshot -> {
+
+                    ArrayList<CardItem> childrenList = new ArrayList<>();
+
                     List<DocumentSnapshot> childrenDocs = childrenSnapshot.getDocuments();
-                    for (DocumentSnapshot individualChildDoc : childrenDocs) {
-                        String childName = individualChildDoc.getString("username");
-                        String childId = individualChildDoc.getString("uid");
-                        String parentId = individualChildDoc.getString("parentId");
-                        childrenList.add(new CardItem(childName, R.drawable.profile_default_img, R.color.white, childId, parentId, new ArrayList<String>()));
+                    for (DocumentSnapshot doc : childrenDocs) {
+
+                        String childName = doc.getString("username");
+                        String childId = doc.getString("uid");
+                        String parentId = doc.getString("parentId");
+
+                        childrenList.add(new CardItem(
+                                childName,
+                                R.drawable.profile_default_img,
+                                R.color.white,
+                                childId,
+                                parentId,
+                                new ArrayList<>()
+                        ));
                     }
+
                     cardList = childrenList;
                     adapter.setList(childrenList);
                     adapter.notifyDataSetChanged();
+
                     hideLoadingDialog();
                 })
                 .addOnFailureListener(e -> {
-                    Log.e("FirestoreCheck", "Error fetching children collection", e);
+                    Log.e("ProviderMain", "Failed loading children", e);
                     hideLoadingDialog();
                 });
     }
 
+    // ------------------------------------------------------------
+    // Loading Dialog
+    // ------------------------------------------------------------
     private void showLoadingDialog() {
         if (loadingDialog == null) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setCancelable(false);
-
-            View view = getLayoutInflater().inflate(R.layout.dialog_loading, null);
-            builder.setView(view);
-
+            View v = getLayoutInflater().inflate(R.layout.dialog_loading, null);
+            builder.setView(v);
             loadingDialog = builder.create();
         }
         loadingDialog.show();
@@ -133,43 +160,54 @@ public class ProviderMain extends AppCompatActivity implements AddPatientPopup.O
             loadingDialog.dismiss();
         }
     }
+    private void checkProviderOnboarding() {
+        String providerUid = UserUtils.getUid();
 
+        db.collection("users")
+                .document(providerUid)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (!doc.exists()) return;
+
+                    Boolean hasSeen = doc.getBoolean("hasSeenOnboardingProvider");
+
+                    // Treat null as false
+                    if (hasSeen == null || !hasSeen) {
+                        showProviderOnboardingPopup(providerUid);
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Log.e("ProviderActivity", "Failed to load onboarding flag", e));
+    }
+    private void showProviderOnboardingPopup(String providerUid) {
+
+        View dialogView = LayoutInflater.from(this)
+                .inflate(R.layout.dialog_provider_onboarding, null);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setCancelable(false)
+                .create();
+
+        dialog.show();
+
+        Button btnClose = dialogView.findViewById(R.id.closeProviderPopup);
+
+        btnClose.setOnClickListener(v -> {
+
+            // Mark onboarding as completed
+            db.collection("users")
+                    .document(providerUid)
+                    .update("hasSeenOnboardingProvider", true)
+                    .addOnFailureListener(e ->
+                            Log.e("ProviderOnboarding", "Failed updating onboarding flag", e));
+
+            dialog.dismiss();
+        });
+    }
+    // Called when AddPatientPopup updates data
     @Override
     public void onDataChanged() {
         loadChildrenList();
     }
-
-    // ------------------------------------------------------------
-    //  onboarding popup
-    // ------------------------------------------------------------
-    private void checkProviderOnboarding() {
-
-        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        if (uid == null) {
-            return;  // Provider 未登录
-        }
-
-        DocumentReference doc = db.collection("users").document(uid);
-
-        doc.get().addOnSuccessListener(snapshot -> {
-            if (!snapshot.exists()) return;
-
-            Boolean hasSeen = snapshot.getBoolean("hasSeenOnboardingProvider");
-
-            if (hasSeen == null || !hasSeen) {
-
-                // ⭐ 显示 Provider Onboarding
-                //TODO: Double check with ChenXin
-                //if (isAdded()) {
-                    new ProviderOnboardingDialog()
-                            .show(getSupportFragmentManager(), "providerOnboarding");
-                //}
-
-                // ⭐ 更新 Firestore，防止下次再弹
-                doc.update("hasSeenOnboardingProvider", true);
-            }
-        });
-    }
-
-
 }
