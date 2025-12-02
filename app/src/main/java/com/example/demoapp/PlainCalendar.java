@@ -1,17 +1,7 @@
 package com.example.demoapp;
 
-import com.example.demoapp.DailyEntryDisplayScreen;
-import com.example.demoapp.calendar.CalendarUtils;
-import com.example.demoapp.calendar.CalendarAdapter;
-
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,25 +9,32 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
+
+import com.example.demoapp.calendar.CalendarAdapter;
+import com.example.demoapp.calendar.CalendarUtils;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-public class SummaryCalendarFragment extends Fragment implements CalendarAdapter.OnItemListener {
-
+public class PlainCalendar extends Fragment implements CalendarAdapter.OnItemListener{
     private String childUid;
     private TextView monthYearText;
     private RecyclerView calendarRecyclerView;
 
     Button prevMonthButt;
     Button nextMonthButt;
-    Button browseHistoryButton;
     String role;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_summary_calendar, container, false);
+        View view = inflater.inflate(R.layout.fragment_plain_calendar, container, false);
 
         initWidgets(view);
 
@@ -50,11 +47,9 @@ public class SummaryCalendarFragment extends Fragment implements CalendarAdapter
 
         prevMonthButt = view.findViewById(R.id.prev_month_button);
         nextMonthButt = view.findViewById(R.id.next_month_button);
-        browseHistoryButton = view.findViewById(R.id.browse_history);
 
         prevMonthButt.setOnClickListener(v -> previousMonthAction());
         nextMonthButt.setOnClickListener(v -> nextMonthAction());
-        browseHistoryButton.setOnClickListener(v -> browseHistoryAction());
 
         CalendarUtils.selectedDate = LocalDate.now();
         setMonthView();
@@ -87,17 +82,6 @@ public class SummaryCalendarFragment extends Fragment implements CalendarAdapter
     public void nextMonthAction() {
         CalendarUtils.selectedDate = CalendarUtils.selectedDate.plusMonths(1);
         setMonthView();
-    }
-
-    public void browseHistoryAction() {
-        if (getActivity() != null) {
-            Intent intent = new Intent(getActivity(), FilterEntriesScreen.class);
-            intent.putExtra("childUid", childUid);
-            intent.putExtra("role", role);
-            intent.putExtra("symptomsAllowed", getArguments().getString("symptomsAllowed"));
-            intent.putExtra("triggersAllowed", getArguments().getString("triggersAllowed"));
-            getActivity().startActivity(intent);
-        }
     }
 
     @Override

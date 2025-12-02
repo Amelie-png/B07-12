@@ -9,6 +9,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import java.util.Calendar;
+
 public class SummaryCalendarHolder extends Fragment {
 
     @Nullable
@@ -16,7 +18,7 @@ public class SummaryCalendarHolder extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_parent_symptom_screen, container, false);
+        return inflater.inflate(R.layout.fragment_parent_child_symptom_screen, container, false);
     }
 
     @Override
@@ -24,7 +26,7 @@ public class SummaryCalendarHolder extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         if (savedInstanceState == null) {
-            SummaryCalendarFragment calendarFragment = new SummaryCalendarFragment();
+            CalendarWithHistory calendarFragment = new CalendarWithHistory();
             getChildFragmentManager()
                     .beginTransaction()
                     .replace(R.id.display_browse_history_container, calendarFragment)
