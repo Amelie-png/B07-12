@@ -45,9 +45,7 @@ public class ParentHomeFragment extends Fragment {
     // 🔒 Prevent duplicate popups during this session
     private final Set<String> shownAlerts = new HashSet<>();
 
-    public ParentHomeFragment() {
-        // Required empty constructor
-    }
+
 
     public static ParentHomeFragment newInstance(String childId, String parentId) {
         ParentHomeFragment fragment = new ParentHomeFragment();
@@ -168,12 +166,12 @@ public class ParentHomeFragment extends Fragment {
                             return;
                         }
 
-                        updateEmergencyCard(lastState);
+                        //updateEmergencyCard(lastState);
                     }
                 });
     }
 
-
+/*
     private void updateEmergencyCard(String state) {
         switch (state) {
             case "RED":
@@ -186,7 +184,7 @@ public class ParentHomeFragment extends Fragment {
                 emergencyText.setText("Current Status: GREEN (Stable)");
         }
     }
-
+*/
 
     // ---------------------------------------------------------
     // Load zone fragment

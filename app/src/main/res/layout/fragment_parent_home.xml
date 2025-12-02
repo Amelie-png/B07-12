@@ -39,7 +39,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingBottom="6dp"
-                android:text="Your child's latest triage status"
+                android:text="Your child's triage history"
                 android:textColor="@android:color/white"
                 android:textSize="22sp"
                 android:textStyle="bold" />
@@ -48,7 +48,7 @@
                 android:id="@+id/btnViewTriageHistory"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="View Triage History"
+                android:text="View"
                 android:layout_marginTop="12dp"/>
         </LinearLayout>
     </androidx.cardview.widget.CardView>

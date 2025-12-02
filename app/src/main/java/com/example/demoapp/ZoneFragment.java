@@ -40,6 +40,7 @@ public class ZoneFragment extends Fragment {
     private View zoneIndicator;
     private ImageView zoneBar;
     private Button btnAddZone, btnEditZone, btnZoneHistory;
+    private boolean redAlertShown = false;
 
     // State
     private int personalBest = -1;
@@ -213,6 +214,8 @@ public class ZoneFragment extends Fragment {
                     lastAfterMed = latest.getBoolean("afterMed") != null && latest.getBoolean("afterMed");
 
                     int pef = latest.getLong("pef").intValue();
+                    if (!isAdded()) return;
+
                     updateZoneUI(pef);
                 })
                 .addOnFailureListener(e -> showNoZoneLayout());
@@ -248,6 +251,7 @@ public class ZoneFragment extends Fragment {
     // UPDATE UI WITH ZONE
     // ---------------------------------------------------------
     private void updateZoneUI(int pef) {
+        if (!isAdded()) return;  // ← IMPORTANT
 
         layoutNoZone.setVisibility(View.GONE);
         layoutHasZone.setVisibility(View.VISIBLE);
@@ -292,6 +296,8 @@ public class ZoneFragment extends Fragment {
 
 
     private void setPercentColor(int percent) {
+        if (!isAdded()) return;
+
         if (percent >= 80)
             textZonePercent.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
         else if (percent >= 50)
@@ -305,7 +311,6 @@ public class ZoneFragment extends Fragment {
     // ADD PEF
     // ---------------------------------------------------------
     private void showAddZoneDialog() {
-
         boolean pbMissing = (personalBest <= 0);
 
         if ("child".equalsIgnoreCase(role) && pbMissing) {
@@ -313,19 +318,20 @@ public class ZoneFragment extends Fragment {
             return;
         }
 
-        AlertDialog dialog = new AlertDialog.Builder(getContext())
-                .setView(buildPefDialog(true))
-                .create();
+        AlertDialog dialog = new AlertDialog.Builder(getContext()).create();
+
+        View v = buildPefDialog(true, dialog);
+        dialog.setView(v);
 
         dialog.show();
     }
+
 
 
     // ---------------------------------------------------------
     // EDIT PEF
     // ---------------------------------------------------------
     private void showEditZoneDialog() {
-
         boolean pbMissing = (personalBest <= 0);
 
         if ("child".equalsIgnoreCase(role) && pbMissing) {
@@ -333,18 +339,20 @@ public class ZoneFragment extends Fragment {
             return;
         }
 
-        AlertDialog dialog = new AlertDialog.Builder(getContext())
-                .setView(buildPefDialog(false))
-                .create();
+        AlertDialog dialog = new AlertDialog.Builder(getContext()).create();
+
+        View v = buildPefDialog(false, dialog);
+        dialog.setView(v);
 
         dialog.show();
     }
 
 
+
     // ---------------------------------------------------------
     // DIALOG BUILDER FOR ADD/EDIT
     // ---------------------------------------------------------
-    private View buildPefDialog(boolean isAdd) {
+    private View buildPefDialog(boolean isAdd, AlertDialog dialog) {
 
         View v = getLayoutInflater().inflate(
                 isAdd ? R.layout.dialog_add_pef : R.layout.dialog_edit_pef,
@@ -381,7 +389,7 @@ public class ZoneFragment extends Fragment {
             }
 
             int pef = Integer.parseInt(input.getText().toString());
-            saveZoneWithMedicine(pef, cbBefore.isChecked(), cbAfter.isChecked());
+            saveZoneWithMedicine(pef, cbBefore.isChecked(), cbAfter.isChecked(), dialog);
         });
 
         return v;
@@ -391,7 +399,7 @@ public class ZoneFragment extends Fragment {
     // ---------------------------------------------------------
     // SAVE ZONE ENTRY
     // ---------------------------------------------------------
-    private void saveZoneWithMedicine(int pef, boolean beforeMed, boolean afterMed) {
+    private void saveZoneWithMedicine(int pef, boolean beforeMed, boolean afterMed, AlertDialog dialog) {
 
         if (personalBest <= 0 || pef > personalBest) {
             personalBest = pef;
@@ -426,13 +434,27 @@ public class ZoneFragment extends Fragment {
                     loadTodayZone();
 
                     // 🚨🚨🚨 ZONE RED ALERT LOGIC (NEW)
-                    if ("RED".equals(zoneColor)) {
-                        sendParentRedZoneAlert();
+                    if ("RED".equals(zoneColor) && !redAlertShown) {
+                        redAlertShown = true;
+                        sendParentRedZoneAlert();  // alert for parent
                     }
+
+                    dialog.dismiss();
+
                 });
     }
 
 
+    private void showLocalRedDialog() {
+        if (!isAdded()) return;
+
+        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle("Alert")
+                .setMessage("Your child's PEF is in the RED zone. Check now.")
+                .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                .create()
+                .show();
+    }
 
     private void showParentReminderDialog() {
         new AlertDialog.Builder(getContext())

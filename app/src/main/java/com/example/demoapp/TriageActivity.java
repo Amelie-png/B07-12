@@ -1,14 +1,10 @@
 package com.example.demoapp;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -30,14 +26,10 @@ public class TriageActivity extends AppCompatActivity {
     private EditText inputRescue, inputPEF;
 
     private Button btnCheckTriage, btnBack;
-    private LinearLayout resultCard;
-    private TextView textRiskTitle, textRiskDetails;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // IMPORTANT: Your actual XML file
         setContentView(R.layout.fragment_triage);
 
         db = FirebaseFirestore.getInstance();
@@ -64,57 +56,40 @@ public class TriageActivity extends AppCompatActivity {
 
         btnCheckTriage = findViewById(R.id.btnCheckTriage);
         btnBack = findViewById(R.id.btnBackHomeTriage);
-
-        resultCard = findViewById(R.id.resultCard);
-        textRiskTitle = findViewById(R.id.textRiskTitle);
-        textRiskDetails = findViewById(R.id.textRiskDetails);
     }
 
     private void setupListeners() {
-
         btnBack.setOnClickListener(v -> finish());
-
         btnCheckTriage.setOnClickListener(v -> calculateTriage());
     }
 
     private void calculateTriage() {
 
-        boolean red1 = chkCantSpeak.isChecked();
-        boolean red2 = chkRetractions.isChecked();
-        boolean red3 = chkBlueLips.isChecked();
+        boolean isRed =
+                chkCantSpeak.isChecked() ||
+                        chkRetractions.isChecked() ||
+                        chkBlueLips.isChecked();
 
-        boolean mod1 = chkCough.isChecked();
-        boolean mod2 = chkChestTight.isChecked();
-
-        int rescue = 0;
-        String pefText = inputPEF.getText().toString().trim();
-        String rescueText = inputRescue.getText().toString().trim();
-
-        if (!rescueText.isEmpty()) {
-            rescue = Integer.parseInt(rescueText);
-        }
-
-        int pef = 0;
-        if (!pefText.isEmpty()) {
-            pef = Integer.parseInt(pefText);
-        }
-
-        // --------------- Determine severity -----------------
+        boolean isYellow =
+                chkCough.isChecked() ||
+                        chkChestTight.isChecked() ||
+                        (!inputRescue.getText().toString().trim().isEmpty()
+                                && Integer.parseInt(inputRescue.getText().toString().trim()) > 0);
 
         String severity;
 
-        if (red1 || red2 || red3) {
+        if (isRed) {
             severity = "RED";
-        } else if (mod1 || mod2 || rescue > 0) {
+        } else if (isYellow) {
             severity = "YELLOW";
         } else {
             severity = "GREEN";
         }
 
-        saveTriage(severity, rescue, pef);
+        saveTriage(severity);
     }
 
-    private void saveTriage(String severity, int rescue, int pef) {
+    private void saveTriage(String severity) {
 
         long now = System.currentTimeMillis();
 
@@ -123,34 +98,24 @@ public class TriageActivity extends AppCompatActivity {
         triageEntry.put("parentId", parentId);
         triageEntry.put("severity", severity);
         triageEntry.put("timestamp", now);
-        triageEntry.put("rescueAttempts", rescue);
-        triageEntry.put("pef", pef);
-        triageEntry.put("cantSpeak", chkCantSpeak.isChecked());
-        triageEntry.put("retractions", chkRetractions.isChecked());
-        triageEntry.put("blueLips", chkBlueLips.isChecked());
-        triageEntry.put("cough", chkCough.isChecked());
-        triageEntry.put("chestTight", chkChestTight.isChecked());
 
-        // --------------- Save triage entry ------------------
-
-        db.collection("triage").document().set(triageEntry)
+        db.collection("triage").add(triageEntry)
                 .addOnSuccessListener(unused -> {
 
-                    // 🔥 update lastTriageState (most important)
+                    // update last state
                     db.collection("children")
                             .document(childId)
                             .update("lastTriageState", severity);
 
-                    // 🔥 Only send alert for RED, and only when it becomes RED now
+                    // only RED sends parent alert now
                     if (severity.equals("RED")) {
                         sendRedAlert();
                     }
 
-                    showResultCard(severity);
-                })
-                .addOnFailureListener(e ->
-                        Toast.makeText(this, "Failed to save triage", Toast.LENGTH_SHORT).show()
-                );
+                    // 🎯 Route to UI card activity
+                    openCorrectAdviceCard(severity);
+
+                });
     }
 
     private void sendRedAlert() {
@@ -167,18 +132,28 @@ public class TriageActivity extends AppCompatActivity {
         db.collection("alerts").add(alert);
     }
 
-    private void showResultCard(String severity) {
+    private void openCorrectAdviceCard(String severity) {
 
-        resultCard.setVisibility(View.VISIBLE);
+        Intent i;
 
-        textRiskTitle.setText(severity);
+        switch (severity) {
 
-        if (severity.equals("RED")) {
-            textRiskDetails.setText("Severe symptoms detected. Seek help immediately.");
-        } else if (severity.equals("YELLOW")) {
-            textRiskDetails.setText("Moderate symptoms. Continue monitoring.");
-        } else {
-            textRiskDetails.setText("Stable condition.");
+            case "RED":
+                i = new Intent(this, EmergencyCardActivity.class);
+                break;
+
+            case "YELLOW":
+                i = new Intent(this, HomeStepsCardActivity.class);
+                break;
+
+            default:
+                i = new Intent(this, GreenAdviceCardActivity.class);
         }
+
+        i.putExtra("uid", childId);
+        i.putExtra("role", role);
+
+        startActivity(i);
+        finish(); // close triage screen
     }
 }
