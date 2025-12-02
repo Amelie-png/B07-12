@@ -12,7 +12,9 @@ import com.google.firebase.firestore.Source;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class EntryLogRepository {
     private final CollectionReference entriesCollection;
@@ -124,6 +126,52 @@ public class EntryLogRepository {
         return true;
     }
 
+    public void countProblemDaysByCategories(String childUid, LocalDate startDate, LocalDate endDate,
+                                             ArrayList<String> categories,
+                                             OnProblemDaysCountedByCategoryListener listener) {
+
+        entriesCollection
+                .whereEqualTo("childUid", childUid)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    Map<String, Integer> counts = new HashMap<>();
+                    for (String cat : categories) {
+                        counts.put(cat, 0);
+                    }
+
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+                    List<DocumentSnapshot> docRef = querySnapshot.getDocuments();
+                    for (DocumentSnapshot doc : docRef) {
+                        EntryLog entry = doc.toObject(EntryLog.class);
+                        if (entry == null) continue;
+
+                        LocalDate entryDate = LocalDate.parse(entry.getDate(), formatter);
+                        if (entryDate.isBefore(startDate) || entryDate.isAfter(endDate)) continue;
+
+                        List<CategoryName> symptoms = entry.getSymptoms();
+                        if (symptoms != null) {
+                            for (CategoryName symptom : symptoms) {
+                                String catName = symptom.getCategory();
+                                if (counts.containsKey(catName)) {
+                                    counts.put(catName, counts.get(catName) + 1);
+                                }
+                            }
+                        }
+                    }
+
+                    listener.onCounted(counts);
+
+                })
+                .addOnFailureListener(listener::onError);
+    }
+
+    public interface OnProblemDaysCountedByCategoryListener {
+        void onCounted(Map<String, Integer> counts);
+        void onError(Exception e);
+    }
+
+
     // Callback interfaces
     public interface OnSuccessListener {
         void onSuccess(String id);
@@ -142,4 +190,5 @@ public class EntryLogRepository {
         void onEntriesRetrieved(ArrayList<EntryLog> entries);
         void onError(Exception e);
     }
+
 }
