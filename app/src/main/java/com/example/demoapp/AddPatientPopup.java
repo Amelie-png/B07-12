@@ -1,5 +1,7 @@
 package com.example.demoapp;
 
+import com.example.demoapp.models.*;
+
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.InsetDrawable;
@@ -81,7 +83,7 @@ public class AddPatientPopup extends DialogFragment {
                                 Map<String, Object> codeData = (Map<String, Object>) shareCodes.get(enteredCode);
                                 Boolean revoked = (Boolean) codeData.get("revoked");
                                 if (revoked != null && !revoked) {
-                                    updateChildProviderId(individualChildDoc.getId());
+                                    updateChildProviderId(individualChildDoc.getId(), enteredCode);
                                 } else {
                                     Toast.makeText(requireContext(), "Cannot Link", Toast.LENGTH_SHORT).show();
                                 }
@@ -100,18 +102,41 @@ public class AddPatientPopup extends DialogFragment {
         return view;
     }
 
-    private void updateChildProviderId(String childID){
-        db.collection("children").document(childID)
-                .update("providerIds", FieldValue.arrayUnion(providerId))
-                .addOnSuccessListener(aVoid -> {
-                    if(listener!=null){
-                        listener.onDataChanged();
+    private void updateChildProviderId(String childID, String enteredCode){
+        db.collection("children")
+                .document(childID)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (!doc.exists()) return;
+
+                    Child child = doc.toObject(Child.class);
+                    if (child == null) return;
+
+                    // Try to bind
+                    boolean success = child.bindProviderWithShareCode(providerId, enteredCode);
+
+                    if (!success) {
+                        Toast.makeText(requireContext(), "Code expired or already used", Toast.LENGTH_SHORT).show();
+                        return;
                     }
+
+                    // Write updated child back to Firestore
+                    Map<String, Object> updatedMap = child.childToMap(child);
+
+                    db.collection("children")
+                            .document(childID)
+                            .set(updatedMap)
+                            .addOnSuccessListener(aVoid -> {
+                                Toast.makeText(requireContext(), "Linked Successfully", Toast.LENGTH_SHORT).show();
+                                if (listener != null) listener.onDataChanged();
+                            })
+                            .addOnFailureListener(e ->
+                                    Toast.makeText(requireContext(), "Failed to save link: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                            );
+
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(requireContext(),
-                            "Failed to link: " + e.getMessage(),
-                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), "Failed to load child: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 

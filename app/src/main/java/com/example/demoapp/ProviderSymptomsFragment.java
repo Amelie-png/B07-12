@@ -11,12 +11,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.firebase.firestore.FirebaseFirestore;
+
 public class ProviderSymptomsFragment extends Fragment {
 
     private String providerUid;
     private String childUid;
 
     public ProviderSymptomsFragment() {}
+
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -32,7 +36,14 @@ public class ProviderSymptomsFragment extends Fragment {
 
         providerUid = getActivity().getIntent().getExtras().getString("uid");
         childUid = getActivity().getIntent().getExtras().getString("childUid");
+    }
 
+    private void hideSymptoms() {
+        View container = requireView().findViewById(R.id.summary_calendar_container);
+        container.setVisibility(View.GONE);
+    }
+
+    public void showSymptoms(){
         SummaryCalendarFragment summaryFragment = new SummaryCalendarFragment();
 
         Bundle bundle = new Bundle();
