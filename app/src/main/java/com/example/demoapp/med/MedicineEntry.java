@@ -76,10 +76,9 @@ public class MedicineEntry {
         return dateTimeFormat.format(new Date(timestamp));
     }
     public int getPreBreathRating() { return preBreathRating; }
-
     public int getPostBreathRating() { return postBreathRating; }
-
     public String getConditionChange() { return conditionChange; }
+    public boolean isTechniqueCompleted() { return techniqueCompleted; }
 
     //Utils
     @Override

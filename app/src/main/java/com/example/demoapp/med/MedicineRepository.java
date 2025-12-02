@@ -2,12 +2,15 @@ package com.example.demoapp.med;
 
 import android.util.Log;
 
+import com.example.demoapp.Badge;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -151,4 +154,121 @@ public class MedicineRepository {
                     cb.onSuccess(list);
                 });
     }
+
+    public void updateStreaksOnNewLog(String childId, boolean techniqueCompleted) {
+        DocumentReference childDoc = childRef.document(childId);
+        long today = System.currentTimeMillis();
+
+        childDoc.get().addOnSuccessListener(snapshot -> {
+            if (!snapshot.exists()) return;
+
+            // ---------- LOAD CURRENT BADGES ----------
+            Map<String, Object> badges = (Map<String, Object>) snapshot.get("badges");
+            if (badges == null) badges = new HashMap<>();
+
+            // Create a typed Badge object for easier handling
+            Badge badge = Badge.fromMap(badges);
+
+            // ---------- UPDATE CONTROLLER STREAK ----------
+            badge.setControllerStreak(
+                    MedicineUtils.isSameDay(badge.getLastCheckedDate(), today) ? badge.getControllerStreak() :
+                            MedicineUtils.isYesterday(badge.getLastCheckedDate(), today) ? badge.getControllerStreak() + 1 :
+                                    1);
+
+            // ---------- UPDATE TECHNIQUE STREAK ----------
+            if (techniqueCompleted) {
+                badge.setControllerStreak(
+                        MedicineUtils.isSameDay(badge.getLastTechniqueDate(), today) ? badge.getTechniqueStreak() :
+                                MedicineUtils.isYesterday(badge.getLastTechniqueDate(), today) ? badge.getTechniqueStreak() + 1 :
+                                        1);
+
+                // update technique date only if used
+                badge.setLastTechniqueDate(today);
+            }
+
+            // Always update last checked date for controller streak
+            badge.setLastCheckedDate(today);
+
+            // ---------- SAVE BACK TO FIRESTORE ----------
+            childDoc.update("badges", Badge.toMap(badge));
+        });
+    }
+
+
+//    public void updateControllerStreakOnNewLog(String childId) {
+//
+//        DocumentReference childDoc = childRef.document(childId);
+//
+//        long today = System.currentTimeMillis();
+//
+//        childDoc.get().addOnSuccessListener(snapshot -> {
+//            if (!snapshot.exists()) return;
+//
+//            Map<String, Object> badges = (Map<String, Object>) snapshot.get("badges");
+//            if (badges == null) badges = new HashMap<>();
+//
+//            Long lastLogDate = badges.get("lastCheckedDate") instanceof Long ?
+//                    (Long) badges.get("lastCheckedDate") : null;
+//
+//            Long controllerStreak = badges.get("controllerStreak") instanceof Long ?
+//                    (Long) badges.get("controllerStreak") : 0L;
+//
+//            boolean sameDay = lastLogDate != null && MedicineUtils.isSameDay(lastLogDate, today);
+//            boolean yesterday = lastLogDate != null && MedicineUtils.isYesterday(lastLogDate, today);
+//
+//            long newStreak;
+//
+//            if (sameDay) {
+//                newStreak = controllerStreak;
+//            } else if (yesterday) {
+//                newStreak = controllerStreak + 1;
+//            } else {
+//                newStreak = 1;
+//            }
+//
+//            badges.put("controllerStreak", newStreak);
+//            badges.put("lastCheckedDate", today);
+//
+//            childDoc.update("badges", badges);
+//        });
+//    }
+//
+//    public void updateTechniqueStreakOnNewLog(String childId) {
+//
+//        DocumentReference childDoc = childRef.document(childId);
+//
+//        long today = System.currentTimeMillis();
+//
+//        childDoc.get().addOnSuccessListener(snapshot -> {
+//            if (!snapshot.exists()) return;
+//
+//            Map<String, Object> badges = (Map<String, Object>) snapshot.get("badges");
+//            if (badges == null) badges = new HashMap<>();
+//
+//            Long lastLogDate = badges.get("lastCheckedDate") instanceof Long ?
+//                    (Long) badges.get("lastCheckedDate") : null;
+//
+//            Long techniqueStreak = badges.get("techniqueStreak") instanceof Long ?
+//                    (Long) badges.get("techniqueStreak") : 0L;
+//
+//            boolean sameDay = lastLogDate != null && MedicineUtils.isSameDay(lastLogDate, today);
+//            boolean yesterday = lastLogDate != null && MedicineUtils.isYesterday(lastLogDate, today);
+//
+//            long newStreak;
+//
+//            if (sameDay) {
+//                newStreak = techniqueStreak;
+//            } else if (yesterday) {
+//                newStreak = techniqueStreak + 1;
+//            } else {
+//                newStreak = 1;
+//            }
+//
+//            badges.put("techniqueStreak", newStreak);
+//            badges.put("lastCheckedDate", today);
+//
+//            childDoc.update("badges", badges);
+//        });
+//    }
+
 }

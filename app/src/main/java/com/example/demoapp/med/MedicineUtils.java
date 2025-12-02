@@ -103,4 +103,27 @@ public class MedicineUtils {
 
         return Math.max(1, days + 1); // inclusive range
     }
+
+    public static boolean isSameDay(long t1, long t2) {
+        Calendar c1 = Calendar.getInstance();
+        Calendar c2 = Calendar.getInstance();
+        c1.setTimeInMillis(t1);
+        c2.setTimeInMillis(t2);
+
+        return c1.get(Calendar.YEAR) == c2.get(Calendar.YEAR)
+                && c1.get(Calendar.DAY_OF_YEAR) == c2.get(Calendar.DAY_OF_YEAR);
+    }
+
+    public static boolean isYesterday(long previousDay, long today) {
+        Calendar cPrev = Calendar.getInstance();
+        Calendar cToday = Calendar.getInstance();
+        cPrev.setTimeInMillis(previousDay);
+        cToday.setTimeInMillis(today);
+
+        cToday.add(Calendar.DAY_OF_YEAR, -1);
+
+        return cPrev.get(Calendar.YEAR) == cToday.get(Calendar.YEAR)
+                && cPrev.get(Calendar.DAY_OF_YEAR) == cToday.get(Calendar.DAY_OF_YEAR);
+    }
+
 }

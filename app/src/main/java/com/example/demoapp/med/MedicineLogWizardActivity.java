@@ -350,6 +350,7 @@ public class MedicineLogWizardActivity extends AppCompatActivity {
         repo.addMedLog(entry, new MedicineRepository.OnResult<String>() {
             @Override public void onSuccess(String id) {
                 // Success -> dismiss the wizard and return to log list
+                repo.updateStreaksOnNewLog(childId, entry.isTechniqueCompleted());
                 Toast.makeText(MedicineLogWizardActivity.this, "Saved!", Toast.LENGTH_SHORT).show();
                 finish();
             }
