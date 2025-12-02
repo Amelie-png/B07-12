@@ -36,11 +36,8 @@ public class ProviderSymptomsFragment extends Fragment {
 
         providerUid = getActivity().getIntent().getExtras().getString("uid");
         childUid = getActivity().getIntent().getExtras().getString("childUid");
-    }
 
-    private void hideSymptoms() {
-        View container = requireView().findViewById(R.id.summary_calendar_container);
-        container.setVisibility(View.GONE);
+        showSymptoms();
     }
 
     public void showSymptoms(){
