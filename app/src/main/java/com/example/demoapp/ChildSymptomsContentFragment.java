@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment;
 
 public class ChildSymptomsContentFragment extends Fragment {
     private String uid;
+    private String role;
 
     @Nullable
     @Override
@@ -30,12 +31,11 @@ public class ChildSymptomsContentFragment extends Fragment {
         Bundle args = getArguments();
         if (args != null) {
             uid = args.getString("uid");
+            role = args.getString("role");
         }
 
         Button addEntryButton = view.findViewById(R.id.add_entry_button);
         addEntryButton.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "add_entry_button clicked", Toast.LENGTH_SHORT).show();
-
             Intent intent = new Intent(requireContext(), AddSymptomsActivity.class);
             intent.putExtra("uid", uid);
             intent.putExtra("role", "child");
@@ -47,8 +47,8 @@ public class ChildSymptomsContentFragment extends Fragment {
 
             Bundle bundle = new Bundle();
             bundle.putString("uid", uid);
-            bundle.putString("role", "child");
-            calendarFragment.setArguments(bundle);  // FIX: use setArguments()
+            bundle.putString("role", role);
+            calendarFragment.setArguments(bundle);
 
             getChildFragmentManager()
                     .beginTransaction()

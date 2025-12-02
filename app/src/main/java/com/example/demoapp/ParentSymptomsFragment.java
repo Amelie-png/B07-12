@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 public class ParentSymptomsFragment extends Fragment {
 
     private String parentUid;
+    private String role;
 
     public ParentSymptomsFragment() {
     }
@@ -33,6 +34,7 @@ public class ParentSymptomsFragment extends Fragment {
         // Updated to use unified argument key "uid"
         if (getArguments() != null) {
             parentUid = getArguments().getString("uid");
+            role = getArguments().getString("role");
         }
 
         Log.d("ParentSymptomFragment", "parentUid = " + parentUid);
@@ -40,6 +42,7 @@ public class ParentSymptomsFragment extends Fragment {
 
         Bundle bundle = new Bundle();
         bundle.putString("uid", parentUid);
+        bundle.putString("role", role);
         parentAddSymptomScreen.setArguments(bundle);
 
         getChildFragmentManager()

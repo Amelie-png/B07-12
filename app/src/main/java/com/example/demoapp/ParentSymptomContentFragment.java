@@ -30,8 +30,6 @@ public class ParentSymptomContentFragment extends Fragment {
         Button addEntryButton = view.findViewById(R.id.add_entry_button);
         addEntryButton.setOnClickListener(v ->
                 {
-                    Toast.makeText(getContext(), "add_entry_button clicked", Toast.LENGTH_SHORT).show();
-
                     Intent intent = new Intent(requireContext(), AddSymptomsActivity.class);
 
                     parentUid = getArguments().getString("uid");
@@ -45,6 +43,11 @@ public class ParentSymptomContentFragment extends Fragment {
 
         if (savedInstanceState == null) {
             CalendarWithHistory calendarFragment = new CalendarWithHistory();
+            Bundle bundle = new Bundle();
+            bundle.putString("uid", parentUid);
+            bundle.putString("role", "parent");
+            calendarFragment.setArguments(bundle);
+
             getChildFragmentManager()
                     .beginTransaction()
                     .replace(R.id.display_browse_history_container, calendarFragment)

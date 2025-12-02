@@ -46,8 +46,7 @@ public class AddSymptomsActivity extends AppCompatActivity {
     private EntryLogRepository entryLogRepository;
 
     private String recorder;
-    //TODO: replace with correct Uid logic
-    private String childUid = "oKaNrSiogbRxH5iCxfjS";
+    private String childUid;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

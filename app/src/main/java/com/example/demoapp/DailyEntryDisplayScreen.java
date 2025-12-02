@@ -27,6 +27,7 @@ public class DailyEntryDisplayScreen extends Fragment implements EntryLogReposit
     private EntryLogRepository entryRepo;
     private FirebaseFirestore db;
     private String childUid;
+    private String role;
     private String startDate;
     private String endDate;
     private ArrayList<String> selectedSymptoms;
@@ -54,7 +55,7 @@ public class DailyEntryDisplayScreen extends Fragment implements EntryLogReposit
         startDate = args.getString("startDate");
         endDate = args.getString("endDate");
         childUid = args.getString("childId");
-
+        role = args.getString("role");
         selectedSymptoms = args.getStringArrayList("symptoms");
         selectedTriggers = args.getStringArrayList("triggers");
         symptomsAllowed = getArguments().getBoolean("symptomsAllowed");

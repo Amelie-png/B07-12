@@ -73,8 +73,8 @@ public class CalendarWithHistory extends Fragment{
             Intent intent = new Intent(getActivity(), FilterEntriesScreen.class);
             intent.putExtra("childUid", childUid);
             intent.putExtra("role", role);
-            intent.putExtra("symptomsAllowed", getArguments().getString("symptomsAllowed"));
-            intent.putExtra("triggersAllowed", getArguments().getString("triggersAllowed"));
+            intent.putExtra("symptomsAllowed", getArguments().getBoolean("symptomsAllowed"));
+            intent.putExtra("triggersAllowed", getArguments().getBoolean("triggersAllowed"));
             getActivity().startActivity(intent);
         }
     }
