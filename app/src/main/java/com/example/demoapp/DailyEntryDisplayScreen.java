@@ -127,8 +127,11 @@ public class DailyEntryDisplayScreen extends Fragment implements EntryLogReposit
             }
 
             if(symptomStr != null && triggerStr != null){
+                String[] arr = getAppropriateStr(symptomStr, triggerStr);
+                symptomStr = arr[0];
+                triggerStr = arr[1];
                 entryList.add(new Entry(Integer.toString(i+1), e.getDate(), e.getRecorder(), symptomStr, triggerStr));
-            } else if(symptomStr == null && triggerStr == null) {
+            }else if(symptomStr == null && triggerStr == null) {
                 entryList.add(new Entry(Integer.toString(i+1), e.getDate(), e.getRecorder()));
             } else if (symptomStr == null) {
                 entryList.add(new Entry(Integer.toString(i+1), e.getDate(), e.getRecorder(), triggerStr, false));
@@ -145,6 +148,13 @@ public class DailyEntryDisplayScreen extends Fragment implements EntryLogReposit
         }
     }
 
+    private String[] getAppropriateStr(String symptomStr, String triggerStr){
+        if(symptomStr.equals("") && triggerStr.equals("")){
+            return new String[] {"No Symptoms!", "N/A"};
+        }else{
+            return new String[] {symptomStr, triggerStr};
+        }
+    }
 
     private String formatSymptomsTriggers(ArrayList<CategoryName> list) {
         if (list == null || list.isEmpty()) return "";

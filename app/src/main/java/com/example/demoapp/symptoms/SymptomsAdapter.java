@@ -140,7 +140,7 @@ public class SymptomsAdapter extends RecyclerView.Adapter<SymptomsAdapter.ViewHo
             // SPECIAL LOGIC FOR "OTHER" CUSTOM INPUT
             // ======================================
             if (symptom.equalsIgnoreCase("Other")) {
-                showCustomInputDialog();
+                showCustomInputDialog(position);
                 return;
             }
 
@@ -171,6 +171,9 @@ public class SymptomsAdapter extends RecyclerView.Adapter<SymptomsAdapter.ViewHo
         String second = target.second;
         for (Pair<String, String> p : list) {
             if (p.first.equals(first) && p.second.equals(second)) {
+                return true;
+            }
+            if (first.equals("Other") && p.first.equals("Other")) {
                 return true;
             }
         }
@@ -222,7 +225,7 @@ public class SymptomsAdapter extends RecyclerView.Adapter<SymptomsAdapter.ViewHo
      * <p>If the user confirms with non-empty input, the custom symptom is added
      * to the selection under the canonical "Other" category.</p>
      */
-    private void showCustomInputDialog() {
+    private void showCustomInputDialog(int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Enter custom symptom");
 
@@ -235,6 +238,7 @@ public class SymptomsAdapter extends RecyclerView.Adapter<SymptomsAdapter.ViewHo
             String custom = input.getText().toString().trim();
             if (!custom.isEmpty()) {
                 selectedSymptoms.add(new Pair<>("Other", custom));
+                notifyItemChanged(position);
                 listener.onSelectionChanged(selectedSymptoms.size());
             }
         });

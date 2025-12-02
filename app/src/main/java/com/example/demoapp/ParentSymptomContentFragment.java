@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment;
 
 public class ParentSymptomContentFragment extends Fragment {
     private String parentUid;
+    private String childUid;
 
     @Nullable
     @Override
@@ -27,14 +28,16 @@ public class ParentSymptomContentFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        parentUid = getArguments().getString("uid");
+        childUid = getArguments().getString("childUid");
+
         Button addEntryButton = view.findViewById(R.id.add_entry_button);
         addEntryButton.setOnClickListener(v ->
                 {
                     Intent intent = new Intent(requireContext(), AddSymptomsActivity.class);
 
-                    parentUid = getArguments().getString("uid");
-
                     intent.putExtra("uid", parentUid);
+                    intent.putExtra("childUid", childUid);
                     intent.putExtra("role", "parent");
 
                     startActivity(intent);
@@ -46,6 +49,7 @@ public class ParentSymptomContentFragment extends Fragment {
             Bundle bundle = new Bundle();
             bundle.putString("uid", parentUid);
             bundle.putString("role", "parent");
+            bundle.putString("childUid", childUid);
             calendarFragment.setArguments(bundle);
 
             getChildFragmentManager()

@@ -72,7 +72,6 @@ public class EntryLogRepository {
                                    String selectedEndDate,
                                    ArrayList<String> selectedSymptoms,
                                    ArrayList<String> selectedTriggers){
-        //TODO: fix cached firebase problem
         entriesCollection
                 .whereEqualTo("childUid", childUid)
                 .get()

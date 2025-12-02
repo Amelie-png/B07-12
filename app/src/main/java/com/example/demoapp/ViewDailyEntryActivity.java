@@ -1,5 +1,6 @@
 package com.example.demoapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 
@@ -29,6 +30,7 @@ public class ViewDailyEntryActivity extends AppCompatActivity {
 
             // Pass extras from intent
             Bundle bundle = new Bundle();
+            Intent thisIntent = getIntent();
             bundle.putString("startDate", getIntent().getStringExtra("startDate"));
             bundle.putString("endDate", getIntent().getStringExtra("endDate"));
             bundle.putStringArrayList("symptoms", getIntent().getStringArrayListExtra("symptoms"));
