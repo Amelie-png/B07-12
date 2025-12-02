@@ -1,29 +1,29 @@
 package com.example.demoapp;
 
 import android.os.Bundle;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class ParentSymptomsFragment extends Fragment {
+public class ChildSymptomsFragment extends Fragment {
 
-    private String parentUid;
+    private String uid;
     private String role;
 
-    public ParentSymptomsFragment() {
+    public ChildSymptomsFragment() {
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_parent_symptom, container, false);
+        return inflater.inflate(R.layout.fragment_child_symptoms, container, false);
     }
 
     @Override
@@ -33,21 +33,21 @@ public class ParentSymptomsFragment extends Fragment {
 
         // Updated to use unified argument key "uid"
         if (getArguments() != null) {
-            parentUid = getArguments().getString("uid");
+            uid = getArguments().getString("uid");
             role = getArguments().getString("role");
         }
 
-        Log.d("ParentSymptomFragment", "parentUid = " + parentUid);
-        ParentSymptomContentFragment parentAddSymptomScreen = new ParentSymptomContentFragment();
+        Log.d("ChildSymptomsFragment", "childUid = " + uid);
+        ChildSymptomsContentFragment childAddSymptomScreen = new ChildSymptomsContentFragment();
 
         Bundle bundle = new Bundle();
-        bundle.putString("uid", parentUid);
+        bundle.putString("uid", uid);
         bundle.putString("role", role);
-        parentAddSymptomScreen.setArguments(bundle);
+        childAddSymptomScreen.setArguments(bundle);
 
         getChildFragmentManager()
                 .beginTransaction()
-                .replace(R.id.fragment_container, parentAddSymptomScreen)
+                .replace(R.id.fragment_container, childAddSymptomScreen)
                 .commit();
     }
 }

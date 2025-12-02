@@ -11,4 +11,12 @@
         android:fadeScrollbars="false"
         android:scrollbars="vertical"></ListView>
 
+    <TextView
+        android:id="@+id/when_empty"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="No entries logged"
+        android:textSize="20sp"
+        android:gravity="center"
+        android:visibility="gone"/>
 </LinearLayout>

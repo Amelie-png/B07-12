@@ -22,6 +22,9 @@ import java.util.Locale;
 
 public class AddSymptomsActivity extends AppCompatActivity {
 
+    // Back Button
+    private Button btnBackHome;
+
     // Symptoms
     private TextView selectedSymptomsText;
     private ArrayList<CategoryName> selectedSymptomsList;
@@ -43,14 +46,13 @@ public class AddSymptomsActivity extends AppCompatActivity {
     private EntryLogRepository entryLogRepository;
 
     private String recorder;
-    //TODO: replace with correct Uid logic
-    private String childUid = "oKaNrSiogbRxH5iCxfjS";
+    private String childUid;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.fragment_add_symptoms); // You may rename this layout if needed
+        setContentView(R.layout.activity_add_symptoms); // You may rename this layout if needed
 
         entryLogRepository = new EntryLogRepository();
         selectedSymptomsList = new ArrayList<>();
@@ -64,6 +66,7 @@ public class AddSymptomsActivity extends AppCompatActivity {
         Log.d("AddSymptomsActivity", "childUid = " + childUid);
 
         // Connect views
+        btnBackHome = findViewById(R.id.btnBackHome);
         buttonSelectSymptoms = findViewById(R.id.buttonSelectSymptoms);
         selectedSymptomsText = findViewById(R.id.selectedSymptomsText);
 
@@ -73,6 +76,8 @@ public class AddSymptomsActivity extends AppCompatActivity {
         buttonAddSymptoms = findViewById(R.id.buttonAddSymptoms);
 
         setNoSelectionText();
+
+        btnBackHome.setOnClickListener(v -> finish());
 
         selectSymptomsLauncher =
                 registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),

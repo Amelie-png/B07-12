@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,11 +23,13 @@ import java.util.ArrayList;
 public class DailyEntryDisplayScreen extends Fragment implements EntryLogRepository.OnEntriesRetrievedListener{
 
     private ListView listView;
+    private TextView whenEmpty;
     private EntryAdapter adapter;
     private ArrayList<Entry> entryList;
     private EntryLogRepository entryRepo;
     private FirebaseFirestore db;
     private String childUid;
+    private String role;
     private String startDate;
     private String endDate;
     private ArrayList<String> selectedSymptoms;
@@ -44,6 +47,7 @@ public class DailyEntryDisplayScreen extends Fragment implements EntryLogReposit
 
         View view = inflater.inflate(R.layout.fragment_daily_entries_display_screen, container, false);
         listView = view.findViewById(R.id.entry_list);
+        whenEmpty = view.findViewById(R.id.when_empty);
 
         db = FirebaseFirestore.getInstance();
         entryRepo = new EntryLogRepository();
@@ -54,7 +58,7 @@ public class DailyEntryDisplayScreen extends Fragment implements EntryLogReposit
         startDate = args.getString("startDate");
         endDate = args.getString("endDate");
         childUid = args.getString("childId");
-
+        role = args.getString("role");
         selectedSymptoms = args.getStringArrayList("symptoms");
         selectedTriggers = args.getStringArrayList("triggers");
         symptomsAllowed = getArguments().getBoolean("symptomsAllowed");
@@ -83,6 +87,15 @@ public class DailyEntryDisplayScreen extends Fragment implements EntryLogReposit
     public void onEntriesRetrieved(ArrayList<EntryLog> entries) {
         entryList.clear();
         int numEntry = entries.size();
+        if (numEntry == 0) {
+            // Show empty message
+            whenEmpty.setVisibility(View.VISIBLE);
+            listView.setVisibility(View.GONE);
+            return;
+        } else {
+            whenEmpty.setVisibility(View.GONE);
+            listView.setVisibility(View.VISIBLE);
+        }
         for (int i=0; i<numEntry; i++) {
             EntryLog e=entries.get(i);
             String symptomStr = null;

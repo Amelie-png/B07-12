@@ -12,8 +12,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-public class ParentSymptomContentFragment extends Fragment {
-    private String parentUid;
+public class ChildSymptomsContentFragment extends Fragment {
+    private String uid;
+    private String role;
 
     @Nullable
     @Override
@@ -27,25 +28,26 @@ public class ParentSymptomContentFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        Bundle args = getArguments();
+        if (args != null) {
+            uid = args.getString("uid");
+            role = args.getString("role");
+        }
+
         Button addEntryButton = view.findViewById(R.id.add_entry_button);
-        addEntryButton.setOnClickListener(v ->
-                {
-                    Intent intent = new Intent(requireContext(), AddSymptomsActivity.class);
-
-                    parentUid = getArguments().getString("uid");
-
-                    intent.putExtra("uid", parentUid);
-                    intent.putExtra("role", "parent");
-
-                    startActivity(intent);
-                }
-        );
+        addEntryButton.setOnClickListener(v -> {
+            Intent intent = new Intent(requireContext(), AddSymptomsActivity.class);
+            intent.putExtra("uid", uid);
+            intent.putExtra("role", "child");
+            startActivity(intent);
+        });
 
         if (savedInstanceState == null) {
-            CalendarWithHistory calendarFragment = new CalendarWithHistory();
+            PlainCalendar calendarFragment = new PlainCalendar();
+
             Bundle bundle = new Bundle();
-            bundle.putString("uid", parentUid);
-            bundle.putString("role", "parent");
+            bundle.putString("uid", uid);
+            bundle.putString("role", role);
             calendarFragment.setArguments(bundle);
 
             getChildFragmentManager()

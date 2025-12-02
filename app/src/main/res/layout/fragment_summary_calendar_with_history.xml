@@ -3,10 +3,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="10dp">
+
+    <Button
+        android:id="@+id/browse_history"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Browse History" />
 
     <FrameLayout
-        android:id="@+id/display_browse_history_container"
+        android:id="@+id/display_plain_calendar_container"
+        android:padding="0dp"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />

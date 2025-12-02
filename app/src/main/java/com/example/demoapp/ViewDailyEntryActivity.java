@@ -36,6 +36,8 @@ public class ViewDailyEntryActivity extends AppCompatActivity {
             bundle.putString("childId", getIntent().getStringExtra("childUid"));
             bundle.putString("uid", getIntent().getStringExtra("uid"));
             bundle.putString("role", getIntent().getStringExtra("role"));
+            bundle.putBoolean("symptomsAllowed", getIntent().getBooleanExtra("symptomsAllowed", true));
+            bundle.putBoolean("triggersAllowed", getIntent().getBooleanExtra("triggersAllowed",true));
 
             fragment.setArguments(bundle);
 

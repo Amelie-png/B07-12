@@ -1,7 +1,6 @@
 package com.example.demoapp;
 
 import android.os.Bundle;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -45,7 +44,7 @@ public class ProviderSymptomsFragment extends Fragment {
     }
 
     public void showSymptoms(){
-        SummaryCalendarFragment summaryFragment = new SummaryCalendarFragment();
+        CalendarWithHistory summaryFragment = new CalendarWithHistory();
 
         Bundle bundle = new Bundle();
         bundle.putString("childUid", childUid);
