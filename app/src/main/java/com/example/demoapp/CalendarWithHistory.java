@@ -36,6 +36,7 @@ public class CalendarWithHistory extends Fragment{
 
         initWidgets(view);
 
+        Bundle b= getArguments();
         role = getArguments().getString("role");
         if(role.equals("provider") || role.equals("parent")){
             childUid = getArguments().getString("childUid");
@@ -52,6 +53,13 @@ public class CalendarWithHistory extends Fragment{
             Bundle calendarArgs = new Bundle();
             calendarArgs.putString("childUid", childUid);
             calendarArgs.putString("role", role);
+            if(role.equals("provider")){
+                calendarArgs.putBoolean("symptomsAllowed", getArguments().getBoolean("symptomsAllowed"));
+                calendarArgs.putBoolean("triggersAllowed", getArguments().getBoolean("triggersAllowed"));
+            }else{
+                calendarArgs.putBoolean("symptomsAllowed", true);
+                calendarArgs.putBoolean("triggersAllowed", true);
+            }
             calendarFragment.setArguments(calendarArgs);
 
             getChildFragmentManager()
@@ -73,8 +81,13 @@ public class CalendarWithHistory extends Fragment{
             Intent intent = new Intent(getActivity(), FilterEntriesScreen.class);
             intent.putExtra("childUid", childUid);
             intent.putExtra("role", role);
-            intent.putExtra("symptomsAllowed", getArguments().getBoolean("symptomsAllowed"));
-            intent.putExtra("triggersAllowed", getArguments().getBoolean("triggersAllowed"));
+            if(role.equals("provider")){
+                intent.putExtra("symptomsAllowed", getArguments().getBoolean("symptomsAllowed"));
+                intent.putExtra("triggersAllowed", getArguments().getBoolean("triggersAllowed"));
+            }else{
+                intent.putExtra("symptomsAllowed", true);
+                intent.putExtra("triggersAllowed", true);
+            }
             getActivity().startActivity(intent);
         }
     }

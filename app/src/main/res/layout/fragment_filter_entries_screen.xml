@@ -81,7 +81,7 @@
             app:checkedIconVisible="true">
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chip_symptom_cough"
+                android:id="@+id/chip_symptom_night_waking"
                 style="@style/Widget.MaterialComponents.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -89,7 +89,7 @@
                 app:chipBackgroundColor="@color/chip_color_selector"/>
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chip_symptom_wheezing"
+                android:id="@+id/chip_symptom_activity_limits"
                 style="@style/Widget.MaterialComponents.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -97,11 +97,19 @@
                 app:chipBackgroundColor="@color/chip_color_selector"/>
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chip_symptom_shortness_of_breath"
+                android:id="@+id/chip_symptom_cough"
                 style="@style/Widget.MaterialComponents.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Cough/Wheeze"
+                app:chipBackgroundColor="@color/chip_color_selector"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_symptom_other"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Other"
                 app:chipBackgroundColor="@color/chip_color_selector"/>
 
         </com.google.android.material.chip.ChipGroup>

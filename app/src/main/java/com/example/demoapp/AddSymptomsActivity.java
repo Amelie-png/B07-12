@@ -52,7 +52,7 @@ public class AddSymptomsActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_add_symptoms); // You may rename this layout if needed
+        setContentView(R.layout.activity_add_symptoms);
 
         entryLogRepository = new EntryLogRepository();
         selectedSymptomsList = new ArrayList<>();
@@ -60,8 +60,12 @@ public class AddSymptomsActivity extends AppCompatActivity {
 
         // Retrieve passed values from ParentAddSymptomActivity if needed
         if (getIntent() != null) {
-            childUid = getIntent().getStringExtra("uid");
             recorder = getIntent().getStringExtra("role");
+            if(recorder.equals("parent")){
+                childUid = getIntent().getStringExtra("childUid");
+            } else{
+                childUid = getIntent().getStringExtra("uid");
+            }
         }
         Log.d("AddSymptomsActivity", "childUid = " + childUid);
 
