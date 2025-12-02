@@ -176,12 +176,12 @@ public class ParentHomeFragment extends Fragment {
                             return;
                         }
 
-                        updateEmergencyCard(lastState);
+                        //updateEmergencyCard(lastState);
                     }
                 });
     }
 
-
+/*
     private void updateEmergencyCard(String state) {
         switch (state) {
             case "RED":
@@ -194,7 +194,7 @@ public class ParentHomeFragment extends Fragment {
                 emergencyText.setText("Current Status: GREEN (Stable)");
         }
     }
-
+*/
 
     // ---------------------------------------------------------
     // Load zone fragment
