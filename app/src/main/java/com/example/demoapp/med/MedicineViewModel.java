@@ -4,15 +4,17 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class MedicineViewModel extends ViewModel {
     private final MutableLiveData<String> childId = new MutableLiveData<>();
 
-    private final MutableLiveData<LocalDate> purchaseDate = new MutableLiveData<>();
-    private final MutableLiveData<LocalDate> expiryDate = new MutableLiveData<>();
-    private final MutableLiveData<LocalDate> startDate = new MutableLiveData<>();
+    private final MutableLiveData<String> purchaseDate = new MutableLiveData<>();
+    private final MutableLiveData<String> expiryDate = new MutableLiveData<>();
+    private final MutableLiveData<String> startDate = new MutableLiveData<>();
 
     private final MutableLiveData<Integer> remainingDoses = new MutableLiveData<>(0);
     private final MutableLiveData<Integer> totalDoses = new MutableLiveData<>(0);
@@ -26,9 +28,15 @@ public class MedicineViewModel extends ViewModel {
     //Setters
     public void setChildId(String id) { childId.setValue(id); }
 
-    public void setPurchaseDate(LocalDate date) { purchaseDate.setValue(date); }
-    public void setExpiryDate(LocalDate date) { expiryDate.setValue(date); }
-    public void setStartDate(LocalDate date) { startDate.setValue(date); }
+    public void setPurchaseDate(LocalDate date) {
+        purchaseDate.setValue(date.toString());
+    }
+    public void setExpiryDate(LocalDate date) {
+        expiryDate.setValue(date.toString());
+    }
+    public void setStartDate(LocalDate date) {
+        startDate.setValue(date.toString());
+    }
 
     public void setRemainingDoses(int value){ remainingDoses.setValue(value); }
     public void setTotalDoses(int value) { totalDoses.setValue(value); }
@@ -42,9 +50,9 @@ public class MedicineViewModel extends ViewModel {
     //Getters
     public MutableLiveData<String> getChildId() { return childId; }
 
-    public MutableLiveData<LocalDate> getPurchaseDate() { return purchaseDate; }
-    public MutableLiveData<LocalDate> getExpiryDate() { return expiryDate; }
-    public MutableLiveData<LocalDate> getStartDate() { return startDate; }
+    public MutableLiveData<String> getPurchaseDate() { return purchaseDate; }
+    public MutableLiveData<String> getExpiryDate() { return expiryDate; }
+    public MutableLiveData<String> getStartDate() { return startDate; }
 
     public MutableLiveData<Integer> getRemainingDoses() { return remainingDoses; }
     public MutableLiveData<Integer> getTotalDoses() { return totalDoses; }

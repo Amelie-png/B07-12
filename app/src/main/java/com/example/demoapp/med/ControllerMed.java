@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ControllerMed extends Medicine {
-    private long startDate;
+    private String startDate;
     private int dosePerDay;
     private List<String> scheduleDays = new ArrayList<>();
 
@@ -25,12 +25,12 @@ public class ControllerMed extends Medicine {
     }
 
     //Getters
-    public long getStartDate() { return startDate; }
+    public String getStartDate() { return startDate; }
     public int getDosePerDay() { return dosePerDay; }
     public List<String> getScheduleDays() { return scheduleDays; }
 
     //Setters
-    public void setStartDate(long startDate) { this.startDate = startDate; }
+    public void setStartDate(String startDate) { this.startDate = startDate; }
     public void setDosePerDay(int dosePerDay) { this.dosePerDay = dosePerDay; }
     public void setScheduleDays(List<String> scheduleDays){ this.scheduleDays = scheduleDays; }
 }

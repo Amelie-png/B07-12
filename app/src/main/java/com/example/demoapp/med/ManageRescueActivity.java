@@ -13,10 +13,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.demoapp.R;
+import com.google.android.material.chip.Chip;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class ManageRescueActivity extends AppCompatActivity {
@@ -33,7 +37,6 @@ public class ManageRescueActivity extends AppCompatActivity {
     private EditText editTotalDoses;
     private Button btnSave;
     private Button btnCancel;
-    private boolean isUpdating;
     //ID
     private String childId;
 
@@ -67,6 +70,9 @@ public class ManageRescueActivity extends AppCompatActivity {
             onSave();
         });
 
+        //Load view
+        loadView();
+
         //Set up date buttons
         setupDate();
 
@@ -77,19 +83,59 @@ public class ManageRescueActivity extends AppCompatActivity {
         setSwitch();
     }
 
+    private void loadView(){
+        repo.loadRescueMed(childId, new MedicineRepository.OnResult<Map<String, Object>>() {
+            @Override
+            public void onSuccess(Map<String, Object> result) {
+                if (result == null) return;
+
+                // Dates
+                Object purchase = result.get("purchaseDate");
+                Object expiry = result.get("expiryDate");
+
+                btnPurchase.setText(purchase != null ? purchase.toString() : "Set date");
+                btnExpiry.setText(expiry != null ? expiry.toString() : "Set date");
+
+                // Numbers
+                Object remaining = result.get("currentAmount");
+                Object total = result.get("totalAmount");
+
+                editRemainingDoses.setText(remaining != null ? String.valueOf(remaining) : "");
+                editTotalDoses.setText(total != null ? String.valueOf(total) : "");
+
+
+                // Boolean
+                Object low = result.get("lowStockFlag");
+                if (low instanceof Boolean) {
+                    lowFlag.setChecked((Boolean) low);
+                } else {
+                    lowFlag.setChecked(false);
+                }
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                // show error dialog
+                new AlertDialog.Builder(ManageRescueActivity.this)
+                        .setTitle("Error")
+                        .setMessage("Could not load existing settings: " + e.getMessage())
+                        .setPositiveButton("OK", null)
+                        .show();
+            }
+        });
+    }
+
     //Date
     private void setupDate(){
         btnPurchase.setOnClickListener(v -> chooseDate(date -> vm.setPurchaseDate(date)));
-        btnExpiry.setOnClickListener(v -> chooseDate(date -> vm.setExpiryDate(date)));
+        btnExpiry.setOnClickListener(v -> chooseDate(date -> vm.setPurchaseDate(date)));
 
         vm.getPurchaseDate().observe(this, date -> {
-            if (date != null)
-                btnPurchase.setText(date.toString());
+            if (date != null) btnPurchase.setText(date);
         });
 
         vm.getExpiryDate().observe(this, date -> {
-            if (date != null)
-                btnExpiry.setText(date.toString());
+            if (date != null) btnExpiry.setText(date);
         });
     }
 
@@ -124,7 +170,6 @@ public class ManageRescueActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                //if (isUpdating) return;
                 try {
                     vm.setRemainingDoses(Integer.parseInt(s.toString().trim()));
                 } catch (Exception e) {
@@ -143,7 +188,6 @@ public class ManageRescueActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                //if (isUpdating) return;
                 try {
                     vm.setTotalDoses(Integer.parseInt(s.toString().trim()));
                 } catch (Exception e) {
@@ -155,22 +199,6 @@ public class ManageRescueActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {}
         });
-
-//        vm.getRemainingDoses().observe(this, val -> {
-//            if (val == null) return;
-//
-//            //isUpdating = true;
-//            editRemainingDoses.setText(String.valueOf(val));
-//            //isUpdating = false;
-//        });
-//
-//        vm.getTotalDoses().observe(this, val -> {
-//            if (val == null) return;
-//
-//            //isUpdating = true;
-//            editTotalDoses.setText(String.valueOf(val));
-//            //isUpdating = false;
-//        });
     }
 
     //Switch
@@ -191,8 +219,8 @@ public class ManageRescueActivity extends AppCompatActivity {
     private void onSave(){
         RescueMed rescue = new RescueMed();
         rescue.setChildId(childId);
-        rescue.setPurchaseDate(Objects.requireNonNull(vm.getPurchaseDate().getValue()).toEpochDay());
-        rescue.setExpiryDate(Objects.requireNonNull(vm.getExpiryDate().getValue()).toEpochDay());
+        rescue.setPurchaseDate(Objects.requireNonNull(vm.getPurchaseDate().getValue()));
+        rescue.setExpiryDate(Objects.requireNonNull(vm.getExpiryDate().getValue()));
         rescue.setCurrentAmount(vm.getRemainingDoses().getValue() != null ? vm.getRemainingDoses().getValue() : 0);
         rescue.setTotalAmount(vm.getTotalDoses().getValue() != null ? vm.getTotalDoses().getValue() : 0);
         rescue.setLowStockFlag(vm.getLowStock().getValue() != null ? vm.getLowStock().getValue() : false);

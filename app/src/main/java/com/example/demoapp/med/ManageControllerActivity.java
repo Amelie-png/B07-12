@@ -47,7 +47,6 @@ public class ManageControllerActivity extends AppCompatActivity {
     private ChipGroup cgDays;
     private Button btnSave;
     private Button btnCancel;
-    private boolean isUpdating;
     //ID
     private String childId;
 
@@ -86,6 +85,9 @@ public class ManageControllerActivity extends AppCompatActivity {
             onSave();
         });
 
+        //Load view
+        loadView();
+
         //Set up date buttons
         setupDate();
 
@@ -99,29 +101,94 @@ public class ManageControllerActivity extends AppCompatActivity {
         setSwitch();
     }
 
+    private void loadView(){
+        repo.loadControllerMed(childId, new MedicineRepository.OnResult<Map<String, Object>>() {
+            @Override
+            public void onSuccess(Map<String, Object> result) {
+                if (result == null) return;
+
+                // Dates
+                Object purchase = result.get("purchaseDate");
+                Object expiry = result.get("expiryDate");
+                Object start = result.get("startDate");
+
+                btnPurchase.setText(purchase != null ? purchase.toString() : "Set date");
+                btnExpiry.setText(expiry != null ? expiry.toString() : "Set date");
+                btnStartDate.setText(start != null ? start.toString() : "Set date");
+
+                // Numbers
+                Object daily = result.get("dosePerDay");
+                Object remaining = result.get("currentAmount");
+                Object total = result.get("totalAmount");
+
+                editDailyDose.setText(daily != null ? String.valueOf(daily) : "");
+                editRemainingDoses.setText(remaining != null ? String.valueOf(remaining) : "");
+                editTotalDoses.setText(total != null ? String.valueOf(total) : "");
+
+                //Chip group
+                Object daysObj = result.get("scheduleDays");
+                if (daysObj instanceof List) {
+                    List<String> days = new ArrayList<>();
+                    for (Object o : (List<?>) daysObj) {
+                        if (o instanceof String) days.add((String) o);
+                    }
+                    applySelectedDays(days);
+                }
+
+                // Boolean
+                Object low = result.get("lowStockFlag");
+                if (low instanceof Boolean) {
+                    lowFlag.setChecked((Boolean) low);
+                } else {
+                    lowFlag.setChecked(false);
+                }
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                // show error dialog
+                new AlertDialog.Builder(ManageControllerActivity.this)
+                        .setTitle("Error")
+                        .setMessage("Could not load existing settings: " + e.getMessage())
+                        .setPositiveButton("OK", null)
+                        .show();
+            }
+        });
+    }
+
+    private void applySelectedDays(List<String> days) {
+        if (days == null) return;
+
+        // Loop all chips inside the group
+        for (int i = 0; i < cgDays.getChildCount(); i++) {
+            Chip chip = (Chip) cgDays.getChildAt(i);
+            String tag = (String) chip.getTag();
+
+            // select chip only if its tag is in the list
+            chip.setChecked(days.contains(tag));
+        }
+    }
+
     //Date
-    private void setupDate(){
+    private void setupDate() {
         btnPurchase.setOnClickListener(v -> chooseDate(date -> vm.setPurchaseDate(date)));
         btnExpiry.setOnClickListener(v -> chooseDate(date -> vm.setExpiryDate(date)));
         btnStartDate.setOnClickListener(v -> chooseDate(date -> vm.setStartDate(date)));
 
         vm.getPurchaseDate().observe(this, date -> {
-            if (date != null)
-                btnPurchase.setText(date.toString());
+            if (date != null) btnPurchase.setText(date);
         });
 
         vm.getExpiryDate().observe(this, date -> {
-            if (date != null)
-                btnExpiry.setText(date.toString());
+            if (date != null) btnExpiry.setText(date);
         });
 
         vm.getStartDate().observe(this, date -> {
-            if (date != null)
-                btnStartDate.setText(date.toString());
+            if (date != null) btnStartDate.setText(date);
         });
     }
 
-    private void chooseDate(OnDateSelected callback){
+    private void chooseDate(OnDateSelected callback) {
         final Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH);
@@ -142,18 +209,18 @@ public class ManageControllerActivity extends AppCompatActivity {
     }
 
     //Edit text
-    private void setEditText(){
+    private void setEditText() {
         editRemainingDoses = findViewById(R.id.et_remaining_doses);
         editTotalDoses = findViewById(R.id.et_total_doses);
         editDailyDose = findViewById(R.id.et_dose_per_day);
 
         editRemainingDoses.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (isUpdating) return;
                 try {
                     vm.setRemainingDoses(Integer.parseInt(s.toString().trim()));
                 } catch (Exception e) {
@@ -163,16 +230,17 @@ public class ManageControllerActivity extends AppCompatActivity {
             }
 
             @Override
-            public void afterTextChanged(Editable s) {}
+            public void afterTextChanged(Editable s) {
+            }
         });
 
         editTotalDoses.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (isUpdating) return;
                 try {
                     vm.setTotalDoses(Integer.parseInt(s.toString().trim()));
                 } catch (Exception e) {
@@ -182,16 +250,17 @@ public class ManageControllerActivity extends AppCompatActivity {
             }
 
             @Override
-            public void afterTextChanged(Editable s) {}
+            public void afterTextChanged(Editable s) {
+            }
         });
 
         editDailyDose.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (isUpdating) return;
                 try {
                     vm.setDailyDose(Integer.parseInt(s.toString().trim()));
                 } catch (Exception e) {
@@ -201,86 +270,60 @@ public class ManageControllerActivity extends AppCompatActivity {
             }
 
             @Override
-            public void afterTextChanged(Editable s) {}
-        });
-
-        vm.getRemainingDoses().observe(this, val -> {
-            if (val == null) return;
-
-            isUpdating = true;
-            editRemainingDoses.setText(String.valueOf(val));
-            isUpdating = false;
-        });
-
-        vm.getTotalDoses().observe(this, val -> {
-            if (val == null) return;
-
-            isUpdating = true;
-            editTotalDoses.setText(String.valueOf(val));
-            isUpdating = false;
-        });
-
-        vm.getDailyDose().observe(this, val -> {
-            if (val == null) return;
-
-            isUpdating = true;
-            editDailyDose.setText(String.valueOf(val));
-            isUpdating = false;
+            public void afterTextChanged(Editable s) {
+            }
         });
     }
 
     //Switch
-    private void setSwitch(){
+    private void setSwitch() {
         lowFlag = findViewById(R.id.switch_low_flag);
 
-        lowFlag.setOnCheckedChangeListener((btn, checked) ->{
+        lowFlag.setOnCheckedChangeListener((btn, checked) -> {
             vm.isLowStock(checked);
         });
 
         vm.getLowStock().observe(this, check -> {
-            if(check != null)
+            if (check != null)
                 lowFlag.setChecked(check);
         });
     }
 
     //Chip group
-    //TODO fix button toggle issue
-    private void setDays(){
+    private void setDays() {
         cgDays = findViewById(R.id.cg_schedule_days);
 
-        cgDays.setOnCheckedStateChangeListener((group, checkedIds) -> {
-            List<String> setDays = new ArrayList<>();
-
-            for(int id : checkedIds){
-                if (id == R.id.chip_mon) setDays.add("Mon");
-                else if (id == R.id.chip_tue) setDays.add("Tue");
-                else if (id == R.id.chip_wed) setDays.add("Wed");
-                else if (id == R.id.chip_thu) setDays.add("Thu");
-                else if (id == R.id.chip_fri) setDays.add("Fri");
-                else if (id == R.id.chip_sat) setDays.add("Sat");
-                else if (id == R.id.chip_sun) setDays.add("Sun");
-            }
-
-            vm.setScheduledDays(setDays);
-        });
+        setChipListener();
 
         vm.getScheduledDays().observe(this, days -> {
-            if (days == null) return;
-            for (int i = 0; i < cgDays.getChildCount(); i++) {
-                int chipId = cgDays.getChildAt(i).getId();
-                boolean checked = days.contains(chipId);
-                ((Chip) cgDays.getChildAt(i)).setChecked(checked);
+            cgDays.setOnCheckedStateChangeListener(null); // detach listener
+            applySelectedDays(days);
+            setChipListener(); // reattach
+        });
+    }
+
+    private void setChipListener() {
+        cgDays.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            List<String> selected = new ArrayList<>();
+
+            for (int id : checkedIds) {
+                Chip chip = group.findViewById(id);
+                if (chip != null && chip.getTag() != null) {
+                    selected.add(chip.getTag().toString());
+                }
             }
+
+            vm.setScheduledDays(selected);
         });
     }
 
     //Save edits
-    private void onSave(){
+    private void onSave() {
         ControllerMed controller = new ControllerMed();
         controller.setChildId(childId);
-        controller.setPurchaseDate(Objects.requireNonNull(vm.getPurchaseDate().getValue()).toEpochDay());
-        controller.setExpiryDate(Objects.requireNonNull(vm.getExpiryDate().getValue()).toEpochDay());
-        controller.setStartDate(Objects.requireNonNull(vm.getStartDate().getValue()).toEpochDay());
+        controller.setPurchaseDate(vm.getPurchaseDate().getValue());
+        controller.setExpiryDate(vm.getExpiryDate().getValue());
+        controller.setStartDate(vm.getStartDate().getValue());
         controller.setCurrentAmount(vm.getRemainingDoses().getValue() != null ? vm.getRemainingDoses().getValue() : 0);
         controller.setTotalAmount(vm.getTotalDoses().getValue() != null ? vm.getTotalDoses().getValue() : 0);
         controller.setDosePerDay(vm.getDailyDose().getValue() != null ? vm.getDailyDose().getValue() : 0);
@@ -294,7 +337,9 @@ public class ManageControllerActivity extends AppCompatActivity {
                 Toast.makeText(ManageControllerActivity.this, "Saved!", Toast.LENGTH_SHORT).show();
                 finish();
             }
-            @Override public void onFailure(Exception e) {
+
+            @Override
+            public void onFailure(Exception e) {
                 // show error dialog
                 new AlertDialog.Builder(ManageControllerActivity.this)
                         .setTitle("Error")

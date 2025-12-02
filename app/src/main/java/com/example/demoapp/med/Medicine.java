@@ -9,8 +9,8 @@ public abstract class Medicine {
     private String type;
     private int currentAmount;
     private int totalAmount;
-    private long purchaseDate;
-    private long expiryDate;
+    private String purchaseDate;
+    private String expiryDate;
     private boolean lowStockFlag;
     private String flagAuthor;
 
@@ -36,8 +36,8 @@ public abstract class Medicine {
     public int getCurrentAmount() { return currentAmount; }
     public int getTotalAmount() { return totalAmount; }
     public boolean isLowStockFlag() { return lowStockFlag; }
-    public long getPurchaseDate() { return purchaseDate; }
-    public long getExpiryDate() { return expiryDate; }
+    public String getPurchaseDate() { return purchaseDate; }
+    public String getExpiryDate() { return expiryDate; }
     public String getFlagAuthor() { return flagAuthor; }
 
     //Setters
@@ -45,8 +45,8 @@ public abstract class Medicine {
     public void setType(String type) { this.type = type; }
     public void setCurrentAmount(int currentAmount) { this.currentAmount = currentAmount; }
     public void setTotalAmount(int totalAmount) { this.totalAmount = totalAmount; }
-    public void setPurchaseDate(long purchaseDate) { this.purchaseDate = purchaseDate; }
-    public void setExpiryDate(long expiryDate) { this.expiryDate = expiryDate; }
+    public void setPurchaseDate(String purchaseDate) { this.purchaseDate = purchaseDate; }
+    public void setExpiryDate(String expiryDate) { this.expiryDate = expiryDate; }
     public void setLowStockFlag(boolean lowStockFlag) { this.lowStockFlag = lowStockFlag; }
     public void setFlagAuthor(String flagAuthor) { this.flagAuthor = flagAuthor; }
 }

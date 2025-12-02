@@ -44,65 +44,41 @@ public class MedicineRepository {
 
     // Save/update controller med settings given childId
     public void saveControllerMed(String childId, ControllerMed controller, OnResult<Void> cb) {
-        childRef.document(childId)
-                .get()
-                .addOnSuccessListener(doc -> {
-                    if (!doc.exists()) {
-                        cb.onFailure(new Exception("Child does not exist."));
-                        return;
-                    }
-
-                    // Load existing child
-                    Child child = doc.toObject(Child.class);
-                    if (child == null) {
-                        cb.onFailure(new Exception("Failed to parse child object."));
-                        return;
-                    }
-
-                    // Update controller field
-                    Map<String, Object> controllerMap = controller.toMap();
-                    child.setControllerMed(controllerMap);
-
-                    // Save updated child
-                    childRef.document(childId)
-                            .set(child.childToMap(child))
-                            .addOnSuccessListener(a -> cb.onSuccess(null))
-                            .addOnFailureListener(cb::onFailure);
-                })
+        Map<String, Object> controllerMap = controller.toMap();
+        childRef.document(childId).update("controller", controllerMap)
+                .addOnSuccessListener(a -> cb.onSuccess(null))
                 .addOnFailureListener(cb::onFailure);
     }
 
     // Save/update rescue med settings given childId
     public void saveRescueMed(String childId, RescueMed rescue, OnResult<Void> cb) {
+        Map<String, Object> rescueMap = rescue.toMap();
+        childRef.document(childId).update("rescue", rescueMap)
+                .addOnSuccessListener(a -> cb.onSuccess(null))
+                .addOnFailureListener(cb::onFailure);
+    }
+
+    // Fetch controller med map
+    public void loadControllerMed(String childId, OnResult<Map<String, Object>> cb) {
         childRef.document(childId)
                 .get()
                 .addOnSuccessListener(doc -> {
-                    if (!doc.exists()) {
-                        cb.onFailure(new Exception("Child does not exist."));
-                        return;
-                    }
-
-                    // Load existing child
-                    Child child = doc.toObject(Child.class);
-                    if (child == null) {
-                        cb.onFailure(new Exception("Failed to parse child object."));
-                        return;
-                    }
-
-                    // Update controller field
-                    Map<String, Object> rescueMap = rescue.toMap();
-                    child.setRescueMed(rescueMap);
-
-                    // Save updated child
-                    childRef.document(childId)
-                            .set(child.childToMap(child))
-                            .addOnSuccessListener(a -> cb.onSuccess(null))
-                            .addOnFailureListener(cb::onFailure);
+                    Map<String,Object> map = (Map<String,Object>) doc.get("controller");
+                    cb.onSuccess(map);
                 })
                 .addOnFailureListener(cb::onFailure);
     }
 
-    //TODO get controller & rescue meds
+    // Fetch rescue med map
+    public void loadRescueMed(String childId, OnResult<Map<String, Object>> cb) {
+        childRef.document(childId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    Map<String,Object> map = (Map<String,Object>) doc.get("rescue");
+                    cb.onSuccess(map);
+                })
+                .addOnFailureListener(cb::onFailure);
+    }
 
     // Fetch logs (query with optional filters)
     public void fetchLogs(String childId, String medicineTypeFilter, long dateFromEpoch, long dateToEpoch, OnResult<List<MedicineEntry>> cb) {
