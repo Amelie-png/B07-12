@@ -48,7 +48,7 @@ public class ProviderMedicineFragment extends Fragment {
     private boolean rescueVisible;
     private boolean controllerVisible;
     //IDs
-    private String childId = "hrlRXxPFis6MDe6SuK9G"; //TODO link actual value
+    private String childId;
     private String providerUid;
 
 
@@ -65,8 +65,10 @@ public class ProviderMedicineFragment extends Fragment {
                               @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        Bundle bundle = getActivity().getIntent().getExtras();
         if (getArguments() != null) {
-            providerUid = getArguments().getString("uid");
+            providerUid = bundle.getString("uid");
+            childId = bundle.getString("childUid");
         }
 
         Log.d("ProviderMedicineFragment", "providerUid = " + providerUid);
