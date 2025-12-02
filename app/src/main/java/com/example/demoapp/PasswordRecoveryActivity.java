@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Patterns;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -35,11 +36,6 @@ public class PasswordRecoveryActivity extends AppCompatActivity {
     /** FirebaseAuth instance used to send password reset emails. */
     private FirebaseAuth auth;
 
-    /**
-     * Initializes the Activity, sets up UI elements, and attaches listeners.
-     *
-     * @param savedInstanceState Previously saved Activity state (unused)
-     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,14 +52,18 @@ public class PasswordRecoveryActivity extends AppCompatActivity {
             return insets;
         });
 
-        // Firebase Authentication reference
+        // Firebase auth
         auth = FirebaseAuth.getInstance();
 
         // -----------------------------
-        // Bind UI components
+        // Bind UI elements
         // -----------------------------
         EditText emailInput = findViewById(R.id.recoveryEmailInput);
         Button sendButton = findViewById(R.id.sendRecoveryButton);
+
+        // ⭐ NEW — Back Button
+        ImageView backButton = findViewById(R.id.backButton);
+        backButton.setOnClickListener(v -> finish());
 
         // -----------------------------
         // Send password reset email
@@ -92,34 +92,26 @@ public class PasswordRecoveryActivity extends AppCompatActivity {
                 return;
             }
 
-            // -----------------------------
             // Send Firebase reset email
-            // -----------------------------
             auth.sendPasswordResetEmail(email)
                     .addOnCompleteListener(task -> {
 
                         if (task.isSuccessful()) {
-
-                            // Success message
                             Toast.makeText(
                                     this,
                                     "A password reset link was sent to " + email,
                                     Toast.LENGTH_LONG
                             ).show();
 
-                            // Clear text field after success
                             emailInput.setText("");
 
-                            // Navigate user back to sign-in screen
                             Intent intent = new Intent(this, SignInActivity.class);
                             startActivity(intent);
                             finish();
                             return;
                         }
 
-                        // -----------------------------
                         // Error handling
-                        // -----------------------------
                         Exception e = task.getException();
 
                         if (e instanceof FirebaseAuthInvalidUserException) {
