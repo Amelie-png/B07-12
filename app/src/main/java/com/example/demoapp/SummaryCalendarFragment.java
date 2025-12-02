@@ -93,6 +93,9 @@ public class SummaryCalendarFragment extends Fragment implements CalendarAdapter
         if (getActivity() != null) {
             Intent intent = new Intent(getActivity(), FilterEntriesScreen.class);
             intent.putExtra("childUid", childUid);
+            intent.putExtra("role", role);
+            intent.putExtra("symptomsAllowed", getArguments().getString("symptomsAllowed"));
+            intent.putExtra("triggersAllowed", getArguments().getString("triggersAllowed"));
             getActivity().startActivity(intent);
         }
     }
@@ -118,6 +121,8 @@ public class SummaryCalendarFragment extends Fragment implements CalendarAdapter
         intent.putStringArrayListExtra("symptoms", new ArrayList<String>());
         intent.putStringArrayListExtra("triggers", new ArrayList<String>());
         intent.putExtra("childUid", childUid);
+        intent.putExtra("symptomsAllowed", getArguments().getBoolean("symptomsAllowed"));
+        intent.putExtra("triggersAllowed", getArguments().getBoolean("triggersAllowed"));
         startActivity(intent);
     }
 }

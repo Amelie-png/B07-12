@@ -15,8 +15,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.demoapp.MainNavActivity;
 import com.example.demoapp.R;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder> {
 
@@ -63,16 +66,60 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder
         holder.profileBackground.setImageResource(item.profileBackground);
 
         holder.cardRoot.setOnClickListener(v -> {
+            String childUid = item.childId;
 
-            Toast.makeText(v.getContext(), item.name + " selected", Toast.LENGTH_SHORT).show();
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-            Intent intent = new Intent(activity, MainNavActivity.class);
-            intent.putExtra("childUid", item.childId);
-            intent.putExtra("uid", activity.getIntent().getExtras().getString("uid"));
-            intent.putExtra("role", "provider");
+            db.collection("children").document(childUid).get()
+                    .addOnSuccessListener(childDoc -> {
+                        if (!childDoc.exists()) {
+                            Toast.makeText(activity, "Child not found", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        //get provider bindings map
+                        Map<String, Object> providerBindings =
+                                (Map<String, Object>) childDoc.get("providerBindings");
 
-            activity.startActivity(intent);
+                        if (providerBindings == null || !providerBindings.containsKey(providerUid)) {
+                            Toast.makeText(activity, "No binding found for provider", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        //get share code DocRef
+                        String shareCode = providerBindings.get(providerUid).toString();
+                        Map<String, Object> shareCodes = (Map<String, Object>) childDoc.get("shareCodes");
+
+                        if (shareCodes == null || !shareCodes.containsKey(shareCode)) {
+                            Toast.makeText(activity, "Share code not found", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        Map<String, Object> codeEntry =
+                                (Map<String, Object>) shareCodes.get(shareCode);
+
+                        Map<String, Object> permissions =
+                                (Map<String, Object>) codeEntry.get("permissions");
+
+                        Boolean symptomsAllowed = (Boolean) permissions.get("symptoms");
+                        Boolean triggersAllowed = (Boolean) permissions.get("triggers");
+
+                        //start main nav activity
+                        Intent intent = new Intent(activity, MainNavActivity.class);
+                        intent.putExtra("childUid", childUid);
+                        intent.putExtra("shareCode", shareCode);
+                        intent.putExtra("symptomsAllowed", symptomsAllowed != null && symptomsAllowed);
+                        intent.putExtra("triggersAllowed", triggersAllowed != null && triggersAllowed);
+                        intent.putExtra("role", "provider");
+                        intent.putExtra("uid", activity.getIntent().getExtras().getString("uid"));
+                        intent.putExtra("role", "provider");
+
+                        activity.startActivity(intent);
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(activity, "Error getting child document", Toast.LENGTH_SHORT).show();
+                    });
         });
+
     }
 
     @Override
