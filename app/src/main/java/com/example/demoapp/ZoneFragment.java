@@ -100,6 +100,10 @@ public class ZoneFragment extends Fragment {
             // Children should NOT see history
             btnZoneHistory.setVisibility(View.GONE);
         }
+        if ("provider".equals(role)) {
+            btnAddZone.setVisibility(View.GONE);
+            btnEditZone.setVisibility(View.GONE);
+        }
 
         return view;
     }

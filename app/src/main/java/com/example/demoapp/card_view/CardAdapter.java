@@ -1,27 +1,26 @@
 package com.example.demoapp.card_view;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.demoapp.MainActivity;
 import com.example.demoapp.MainNavActivity;
 import com.example.demoapp.R;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
 public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder> {
-    public class CardViewHolder extends RecyclerView.ViewHolder {
+
+    public static class CardViewHolder extends RecyclerView.ViewHolder {
         TextView name;
         ImageView profilePic;
         ImageView profileBackground;
@@ -35,12 +34,16 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder
             profileBackground = itemView.findViewById(R.id.cardview_patient_background);
         }
     }
+
     private ArrayList<CardItem> list;
     private Activity activity;
+    private String providerUid;
 
-    public CardAdapter(Activity activity, ArrayList<CardItem> list) {
+    // Constructor
+    public CardAdapter(Activity activity, ArrayList<CardItem> list, String providerUid) {
         this.activity = activity;
         this.list = list;
+        this.providerUid = providerUid;
     }
 
     @NonNull
@@ -54,13 +57,14 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder
     @Override
     public void onBindViewHolder(@NonNull CardViewHolder holder, int position) {
         CardItem item = list.get(position);
+
         holder.name.setText(item.name);
         holder.profilePic.setImageResource(item.profilePic);
         holder.profileBackground.setImageResource(item.profileBackground);
 
-        // Handle click
         holder.cardRoot.setOnClickListener(v -> {
-            Toast.makeText(v.getContext(), item.name + " clicked", Toast.LENGTH_SHORT).show();
+
+            Toast.makeText(v.getContext(), item.name + " selected", Toast.LENGTH_SHORT).show();
 
             Intent intent = new Intent(activity, MainNavActivity.class);
             intent.putExtra("childUid", item.childId);
@@ -73,14 +77,10 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder
 
     @Override
     public int getItemCount() {
-        if(list != null){
-            return list.size();
-        }else{
-            return 0;
-        }
+        return (list != null ? list.size() : 0);
     }
 
-    public void setList(ArrayList<CardItem> list){
+    public void setList(ArrayList<CardItem> list) {
         this.list = list;
     }
 }
