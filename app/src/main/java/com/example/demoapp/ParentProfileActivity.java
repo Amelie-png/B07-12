@@ -19,7 +19,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class ParentProfileActivity extends AppCompatActivity {
 
-    private TextView providerName;          // full name
+    private TextView providerName;
     private TextView usernameValue;
     private TextView firstNameValue;
     private TextView lastNameValue;
@@ -30,6 +30,7 @@ public class ParentProfileActivity extends AppCompatActivity {
     private Button logoutButton;
 
     private ImageView profileImage;
+    private ImageView backButton;    // <-- NEW
 
     private FirebaseFirestore db;
     private String parentUid;
@@ -37,10 +38,9 @@ public class ParentProfileActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_parent_profile);   // <-- your XML file
+        setContentView(R.layout.activity_parent_profile);
 
         db = FirebaseFirestore.getInstance();
-
         parentUid = getIntent().getStringExtra("uid");
 
         if (parentUid == null) {
@@ -49,7 +49,10 @@ public class ParentProfileActivity extends AppCompatActivity {
             return;
         }
 
-        // Bind UI
+        // -----------------------------
+        // Bind UI Elements
+        // -----------------------------
+        backButton = findViewById(R.id.backButton);   // <-- NEW
         profileImage = findViewById(R.id.profileImage);
         providerName = findViewById(R.id.providerName);
         usernameValue = findViewById(R.id.usernameValue);
@@ -61,11 +64,19 @@ public class ParentProfileActivity extends AppCompatActivity {
         editLastButton = findViewById(R.id.editLastNameButton);
         logoutButton = findViewById(R.id.providerLogoutButton);
 
+        // -----------------------------
+        // Back Button Behavior
+        // -----------------------------
+        backButton.setOnClickListener(v -> finish());
+
+        // Load user profile
         loadParentProfile();
 
+        // Edit Buttons
         editFirstButton.setOnClickListener(v -> showEditDialog("firstName"));
         editLastButton.setOnClickListener(v -> showEditDialog("lastName"));
 
+        // Logout Button
         logoutButton.setOnClickListener(v -> {
             FirebaseAuth.getInstance().signOut();
             startActivity(new Intent(ParentProfileActivity.this, SignInActivity.class));
@@ -141,7 +152,7 @@ public class ParentProfileActivity extends AppCompatActivity {
     }
 
     // -----------------------------
-    // Save to Firestore
+    // Save Updated Profile Field
     // -----------------------------
     private void saveUpdatedField(String key, String value) {
         db.collection("users")

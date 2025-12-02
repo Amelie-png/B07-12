@@ -30,9 +30,9 @@ public class ProviderProfileActivity extends AppCompatActivity {
     private Button logoutButton;
 
     private ImageView profileImage;
+    private ImageView backButton;   // <-- NEW
 
     private FirebaseFirestore db;
-
     private String providerUid;
 
     @Override
@@ -51,7 +51,10 @@ public class ProviderProfileActivity extends AppCompatActivity {
             return;
         }
 
+        // -----------------------------
         // Bind UI
+        // -----------------------------
+        backButton = findViewById(R.id.backButton);   // <-- NEW
         profileImage = findViewById(R.id.profileImage);
         providerName = findViewById(R.id.providerName);
         usernameValue = findViewById(R.id.usernameValue);
@@ -63,11 +66,19 @@ public class ProviderProfileActivity extends AppCompatActivity {
         editLastButton = findViewById(R.id.editLastNameButton);
         logoutButton = findViewById(R.id.providerLogoutButton);
 
+        // -----------------------------
+        // Back Button
+        // -----------------------------
+        backButton.setOnClickListener(v -> finish());
+
+        // Load provider profile data
         loadProviderProfile();
 
+        // Edit buttons
         editFirstButton.setOnClickListener(v -> showEditDialog("firstName"));
         editLastButton.setOnClickListener(v -> showEditDialog("lastName"));
 
+        // Logout action
         logoutButton.setOnClickListener(v -> {
             FirebaseAuth.getInstance().signOut();
             startActivity(new Intent(ProviderProfileActivity.this, SignInActivity.class));
@@ -75,9 +86,8 @@ public class ProviderProfileActivity extends AppCompatActivity {
         });
     }
 
-
     // ---------------------------
-    // Load provider info
+    // Load Provider Info
     // ---------------------------
     private void loadProviderProfile() {
         db.collection("users")
@@ -109,9 +119,8 @@ public class ProviderProfileActivity extends AppCompatActivity {
                 });
     }
 
-
     // ---------------------------
-    // Edit name dialog
+    // Edit Name Dialog
     // ---------------------------
     private void showEditDialog(String fieldKey) {
 
@@ -146,7 +155,6 @@ public class ProviderProfileActivity extends AppCompatActivity {
         builder.show();
     }
 
-
     // ---------------------------
     // Save to Firestore
     // ---------------------------
@@ -157,7 +165,7 @@ public class ProviderProfileActivity extends AppCompatActivity {
                 .update(key, value)
                 .addOnSuccessListener(aVoid -> {
 
-                    // Update UI
+                    // Update UI immediately
                     if (key.equals("firstName")) {
                         firstNameValue.setText(value);
                     } else {
