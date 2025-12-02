@@ -86,7 +86,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Night waking"
-                app:chipBackgroundColor="@color/chip_color_selector"/>
+                app:chipBackgroundColor="@color/nav_item_color"/>
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_symptom_activity_limits"
@@ -94,7 +94,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="activity limits"
-                app:chipBackgroundColor="@color/chip_color_selector"/>
+                app:chipBackgroundColor="@color/nav_item_color"/>
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_symptom_cough"
@@ -102,7 +102,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Cough/Wheeze"
-                app:chipBackgroundColor="@color/chip_color_selector"/>
+                app:chipBackgroundColor="@color/nav_item_color"/>
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_symptom_other"
@@ -110,7 +110,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Other"
-                app:chipBackgroundColor="@color/chip_color_selector"/>
+                app:chipBackgroundColor="@color/nav_item_color"/>
 
         </com.google.android.material.chip.ChipGroup>
 
@@ -138,7 +138,7 @@
                 android:layout_height="wrap_content"
                 android:text="Dust Mites"
                 app:checkedIconVisible="true"
-                app:chipBackgroundColor="@color/chip_color_selector"/>
+                app:chipBackgroundColor="@color/nav_item_color"/>
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_trigger_pets"
@@ -146,7 +146,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Pets"
-                app:chipBackgroundColor="@color/chip_color_selector"/>
+                app:chipBackgroundColor="@color/nav_item_color"/>
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_trigger_smoke"
@@ -154,7 +154,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Smoke"
-                app:chipBackgroundColor="@color/chip_color_selector"/>
+                app:chipBackgroundColor="@color/nav_item_color"/>
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_trigger_perfumes"
@@ -162,7 +162,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Strong Odors / Perfumes"
-                app:chipBackgroundColor="@color/chip_color_selector"/>
+                app:chipBackgroundColor="@color/nav_item_color"/>
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_trigger_cold_air"
@@ -170,7 +170,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Cold Air"
-                app:chipBackgroundColor="@color/chip_color_selector"/>
+                app:chipBackgroundColor="@color/nav_item_color"/>
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_trigger_illness"
@@ -178,7 +178,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Illness"
-                app:chipBackgroundColor="@color/chip_color_selector"/>
+                app:chipBackgroundColor="@color/nav_item_color"/>
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_trigger_exercise"
@@ -186,7 +186,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Exercise"
-                app:chipBackgroundColor="@color/chip_color_selector"/>
+                app:chipBackgroundColor="@color/nav_item_color"/>
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_trigger_other"
@@ -194,7 +194,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Other"
-                app:chipBackgroundColor="@color/chip_color_selector"/>
+                app:chipBackgroundColor="@color/nav_item_color"/>
 
         </com.google.android.material.chip.ChipGroup>
 

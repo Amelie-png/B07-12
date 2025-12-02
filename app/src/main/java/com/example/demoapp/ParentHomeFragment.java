@@ -22,6 +22,8 @@ import com.google.firebase.firestore.ListenerRegistration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ParentHomeFragment extends Fragment {
 
@@ -40,6 +42,12 @@ public class ParentHomeFragment extends Fragment {
     private int trendDays = 7; // 默认 7 天
 
     public ParentHomeFragment() { }
+    // 🔒 Prevent duplicate popups during this session
+    private final Set<String> shownAlerts = new HashSet<>();
+
+    public ParentHomeFragment() {
+        // Required empty constructor
+    }
 
     public static ParentHomeFragment newInstance(String childId, String parentId) {
         ParentHomeFragment fragment = new ParentHomeFragment();
@@ -72,7 +80,7 @@ public class ParentHomeFragment extends Fragment {
 
         if (getArguments() != null) {
             childId = getArguments().getString("uid");
-            parentId = getArguments().getString("parentId");
+            parentId = getArguments().getString("parentId");  // optional, overwritten next
         }
 
         if (childId == null) {
@@ -80,14 +88,29 @@ public class ParentHomeFragment extends Fragment {
             return;
         }
 
+        // 🔥 Load parentId from Firestore (source of truth)
         db.collection("children")
                 .document(childId)
                 .get()
                 .addOnSuccessListener(doc -> {
                     if (doc.exists()) {
+
                         parentId = doc.getString("parentId");
+
+                        if (parentId == null) {
+                            Toast.makeText(requireContext(), "Parent ID missing", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        // EVERYTHING depends on parentId — run AFTER loading it
+                        bindUI(view);
+                        loadLatestTriageState();
+                        loadZoneFragment();
                         startListeningForAlerts();
                     }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(requireContext(), "Failed to load child", Toast.LENGTH_SHORT).show();
                 });
 
         bindUI(view);
@@ -96,6 +119,10 @@ public class ParentHomeFragment extends Fragment {
         loadMedicineLogsAndShowTrend();
     }
 
+
+    // ---------------------------------------------------------
+    // UI Setup
+    // ---------------------------------------------------------
     private void bindUI(View view) {
         emergencyText = view.findViewById(R.id.emergencyText);
         btnViewTriageHistory = view.findViewById(R.id.btnViewTriageHistory);
@@ -124,6 +151,9 @@ public class ParentHomeFragment extends Fragment {
     }
 
 
+    // ---------------------------------------------------------
+    // Load last triage state
+    // ---------------------------------------------------------
     private void loadLatestTriageState() {
         db.collection("children")
                 .document(childId)
@@ -131,14 +161,18 @@ public class ParentHomeFragment extends Fragment {
                 .addOnSuccessListener(doc -> {
                     if (doc.exists()) {
                         String lastState = doc.getString("lastTriageState");
-                        if (lastState == null) lastState = "GREEN";
+
+                        if (lastState == null) {
+                            // ❗ No triage yet — show a neutral placeholder
+                            emergencyText.setText("Current Status: No Triage Data Yet");
+                            return;
+                        }
+
                         updateEmergencyCard(lastState);
                     }
-                })
-                .addOnFailureListener(e ->
-                        Toast.makeText(requireContext(), "Failed to load triage state", Toast.LENGTH_SHORT).show()
-                );
+                });
     }
+
 
     private void updateEmergencyCard(String state) {
         switch (state) {
@@ -153,6 +187,10 @@ public class ParentHomeFragment extends Fragment {
         }
     }
 
+
+    // ---------------------------------------------------------
+    // Load zone fragment
+    // ---------------------------------------------------------
     private void loadZoneFragment() {
         ZoneFragment fragment = new ZoneFragment();
         Bundle args = new Bundle();
@@ -166,6 +204,10 @@ public class ParentHomeFragment extends Fragment {
                 .commit();
     }
 
+
+    // ---------------------------------------------------------
+    // Alert listener (bullet-proof)
+    // ---------------------------------------------------------
     private void startListeningForAlerts() {
         if (parentId == null) return;
 
@@ -173,13 +215,26 @@ public class ParentHomeFragment extends Fragment {
                 .whereEqualTo("parentId", parentId)
                 .whereEqualTo("seen", false)
                 .addSnapshotListener((snap, e) -> {
+
                     if (e != null || snap == null) return;
 
                     for (DocumentChange change : snap.getDocumentChanges()) {
+
                         if (change.getType() == DocumentChange.Type.ADDED) {
-                            String message = change.getDocument().getString("message");
+
                             String alertId = change.getDocument().getId();
+                            String message = change.getDocument().getString("message");
+
+                            // 🔒 Local duplicate guard (avoids race condition)
+                            if (shownAlerts.contains(alertId)) {
+                                continue;
+                            }
+                            shownAlerts.add(alertId);
+
+                            // Show popup
                             showAlertPopup(message);
+
+                            // Mark alert as seen in Firestore
                             db.collection("alerts")
                                     .document(alertId)
                                     .update("seen", true);
@@ -187,6 +242,7 @@ public class ParentHomeFragment extends Fragment {
                     }
                 });
     }
+
 
     private void showAlertPopup(String message) {
         if (!isAdded()) return;

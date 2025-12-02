@@ -39,6 +39,9 @@
         <activity
             android:name=".TriageActivity"
             android:exported="false" />
+        <activity
+            android:name=".CreateAccountActivity"
+            android:exported="false" />
 
         <!-- CHANGE: SignInActivity is now the launcher -->
         <activity
@@ -99,6 +102,9 @@
             android:exported="false"/>
         <activity
             android:name=".AddSymptomsActivity"
+            android:exported="false"/>
+        <activity
+            android:name=".CreateAccountActivity"
             android:exported="false"/>
     </application>
 
