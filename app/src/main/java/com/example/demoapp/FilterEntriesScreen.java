@@ -151,6 +151,9 @@ public class FilterEntriesScreen extends AppCompatActivity {
             bundle.putStringArrayList("symptoms", selectedSymptoms);
             bundle.putStringArrayList("triggers", selectedTriggers);
             bundle.putString("childId", childUid);
+            bundle.putString("role", getIntent().getExtras().getString("role"));
+            bundle.putBoolean("symptomsAllowed", getIntent().getExtras().getBoolean("symptomsAllowed"));
+            bundle.putBoolean("triggersAllowed", getIntent().getExtras().getBoolean("triggersAllowed"));
 
             DailyEntryDisplayScreen dailyEntryScreen = new DailyEntryDisplayScreen();
             dailyEntryScreen.setArguments(bundle);

@@ -31,6 +31,9 @@ public class DailyEntryDisplayScreen extends Fragment implements EntryLogReposit
     private String endDate;
     private ArrayList<String> selectedSymptoms;
     private ArrayList<String> selectedTriggers;
+    boolean symptomsAllowed;
+    boolean triggersAllowed;
+
 
 
     @Nullable
@@ -50,13 +53,15 @@ public class DailyEntryDisplayScreen extends Fragment implements EntryLogReposit
         Bundle args = getArguments();
         startDate = args.getString("startDate");
         endDate = args.getString("endDate");
-        // TODO: replace with actual get childId logic
         childUid = args.getString("childId");
 
         selectedSymptoms = args.getStringArrayList("symptoms");
         selectedTriggers = args.getStringArrayList("triggers");
+        symptomsAllowed = getArguments().getBoolean("symptomsAllowed");
+        triggersAllowed = getArguments().getBoolean("triggersAllowed");
 
-        adapter = new EntryAdapter(getContext(), entryList);
+
+        adapter = new EntryAdapter(getContext(), entryList, symptomsAllowed, triggersAllowed);
         if (startDate != null && endDate != null && childUid != null) {
             loadEntryList();
         }
@@ -80,9 +85,23 @@ public class DailyEntryDisplayScreen extends Fragment implements EntryLogReposit
         int numEntry = entries.size();
         for (int i=0; i<numEntry; i++) {
             EntryLog e=entries.get(i);
-            String symptomStr = formatSymptomsTriggers(e.getSymptoms());
-            String triggerStr = formatSymptomsTriggers(e.getTriggers());
-            entryList.add(new Entry(Integer.toString(i+1), e.getDate(), e.getRecorder(), symptomStr, triggerStr));
+            String symptomStr = null;
+            String triggerStr = null;
+            if(symptomsAllowed){
+                symptomStr = formatSymptomsTriggers(e.getSymptoms());
+            }
+            if(triggersAllowed){
+                triggerStr = formatSymptomsTriggers(e.getTriggers());
+            }
+            if(symptomStr != null && triggerStr != null){
+                entryList.add(new Entry(Integer.toString(i+1), e.getDate(), e.getRecorder(), symptomStr, triggerStr));
+            } else if(symptomStr == null && triggerStr == null) {
+                entryList.add(new Entry(Integer.toString(i+1), e.getDate(), e.getRecorder()));
+            }else if (symptomStr == null) {
+                entryList.add(new Entry(Integer.toString(i+1), e.getDate(), e.getRecorder(), triggerStr, false));
+            } else if (triggerStr == null){
+                entryList.add(new Entry(Integer.toString(i+1), e.getDate(), e.getRecorder(), symptomStr, true));
+            }
         }
         adapter.notifyDataSetChanged();
     }

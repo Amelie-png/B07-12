@@ -17,6 +17,7 @@ public class ProviderSymptomsFragment extends Fragment {
 
     private String providerUid;
     private String childUid;
+    private Boolean symptomsAllowed, triggersAllowed;
 
     public ProviderSymptomsFragment() {}
 
@@ -34,8 +35,11 @@ public class ProviderSymptomsFragment extends Fragment {
                               @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        providerUid = getActivity().getIntent().getExtras().getString("uid");
-        childUid = getActivity().getIntent().getExtras().getString("childUid");
+        Bundle bundle = getActivity().getIntent().getExtras();
+        providerUid = bundle.getString("uid");
+        childUid = bundle.getString("childUid");
+        symptomsAllowed = bundle.getBoolean("symptomsAllowed");
+        triggersAllowed = bundle.getBoolean("triggersAllowed");
 
         showSymptoms();
     }
@@ -47,6 +51,8 @@ public class ProviderSymptomsFragment extends Fragment {
         bundle.putString("childUid", childUid);
         bundle.putString("uid", providerUid);
         bundle.putString("role", "provider");
+        bundle.putBoolean("symptomsAllowed", symptomsAllowed);
+        bundle.putBoolean("triggersAllowed", triggersAllowed);
         summaryFragment.setArguments(bundle);
 
         getChildFragmentManager()
