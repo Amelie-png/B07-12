@@ -59,10 +59,6 @@ public class ProviderMain extends AppCompatActivity implements AddPatientPopup.O
 
         // providerUid passed from login or previous Activity
         providerUid = getIntent().getStringExtra("uid");
-        //TODO: replace with args
-        if (providerUid == null) {
-            providerUid = "65eaII6T0dTv20cnH6ZNPGkkHTQ2"; // remove later
-        }
 
         // find buttons
         addItemButton = findViewById(R.id.add_item_button);

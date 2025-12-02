@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 public class ProviderSymptomsFragment extends Fragment {
 
     private String providerUid;
+    private String childUid;
 
     public ProviderSymptomsFragment() {}
 
@@ -29,15 +30,15 @@ public class ProviderSymptomsFragment extends Fragment {
                               @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        if (getArguments() != null) {
-            providerUid = getArguments().getString("uid");
-        }
+        providerUid = getActivity().getIntent().getExtras().getString("uid");
+        childUid = getActivity().getIntent().getExtras().getString("childUid");
 
-        Log.d("ProviderSymptomsFragment", "providerUid = " + providerUid);
         SummaryCalendarFragment summaryFragment = new SummaryCalendarFragment();
 
         Bundle bundle = new Bundle();
+        bundle.putString("childUid", childUid);
         bundle.putString("uid", providerUid);
+        bundle.putString("role", "provider");
         summaryFragment.setArguments(bundle);
 
         getChildFragmentManager()

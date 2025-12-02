@@ -24,7 +24,6 @@ import java.util.ArrayList;
 
 public class SummaryCalendarFragment extends Fragment implements CalendarAdapter.OnItemListener {
 
-    private String providerUid;
     private String childUid;
     private TextView monthYearText;
     private RecyclerView calendarRecyclerView;
@@ -32,6 +31,7 @@ public class SummaryCalendarFragment extends Fragment implements CalendarAdapter
     Button prevMonthButt;
     Button nextMonthButt;
     Button browseHistoryButton;
+    String role;
 
     @Nullable
     @Override
@@ -41,8 +41,12 @@ public class SummaryCalendarFragment extends Fragment implements CalendarAdapter
 
         initWidgets(view);
 
-        //TODO: replace with correct childUid logic
-        childUid = "oKaNrSiogbRxH5iCxfjS";
+        role = getArguments().getString("role");
+        if(role.equals("provider") || role.equals("parent")){
+            childUid = getArguments().getString("childUid");
+        } else{
+            childUid = getArguments().getString("uid");
+        }
 
         prevMonthButt = view.findViewById(R.id.prev_month_button);
         nextMonthButt = view.findViewById(R.id.next_month_button);
@@ -88,8 +92,7 @@ public class SummaryCalendarFragment extends Fragment implements CalendarAdapter
     public void browseHistoryAction() {
         if (getActivity() != null) {
             Intent intent = new Intent(getActivity(), FilterEntriesScreen.class);
-            intent.putExtra("Uid", childUid);
-            intent.putExtra("providerUid", providerUid);
+            intent.putExtra("childUid", childUid);
             getActivity().startActivity(intent);
         }
     }
@@ -108,11 +111,13 @@ public class SummaryCalendarFragment extends Fragment implements CalendarAdapter
     private void openDailyEntryScreen(LocalDate date) {
         Intent intent = new Intent(requireActivity(), ViewDailyEntryActivity.class);
         // Pass the filter data as extras
+        intent.putExtra("Uid", getArguments().getString("uid"));
+        intent.putExtra("role", getArguments().getString("role"));
         intent.putExtra("startDate", date.toString());
         intent.putExtra("endDate", date.toString());
         intent.putStringArrayListExtra("symptoms", new ArrayList<String>());
         intent.putStringArrayListExtra("triggers", new ArrayList<String>());
-        intent.putExtra("childId", childUid);
+        intent.putExtra("childUid", childUid);
         startActivity(intent);
     }
 }
