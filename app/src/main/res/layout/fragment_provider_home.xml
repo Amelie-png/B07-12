@@ -1,14 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ProviderHomeFragment">
+    android:fillViewport="true">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="blank provider home" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="0dp">
+        <TextView
+            android:id="@+id/titleEmergency"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="8dp"
+            android:text="Triage Incident:"
+            android:layout_marginLeft="16dp"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+        <!-- TRIAGE CARD (conditionally visible) -->
+        <include
+            android:id="@+id/triageCard"
+            layout="@layout/card_provider_triage" />
 
-</FrameLayout>
+        <!-- ZONE CARD (conditionally visible) -->
+        <FrameLayout
+            android:id="@+id/zoneFragmentContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="15dp"
+            android:layout_marginTop="12dp"
+            android:minHeight="200dp" />
+
+    </LinearLayout>
+
+</ScrollView>

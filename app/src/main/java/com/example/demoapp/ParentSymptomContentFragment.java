@@ -1,5 +1,6 @@
 package com.example.demoapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,16 +12,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.example.demoapp.entry_db.EntryLog;
-
-public class ParentAddSymptomScreen extends Fragment {
+public class ParentSymptomContentFragment extends Fragment {
+    private String parentUid;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_parent_add_symptom_screen, container, false);
+        return inflater.inflate(R.layout.fragment_parent_symptom_screen, container, false);
     }
 
     @Override
@@ -31,14 +31,15 @@ public class ParentAddSymptomScreen extends Fragment {
         addEntryButton.setOnClickListener(v ->
                 {
                     Toast.makeText(getContext(), "add_entry_button clicked", Toast.LENGTH_SHORT).show();
-                    Fragment next = new ChildSymptomsFragment("Parent");
-                    requireActivity()
-                            .getSupportFragmentManager()
-                            .beginTransaction()
-                            //TODO: replace R.id with the actual fragment container name
-                            .replace(R.id.fragment_container, next)
-                            .addToBackStack(null)
-                            .commit();
+
+                    Intent intent = new Intent(requireContext(), AddSymptomsActivity.class);
+
+                    parentUid = getArguments().getString("uid");
+
+                    intent.putExtra("uid", parentUid);
+                    intent.putExtra("role", "parent");
+
+                    startActivity(intent);
                 }
         );
 

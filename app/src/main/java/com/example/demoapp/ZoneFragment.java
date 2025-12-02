@@ -66,14 +66,44 @@ public class ZoneFragment extends Fragment {
         btnEditZone = view.findViewById(R.id.btnEditPEF);
 
         Button btnZoneHistory = view.findViewById(R.id.btnZoneHistory);
+
         btnZoneHistory.setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), ZoneHistoryActivity.class);
             intent.putExtra("uid", childId);
             startActivity(intent);
         });
 
+// Hide from children
+        if ("child".equalsIgnoreCase(role)) {
+            btnZoneHistory.setVisibility(View.GONE);
+        }
+
+
         btnAddZone.setOnClickListener(v -> showAddZoneDialog());
         btnEditZone.setOnClickListener(v -> showEditZoneDialog());
+// ROLE-BASED VISIBILITY
+        if (role != null && role.equalsIgnoreCase("parent")) {
+
+            // Parents CAN add/edit PEF
+            btnAddZone.setVisibility(View.VISIBLE);
+            btnEditZone.setVisibility(View.VISIBLE);
+
+            // Parents SHOULD see history
+            btnZoneHistory.setVisibility(View.VISIBLE);
+
+        } else if (role != null && role.equalsIgnoreCase("child")) {
+
+            // Children can add/edit PEF (your original logic handles PB lock)
+            btnAddZone.setVisibility(View.VISIBLE);
+            btnEditZone.setVisibility(View.VISIBLE);
+
+            // Children should NOT see history
+            btnZoneHistory.setVisibility(View.GONE);
+        }
+        if ("provider".equals(role)) {
+            btnAddZone.setVisibility(View.GONE);
+            btnEditZone.setVisibility(View.GONE);
+        }
 
         return view;
     }
@@ -100,6 +130,11 @@ public class ZoneFragment extends Fragment {
         loadPersonalBest();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadPersonalBest();   // This triggers loadTodayZone too
+    }
 
     // ----------------------------------------------------
     // LOAD PERSONAL BEST
@@ -225,7 +260,19 @@ public class ZoneFragment extends Fragment {
         layoutNoZone.setVisibility(View.VISIBLE);
         layoutHasZone.setVisibility(View.GONE);
         layoutNoPB.setVisibility(View.GONE);
+
+        // Role fix for buttons
+        if (role != null && role.equalsIgnoreCase("parent")) {
+            btnAddZone.setVisibility(View.VISIBLE);
+            btnEditZone.setVisibility(View.GONE);   // no edit when no PEF
+            // history only makes sense when a PEF exists → hide for now
+            // (same as children)
+        } else {
+            btnAddZone.setVisibility(View.VISIBLE);
+            btnEditZone.setVisibility(View.GONE);
+        }
     }
+
 
 
     // ----------------------------------------------------
@@ -236,6 +283,14 @@ public class ZoneFragment extends Fragment {
         layoutNoZone.setVisibility(View.GONE);
         layoutHasZone.setVisibility(View.VISIBLE);
         layoutNoPB.setVisibility(View.GONE);
+// ROLE-BASED ZONE HISTORY VISIBILITY
+        View btnZoneHistory = getView().findViewById(R.id.btnZoneHistory);
+
+        if (role != null && role.equalsIgnoreCase("parent")) {
+            btnZoneHistory.setVisibility(View.VISIBLE);
+        } else {
+            btnZoneHistory.setVisibility(View.GONE);
+        }
 
         int percent = personalBest > 0
                 ? (int) ((pefValue * 100f) / personalBest)
@@ -252,12 +307,37 @@ public class ZoneFragment extends Fragment {
 
 
     private void moveIndicator(int percent) {
+
+        // clamp percent
+        if (percent < 0) percent = 0;
+        if (percent > 100) percent = 100;
+
+        int finalPercent = percent; // for lambda use
+
         zoneBar.post(() -> {
+
             float barWidth = zoneBar.getWidth();
-            float px = percent / 100f * barWidth;
+
+            // Adjust if needed for your zone_bar rounded edges
+            float leftPadding = barWidth * 0.07f;
+            float rightPadding = barWidth * 0.07f;
+
+            float usableWidth = barWidth - leftPadding - rightPadding;
+
+            // Position inside usable area
+            float px = leftPadding + (finalPercent / 100f) * usableWidth;
+
+            // Horizontal position
             zoneIndicator.setX(px - zoneIndicator.getWidth() / 2f);
+
+            // Vertical center alignment
+            zoneIndicator.setY(
+                    zoneBar.getY() + (zoneBar.getHeight() / 2f) - (zoneIndicator.getHeight() / 2f)
+            );
         });
     }
+
+
 
 
     private void setPercentColor(int percent) {

@@ -1,107 +1,213 @@
 package com.example.demoapp;
 
+import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Toast;
+import android.widget.ImageButton;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.demoapp.card_view.CardAdapter;
 import com.example.demoapp.card_view.CardItem;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class ProviderMain extends Fragment {
+public class ProviderMain extends AppCompatActivity implements AddPatientPopup.OnDataChangedListener {
+
+    private String providerUid;
+
     private Button addItemButton;
+    private ImageButton profileButton;
     private RecyclerView recyclerView;
+
     private ArrayList<CardItem> cardList;
     private CardAdapter adapter;
 
+    private FirebaseAuth auth;
     private FirebaseFirestore db;
 
+    private AlertDialog loadingDialog;
 
-    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.provider_main_screen);
 
-        View view = inflater.inflate(R.layout.provider_main_screen, container, false);
         db = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
 
-        // Find button
-        addItemButton = view.findViewById(R.id.add_item_button);
+        // providerUid passed from login or previous Activity
+        providerUid = getIntent().getStringExtra("uid");
 
-        if (addItemButton == null) {
-            Toast.makeText(getContext(), "Button is NULL!", Toast.LENGTH_LONG).show();
-        } else {
-            Toast.makeText(getContext(), "Button found!", Toast.LENGTH_SHORT).show();
-            addItemButton.setOnClickListener(v -> onAddPatientClicked());
+        if (providerUid == null) {
+            Log.e("ProviderMain", "ERROR: Provider UID is NULL");
+            finish();
+            return;
         }
 
-        // Find RecyclerView from the inflated view
-        recyclerView = view.findViewById(R.id.patient_list);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        // ----------------------------------------------------
+        // SET UP UI
+        // ----------------------------------------------------
+        addItemButton = findViewById(R.id.add_item_button);
+        profileButton = findViewById(R.id.provider_profile_button);
+        recyclerView = findViewById(R.id.patient_list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // Sample data for testing
         cardList = new ArrayList<>();
-        cardList.add(new CardItem("A", R.drawable.profile_default_img, R.color.white, "", "", new ArrayList<String>()));
-        cardList.add(new CardItem("B", R.drawable.profile_default_img, R.color.white,"", "", new ArrayList<String>()));
-        cardList.add(new CardItem("C", R.drawable.profile_default_img, R.color.white, "", "", new ArrayList<String>()));
-        cardList.add(new CardItem("D", R.drawable.profile_default_img, R.color.white, "", "", new ArrayList<String>()));
 
-        // Set adapter
-        adapter = new CardAdapter(cardList);
+        // Pass providerUid to adapter
+        adapter = new CardAdapter(this, cardList, providerUid);
         recyclerView.setAdapter(adapter);
 
-        return view;
+        // BUTTONS
+        addItemButton.setOnClickListener(v -> onAddPatientClicked());
+        profileButton.setOnClickListener(v -> onProviderProfileClicked());
+
+        // ----------------------------------------------------
+        // LOAD ASSIGNED CHILDREN
+        // ----------------------------------------------------
+        checkProviderOnboarding();
+        loadChildrenList();
     }
+
+    // ------------------------------------------------------------
+    // Add Patient Popup
+    // ------------------------------------------------------------
     private void onAddPatientClicked() {
-        Toast.makeText(getContext(), "Button clicked!", Toast.LENGTH_SHORT).show();
-        AddPatientPopup popup = new AddPatientPopup();
-        popup.show(getParentFragmentManager(), "addPatientPopup");
+        AddPatientPopup popup = new AddPatientPopup(providerUid);
+        popup.setOnDataChangedListener(this);
+        popup.show(getSupportFragmentManager(), "addPatientPopup");
     }
-    // ------------------------------------------------------------
-    //  onboarding popup
-    // ------------------------------------------------------------
-    private void checkProviderOnboarding() {
 
-        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        if (uid == null) {
-            return;  // Provider 未登录
+    // ------------------------------------------------------------
+    // Provider’s Own Profile
+    // ------------------------------------------------------------
+    private void onProviderProfileClicked() {
+        Intent intent = new Intent(ProviderMain.this, ProviderProfileActivity.class);
+        intent.putExtra("providerUid", providerUid);
+        startActivity(intent);
+    }
+
+    // ------------------------------------------------------------
+    // Load all children assigned to this provider
+    // ------------------------------------------------------------
+    private void loadChildrenList() {
+        showLoadingDialog();
+
+        db.collection("children")
+                .whereArrayContains("providerIds", providerUid)
+                .get()
+                .addOnSuccessListener(childrenSnapshot -> {
+
+                    ArrayList<CardItem> childrenList = new ArrayList<>();
+
+                    List<DocumentSnapshot> childrenDocs = childrenSnapshot.getDocuments();
+                    for (DocumentSnapshot doc : childrenDocs) {
+
+                        String childName = doc.getString("username");
+                        String childId = doc.getString("uid");
+                        String parentId = doc.getString("parentId");
+
+                        childrenList.add(new CardItem(
+                                childName,
+                                R.drawable.profile_default_img,
+                                R.color.white,
+                                childId,
+                                parentId,
+                                new ArrayList<>()
+                        ));
+                    }
+
+                    cardList = childrenList;
+                    adapter.setList(childrenList);
+                    adapter.notifyDataSetChanged();
+
+                    hideLoadingDialog();
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("ProviderMain", "Failed loading children", e);
+                    hideLoadingDialog();
+                });
+    }
+
+    // ------------------------------------------------------------
+    // Loading Dialog
+    // ------------------------------------------------------------
+    private void showLoadingDialog() {
+        if (loadingDialog == null) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setCancelable(false);
+            View v = getLayoutInflater().inflate(R.layout.dialog_loading, null);
+            builder.setView(v);
+            loadingDialog = builder.create();
         }
+        loadingDialog.show();
+    }
 
-        DocumentReference doc = db.collection("users").document(uid);
+    private void hideLoadingDialog() {
+        if (loadingDialog != null && loadingDialog.isShowing()) {
+            loadingDialog.dismiss();
+        }
+    }
+    private void checkProviderOnboarding() {
+        String providerUid = UserUtils.getUid();
 
-        doc.get().addOnSuccessListener(snapshot -> {
-            if (!snapshot.exists()) return;
+        db.collection("users")
+                .document(providerUid)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (!doc.exists()) return;
 
-            Boolean hasSeen = snapshot.getBoolean("hasSeenOnboardingProvider");
+                    Boolean hasSeen = doc.getBoolean("hasSeenOnboardingProvider");
 
-            if (hasSeen == null || !hasSeen) {
+                    // Treat null as false
+                    if (hasSeen == null || !hasSeen) {
+                        showProviderOnboardingPopup(providerUid);
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Log.e("ProviderActivity", "Failed to load onboarding flag", e));
+    }
+    private void showProviderOnboardingPopup(String providerUid) {
 
-                // ⭐ 显示 Provider Onboarding
-                if (isAdded()) {
-                    new ProviderOnboardingDialog()
-                            .show(getChildFragmentManager(), "providerOnboarding");
-                }
+        View dialogView = LayoutInflater.from(this)
+                .inflate(R.layout.dialog_provider_onboarding, null);
 
-                // ⭐ 更新 Firestore，防止下次再弹
-                doc.update("hasSeenOnboardingProvider", true);
-            }
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setCancelable(false)
+                .create();
+
+        dialog.show();
+
+        Button btnClose = dialogView.findViewById(R.id.closeProviderPopup);
+
+        btnClose.setOnClickListener(v -> {
+
+            // Mark onboarding as completed
+            db.collection("users")
+                    .document(providerUid)
+                    .update("hasSeenOnboardingProvider", true)
+                    .addOnFailureListener(e ->
+                            Log.e("ProviderOnboarding", "Failed updating onboarding flag", e));
+
+            dialog.dismiss();
         });
     }
-
-
+    // Called when AddPatientPopup updates data
+    @Override
+    public void onDataChanged() {
+        loadChildrenList();
+    }
 }

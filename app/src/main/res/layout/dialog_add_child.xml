@@ -6,24 +6,18 @@
     android:orientation="vertical"
     android:padding="24dp">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Add Child"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="16dp"/>
+
 
     <ImageView
-        android:id="@+id/iv_child_avatar_dialog"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:src="@android:drawable/ic_menu_camera"
-        android:contentDescription="Child Avatar"
+        android:id="@+id/profileImageParent"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
+        android:src="@drawable/ic_profile_placeholder"
+        android:background="@drawable/circle_bg"
+        android:scaleType="centerCrop"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="16dp"
-        android:background="@drawable/circle_background"/>
+        android:layout_marginBottom="16dp" />
+
 
     <!-- 用户名 -->
     <LinearLayout

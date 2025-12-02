@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.demoapp">
-    <!-- 权限 -->
+
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -11,6 +11,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.DemoApp">
+
+        <activity
+            android:name=".ViewDailyEntryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".TriageHistoryActivity"
+            android:exported="false" />
         <activity
             android:name=".ProviderProfileActivity"
             android:exported="false" />
@@ -32,17 +39,22 @@
         <activity
             android:name=".TriageActivity"
             android:exported="false" />
-        <!-- Launcher Activity -->
+
+        <!-- CHANGE: SignInActivity is now the launcher -->
         <activity
-            android:name=".CreateAccountActivity"
+            android:name=".SignInActivity"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <!-- 内部使用 Activity -->
+
+        <!-- ProviderMain is now just a normal activity -->
+        <activity
+            android:name=".ProviderMain"
+            android:exported="false" />
+
         <activity
             android:name=".ChooseIdentityActivity"
             android:exported="false" />
@@ -59,9 +71,6 @@
             android:name=".CardViewHomeScreen"
             android:exported="false" />
         <activity
-            android:name=".SignInActivity"
-            android:exported="false" />
-        <activity
             android:name=".HomeScreenActivity"
             android:exported="false" />
         <activity
@@ -76,13 +85,21 @@
         <activity
             android:name=".med.ManageRescueActivity"
             android:exported="false" />
-        <!-- ParentActivity -->
         <activity
             android:name=".ParentActivity"
-            android:exported="true" /> <!-- NEW: MainNavActivity -->
+            android:exported="true" />
         <activity
             android:name=".MainNavActivity"
             android:exported="false" />
+        <activity
+            android:name=".MainActivity"
+            android:exported="false" />
+        <activity
+            android:name=".FilterEntriesScreen"
+            android:exported="false"/>
+        <activity
+            android:name=".AddSymptomsActivity"
+            android:exported="false"/>
     </application>
 
 </manifest>

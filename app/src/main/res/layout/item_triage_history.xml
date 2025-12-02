@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:padding="12dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white"
+    android:layout_marginBottom="12dp"
+    android:elevation="3dp">
+
+    <!-- Severity Color Strip -->
+    <View
+        android:id="@+id/viewSeverityStrip"
+        android:layout_width="6dp"
+        android:layout_height="match_parent"
+        android:background="#4CAF50" />
+
+    <!-- Content -->
+    <LinearLayout
+        android:orientation="vertical"
+        android:paddingLeft="12dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/txtSeverity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="GREEN"
+            android:textStyle="bold"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/txtDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="2dp"
+            android:text="Jan 5, 2025 - 4:15 PM"/>
+
+        <TextView
+            android:id="@+id/txtPEF"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="6dp"
+            android:text="PEF: 90"/>
+
+        <TextView
+            android:id="@+id/txtRescueAttempts"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Rescue Attempts: 1"/>
+
+        <TextView
+            android:id="@+id/txtSymptoms"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="6dp"
+            android:text="Symptoms: cough, chest tight"
+            android:textColor="#555"/>
+
+    </LinearLayout>
+
+</LinearLayout>
