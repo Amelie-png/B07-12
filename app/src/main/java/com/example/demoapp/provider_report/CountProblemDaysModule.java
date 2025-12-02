@@ -1,6 +1,6 @@
 package com.example.demoapp.provider_report;
-import com.example.demoapp.entry_db.EntryLogRepository;
 
+import com.example.demoapp.entry_db.EntryLogRepository;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Map;
@@ -19,7 +19,8 @@ public class CountProblemDaysModule {
 
     public void countProblemDays(ResultListener listener) {
         EntryLogRepository repo = new EntryLogRepository();
-        repo.countProblemDaysByCategories(childId, startDate, endDate, categories,
+        // 显式指定接口类型，避免模糊调用
+        EntryLogRepository.OnProblemDaysCountedByCategoryListener callback =
                 new EntryLogRepository.OnProblemDaysCountedByCategoryListener() {
                     @Override
                     public void onCounted(Map<String, Integer> counts) {
@@ -30,11 +31,13 @@ public class CountProblemDaysModule {
                     public void onError(Exception e) {
                         listener.onError(e);
                     }
-                });
+                };
+
+        repo.countProblemDaysByCategories(childId, startDate, endDate, categories, callback);
     }
 
     public interface ResultListener {
-        void onResult(Map<String, Integer> counts); // category -> count
+        void onResult(Map<String, Integer> counts);
         void onError(Exception e);
     }
 }

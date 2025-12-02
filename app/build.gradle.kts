@@ -51,7 +51,8 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.constraintlayout)
     implementation(libs.recyclerview)
-
+    implementation("com.itextpdf:itextpdf:5.5.13.3")
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     // Navigation
     implementation("androidx.navigation:navigation-fragment:2.7.5")
     implementation("androidx.navigation:navigation-ui:2.7.5")

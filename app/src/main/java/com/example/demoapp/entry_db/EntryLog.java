@@ -5,11 +5,14 @@ import com.google.firebase.firestore.Exclude;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Locale;
+import java.util.List;
+import java.util.Locale;import com.example.demoapp.med.MedicineEntry;
 
 public class EntryLog{
     private String childUid;
     private String id;
+    public List<MedicineEntry> medicineEntries; // 用 public 或者 getter
+    public String triageState;
     private ArrayList<CategoryName> symptoms;
     private ArrayList<CategoryName> triggers;
     private String date;
@@ -51,6 +54,9 @@ public class EntryLog{
 
     public String getRecorder(){ return recorder; }
     public void setRecorder(String r){ recorder = r; }
+
+    public List<MedicineEntry> getMedicineEntries() { return medicineEntries; }
+    public String getTriageState() { return triageState; }
 
     @Exclude
     public String getTime() {
