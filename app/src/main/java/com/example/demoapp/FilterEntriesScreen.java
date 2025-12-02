@@ -36,6 +36,9 @@ public class FilterEntriesScreen extends AppCompatActivity {
     private ArrayList<Entry> lastFilteredEntries = new ArrayList<>();
     private String childUid;
 
+    // ⭐补回丢失的变量
+    private ArrayList<Entry> filteredEntry = new ArrayList<>();
+
     @Nullable
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -56,7 +59,6 @@ public class FilterEntriesScreen extends AppCompatActivity {
         }
     }
 
-
     private void initViews() {
         startDateEditText = findViewById(R.id.startDateEditText);
         endDateEditText = findViewById(R.id.endDateEditText);
@@ -69,7 +71,6 @@ public class FilterEntriesScreen extends AppCompatActivity {
         btnApplyFilter = findViewById(R.id.btnApplyFilter);
         btnBack = findViewById(R.id.btnBackHome);
 
-        // Hide chip groups on start
         chipGroupSymptoms.setVisibility(View.GONE);
         chipGroupTriggers.setVisibility(View.GONE);
     }
@@ -140,28 +141,29 @@ public class FilterEntriesScreen extends AppCompatActivity {
         LocalDate startDate = (LocalDate) startDateEditText.getTag();
         LocalDate endDate = (LocalDate) endDateEditText.getTag();
 
-        if (validateDateRange(startDate, endDate)) {
-            Bundle bundle = new Bundle();
+        if (!validateDateRange(startDate, endDate)) return;
 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            String startDateStr = startDate.format(formatter);
-            String endDateStr = endDate.format(formatter);
+        Bundle bundle = new Bundle();
 
-            bundle.putString("startDate", startDateStr);
-            bundle.putString("endDate", endDateStr);
-            bundle.putStringArrayList("symptoms", selectedSymptoms);
-            bundle.putStringArrayList("triggers", selectedTriggers);
-            bundle.putString("childId", childUid);
-            bundle.putString("role", getIntent().getExtras().getString("role"));
-            bundle.putBoolean("symptomsAllowed", getIntent().getExtras().getBoolean("symptomsAllowed"));
-            bundle.putBoolean("triggersAllowed", getIntent().getExtras().getBoolean("triggersAllowed"));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String startDateStr = startDate.format(formatter);
+        String endDateStr = endDate.format(formatter);
 
-            DailyEntryDisplayScreen dailyEntryScreen = new DailyEntryDisplayScreen();
-            dailyEntryScreen.setArguments(bundle);
+        bundle.putString("startDate", startDateStr);
+        bundle.putString("endDate", endDateStr);
+        bundle.putStringArrayList("symptoms", selectedSymptoms);
+        bundle.putStringArrayList("triggers", selectedTriggers);
+        bundle.putString("childId", childUid);
+        bundle.putString("role", getIntent().getExtras().getString("role"));
+        bundle.putBoolean("symptomsAllowed", getIntent().getExtras().getBoolean("symptomsAllowed"));
+        bundle.putBoolean("triggersAllowed", getIntent().getExtras().getBoolean("triggersAllowed"));
 
-        // ✅ 设置回调，让 Fragment 查询完成后把数据回传
+        DailyEntryDisplayScreen dailyEntryScreen = new DailyEntryDisplayScreen();
+        dailyEntryScreen.setArguments(bundle);
+
+        // ⭐ 正确放在 IF 内部，确保一定被执行！
         dailyEntryScreen.setOnEntriesAvailableListener(entries -> {
-            lastFilteredEntries = entries; // PDF/CSV 数据更新
+            lastFilteredEntries = entries;  // 更新 PDF / CSV 数据
         });
 
         getSupportFragmentManager()
@@ -169,6 +171,7 @@ public class FilterEntriesScreen extends AppCompatActivity {
                 .replace(R.id.filtered_entry_list, dailyEntryScreen)
                 .commit();
     }
+
 
     private void setupBackButton() {
         btnBack.setOnClickListener(v -> finish());
@@ -246,7 +249,6 @@ public class FilterEntriesScreen extends AppCompatActivity {
 
             FileWriter writer = new FileWriter(file);
 
-            // CSV 表头
             writer.append("\"Entry Number\",\"Date\",\"Person\",\"Symptoms\",\"Triggers\"\n");
 
             for (Entry entry : entries) {
@@ -254,7 +256,6 @@ public class FilterEntriesScreen extends AppCompatActivity {
                 writer.append("\"").append(entry.getTimeRecorded()).append("\",");
                 writer.append("\"").append(entry.getPerson()).append("\",");
 
-                // 替换内容中的双引号为两个双引号，并换行符用 \n
                 String symptoms = entry.getSymptoms().replace("\"", "\"\"").replace(",", " | ");
                 String triggers = entry.getTriggers().replace("\"", "\"\"").replace(",", " | ");
 
@@ -271,8 +272,6 @@ public class FilterEntriesScreen extends AppCompatActivity {
             Toast.makeText(this, "Error generating CSV: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
-
-
 
     private void generatePdf(List<Entry> entries) {
         if (entries == null || entries.isEmpty()) {
@@ -311,12 +310,11 @@ public class FilterEntriesScreen extends AppCompatActivity {
             Canvas canvas = page.getCanvas();
             y = 60;
 
-            // 绘制标题和表头
             drawTitleAndHeader(canvas, margin, y, titlePaint, headerPaint);
             y += 60;
 
             for (Entry entry : entries) {
-                if (y > pageHeight - margin - 100) { // 预留空间
+                if (y > pageHeight - margin - 100) {
                     pdf.finishPage(page);
                     pageNumber++;
                     pageInfo = new PdfDocument.PageInfo.Builder(pageWidth, pageHeight, pageNumber).create();
@@ -327,14 +325,12 @@ public class FilterEntriesScreen extends AppCompatActivity {
                     y += 60;
                 }
 
-                // 交替背景
                 if (alternate) {
                     bgPaint.setColor(0xFFEFEFEF);
                     canvas.drawRect(margin - 5, y - 15, pageWidth - margin, y + 100, bgPaint);
                 }
                 alternate = !alternate;
 
-                // 绘制内容
                 canvas.drawText("Entry #: " + safe(entry.getEntryNumber()), margin, y, contentPaint);
                 y += lineSpacing;
                 canvas.drawText("Date: " + safe(entry.getTimeRecorded()), margin, y, contentPaint);
@@ -344,7 +340,7 @@ public class FilterEntriesScreen extends AppCompatActivity {
                 canvas.drawText("Symptoms: " + safe(entry.getSymptoms()).replace(",", " | "), margin, y, contentPaint);
                 y += lineSpacing;
                 canvas.drawText("Triggers: " + safe(entry.getTriggers()).replace(",", " | "), margin, y, contentPaint);
-                y += lineSpacing + 10; // Entry 间距
+                y += lineSpacing + 10;
             }
 
             pdf.finishPage(page);
@@ -360,7 +356,6 @@ public class FilterEntriesScreen extends AppCompatActivity {
         }
     }
 
-    // 每页表头绘制方法
     private void drawTitleAndHeader(Canvas canvas, int margin, int y, Paint titlePaint, Paint headerPaint) {
         canvas.drawText("Filtered Daily Entries Report", margin, y, titlePaint);
         y += 40;
@@ -370,6 +365,5 @@ public class FilterEntriesScreen extends AppCompatActivity {
     private String safe(String str) {
         return str == null ? "" : str;
     }
-
 
 }

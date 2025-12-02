@@ -37,6 +37,9 @@ public class DailyEntryDisplayScreen extends Fragment implements EntryLogReposit
     boolean symptomsAllowed;
     boolean triggersAllowed;
 
+    // ====== 新增：缺失的变量 ======
+    private ArrayList<Entry> convertedEntries = new ArrayList<>();
+    // ============================
 
     // ================== 新增接口 ==================
     public interface OnEntriesAvailableListener {
@@ -68,14 +71,13 @@ public class DailyEntryDisplayScreen extends Fragment implements EntryLogReposit
         Bundle args = getArguments();
         startDate = args.getString("startDate");
         endDate = args.getString("endDate");
-        // TODO: replace with actual get childId logic
+
         childUid = args.getString("childId");
         role = args.getString("role");
         selectedSymptoms = args.getStringArrayList("symptoms");
         selectedTriggers = args.getStringArrayList("triggers");
         symptomsAllowed = getArguments().getBoolean("symptomsAllowed");
         triggersAllowed = getArguments().getBoolean("triggersAllowed");
-
 
         adapter = new EntryAdapter(getContext(), entryList, symptomsAllowed, triggersAllowed);
         listView.setAdapter(adapter);
@@ -99,10 +101,11 @@ public class DailyEntryDisplayScreen extends Fragment implements EntryLogReposit
 
     @Override
     public void onEntriesRetrieved(ArrayList<EntryLog> entries) {
+
         entryList.clear();
+
         int numEntry = entries.size();
         if (numEntry == 0) {
-            // Show empty message
             whenEmpty.setVisibility(View.VISIBLE);
             listView.setVisibility(View.GONE);
             return;
@@ -110,35 +113,38 @@ public class DailyEntryDisplayScreen extends Fragment implements EntryLogReposit
             whenEmpty.setVisibility(View.GONE);
             listView.setVisibility(View.VISIBLE);
         }
+
         for (int i=0; i<numEntry; i++) {
             EntryLog e=entries.get(i);
             String symptomStr = null;
             String triggerStr = null;
+
             if(symptomsAllowed){
                 symptomStr = formatSymptomsTriggers(e.getSymptoms());
             }
             if(triggersAllowed){
                 triggerStr = formatSymptomsTriggers(e.getTriggers());
             }
+
             if(symptomStr != null && triggerStr != null){
                 entryList.add(new Entry(Integer.toString(i+1), e.getDate(), e.getRecorder(), symptomStr, triggerStr));
             } else if(symptomStr == null && triggerStr == null) {
                 entryList.add(new Entry(Integer.toString(i+1), e.getDate(), e.getRecorder()));
-            }else if (symptomStr == null) {
+            } else if (symptomStr == null) {
                 entryList.add(new Entry(Integer.toString(i+1), e.getDate(), e.getRecorder(), triggerStr, false));
             } else if (triggerStr == null){
                 entryList.add(new Entry(Integer.toString(i+1), e.getDate(), e.getRecorder(), symptomStr, true));
             }
         }
-        entryList.addAll(convertedEntries);
+
         adapter.notifyDataSetChanged();
 
-        // ============ 通过回调传回 FilterEntriesScreen ============
+        // 🟢 正确回传 entryList，而不是 convertedEntries！
         if (listener != null) {
-            listener.onEntriesAvailable(convertedEntries);
+            listener.onEntriesAvailable(entryList);
         }
-        // ==========================================================
     }
+
 
     private String formatSymptomsTriggers(ArrayList<CategoryName> list) {
         if (list == null || list.isEmpty()) return "";
