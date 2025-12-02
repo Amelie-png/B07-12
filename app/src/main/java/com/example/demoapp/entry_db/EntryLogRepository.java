@@ -2,17 +2,11 @@ package com.example.demoapp.entry_db;
 
 import android.widget.Toast;
 
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.Source;
+import com.google.firebase.firestore.*;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class EntryLogRepository {
     private final CollectionReference entriesCollection;
@@ -28,7 +22,6 @@ public class EntryLogRepository {
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
                     if (querySnapshot.isEmpty()) {
-                        // No matching entry exists, then save
                         DocumentReference docRef = entriesCollection.document();
                         entry.setId(docRef.getId());
 
@@ -58,88 +51,56 @@ public class EntryLogRepository {
                     ArrayList<EntryLog> entries = new ArrayList<>();
                     for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
                         EntryLog entry = doc.toObject(EntryLog.class);
-                        if (entry != null) {
-                            entries.add(entry);
-                        }
+                        if (entry != null) entries.add(entry);
                     }
                     listener.onEntriesRetrieved(entries);
                 })
                 .addOnFailureListener(listener::onError);
     }
 
-    public void getFilteredEntries(OnEntriesRetrievedListener listener,
-                                   String childUid, String selectedStartDate,
-                                   String selectedEndDate,
-                                   ArrayList<String> selectedSymptoms,
-                                   ArrayList<String> selectedTriggers){
+    public void countProblemDaysByCategories(String childUid, LocalDate startDate, LocalDate endDate,
+                                             ArrayList<String> categories,
+                                             OnProblemDaysCountedByCategoryListener listener) {
         entriesCollection
                 .whereEqualTo("childUid", childUid)
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
-                    ArrayList<EntryLog> entries = new ArrayList<>();
-                    List<DocumentSnapshot> docs =  querySnapshot.getDocuments();
+                    Map<String, Integer> counts = new HashMap<>();
+                    for (String cat : categories) counts.put(cat, 0);
+
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                    List<DocumentSnapshot> docs = querySnapshot.getDocuments();
                     for (DocumentSnapshot doc : docs) {
                         EntryLog entry = doc.toObject(EntryLog.class);
-                        String entryDateString = entry.getDate();
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                        LocalDate entryDate = LocalDate.parse(entryDateString, formatter);
-                        LocalDate startDate = LocalDate.parse(selectedStartDate, formatter);
-                        LocalDate endDate = LocalDate.parse(selectedEndDate, formatter);
+                        if (entry == null) continue;
 
-                        boolean afterStartDate = entryDate.isAfter(startDate) || entryDate.isEqual(startDate);
-                        boolean beforeEndDate = entryDate.isBefore(endDate) || entryDate.isEqual(endDate);
-                        if(entry != null && hasMatchingSymptomsTriggers(
-                                entry.getSymptoms(), entry.getTriggers(),
-                                selectedSymptoms, selectedTriggers)
-                                && afterStartDate
-                                && beforeEndDate) {
-                            entries.add(entry);
+                        LocalDate entryDate = LocalDate.parse(entry.getDate(), formatter);
+                        if (entryDate.isBefore(startDate) || entryDate.isAfter(endDate)) continue;
+
+                        List<CategoryName> symptoms = entry.getSymptoms();
+                        if (symptoms != null) {
+                            for (CategoryName symptom : symptoms) {
+                                String catName = symptom.getCategory();
+                                if (counts.containsKey(catName)) {
+                                    counts.put(catName, counts.get(catName) + 1);
+                                }
+                            }
                         }
                     }
-                    listener.onEntriesRetrieved(entries);
+
+                    listener.onCounted(counts);
                 })
                 .addOnFailureListener(listener::onError);
     }
 
-    private boolean hasMatchingSymptomsTriggers(ArrayList<CategoryName> entrySymptoms,
-                                                ArrayList<CategoryName> entryTriggers,
-                                                ArrayList<String> selectedSymptoms,
-                                                ArrayList<String> selectedTriggers) {
-        return containEntryStrings(entrySymptoms, selectedSymptoms) && containEntryStrings(entryTriggers, selectedTriggers);
-    }
-
-    private boolean containEntryStrings(ArrayList<CategoryName> entryValues,
-                                          ArrayList<String> selectedValues){
-        for(String selectedSymptom : selectedValues){
-            for(int j = 0; j < entryValues.size(); j++){
-                CategoryName p = entryValues.get(j);
-                if(p.getCategory().equals(selectedSymptom)){
-                    break;
-                }
-                if(j == entryValues.size()-1){
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    // Callback interfaces
-    public interface OnSuccessListener {
-        void onSuccess(String id);
-    }
-
-    public interface OnFailureListener {
-        void onFailure(Exception e);
-    }
-
-    public interface OnEntryRetrievedListener {
-        void onEntryRetrieved(EntryLog entry);
+    public interface OnProblemDaysCountedByCategoryListener {
+        void onCounted(Map<String, Integer> counts);
         void onError(Exception e);
     }
 
-    public interface OnEntriesRetrievedListener {
-        void onEntriesRetrieved(ArrayList<EntryLog> entries);
-        void onError(Exception e);
-    }
+
+    public interface OnSuccessListener { void onSuccess(String id); }
+    public interface OnFailureListener { void onFailure(Exception e); }
+    public interface OnEntryRetrievedListener { void onEntryRetrieved(EntryLog entry); void onError(Exception e); }
+    public interface OnEntriesRetrievedListener { void onEntriesRetrieved(ArrayList<EntryLog> entries); void onError(Exception e); }
 }
