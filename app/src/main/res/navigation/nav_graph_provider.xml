@@ -18,12 +18,8 @@
         android:id="@+id/providerHomeFragment"
         android:name="com.example.demoapp.ProviderHomeFragment"
         android:label="Home">
-        <argument
-            android:name="uid"
-            app:argType="string" />
-        <argument
-            android:name="role"
-            app:argType="string" />
+        <argument android:name="uid" app:argType="string" />
+        <argument android:name="role" app:argType="string" />
     </fragment>
 
     <!-- SYMPTOMS -->
@@ -31,12 +27,8 @@
         android:id="@+id/providerSymptomFragment"
         android:name="com.example.demoapp.ProviderSymptomsFragment"
         android:label="Symptom">
-        <argument
-            android:name="uid"
-            app:argType="string" />
-        <argument
-            android:name="role"
-            app:argType="string" />
+        <argument android:name="uid" app:argType="string" />
+        <argument android:name="role" app:argType="string" />
     </fragment>
 
     <!-- MEDICINE -->
@@ -44,12 +36,8 @@
         android:id="@+id/providerMedicineFragment"
         android:name="com.example.demoapp.ProviderMedicineFragment"
         android:label="Medicine">
-        <argument
-            android:name="uid"
-            app:argType="string" />
-        <argument
-            android:name="role"
-            app:argType="string" />
+        <argument android:name="uid" app:argType="string" />
+        <argument android:name="role" app:argType="string" />
     </fragment>
 
     <!-- BADGES -->
@@ -57,24 +45,22 @@
         android:id="@+id/providerBadgesFragment"
         android:name="com.example.demoapp.ProviderBadgesFragment"
         android:label="Badges">
-        <argument
-            android:name="uid"
-            app:argType="string" />
-        <argument
-            android:name="role"
-            app:argType="string" />
+        <argument android:name="uid" app:argType="string" />
+        <argument android:name="role" app:argType="string" />
     </fragment>
 
-    <!-- PROFILE -->
+    <!-- PROFILE (FIXED) -->
     <fragment
         android:id="@+id/providerProfileFragment"
         android:name="com.example.demoapp.ProviderProfileFragment"
         android:label="Profile">
+
         <argument
-            android:name="uid"
+            android:name="childUid"
             app:argType="string" />
+
         <argument
-            android:name="role"
+            android:name="providerUid"
             app:argType="string" />
     </fragment>
 

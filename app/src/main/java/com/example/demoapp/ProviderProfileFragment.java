@@ -47,9 +47,11 @@ public class ProviderProfileFragment extends Fragment {
 
         db = FirebaseFirestore.getInstance();
 
-        // Get arguments passed by navigation
+        // ------------------------------------------
+        //  ⭐ READ ARGUMENTS EXACT SAME AS PARENT
+        // ------------------------------------------
         if (getArguments() != null) {
-            childUid = getArguments().getString("childUid");
+            childUid = getArguments().getString("uid");          // <-- CHILD ID (same as parent)
             providerUid = getArguments().getString("providerUid");
         }
 
@@ -67,18 +69,17 @@ public class ProviderProfileFragment extends Fragment {
 
         loadChildProfile();
 
-        // Return to Provider Home
+        // Return to Provider Main
         returnButton.setOnClickListener(v -> {
             Intent intent = new Intent(requireActivity(), ProviderMain.class);
             intent.putExtra("uid", providerUid);
-            intent.putExtra("role", "provider");
             startActivity(intent);
             requireActivity().finish();
         });
     }
 
     // ----------------------------------------------------
-    // Load child's profile from Firestore for provider view
+    // Load child's profile
     // ----------------------------------------------------
     private void loadChildProfile() {
 
@@ -92,24 +93,21 @@ public class ProviderProfileFragment extends Fragment {
                         return;
                     }
 
-                    // Fetch fields
                     String first = doc.getString("firstName");
                     String last = doc.getString("lastName");
                     String username = doc.getString("username");
                     String dob = doc.getString("dob");
 
-                    // Name and username
                     String fullName = ((first != null) ? first : "") + " " + ((last != null) ? last : "");
                     childNameView.setText(fullName.trim().isEmpty() ? "Unknown" : fullName);
 
                     childUsernameView.setText(username != null ? username : "-");
-
-                    // DOB
                     dobValueView.setText(dob != null ? dob : "-");
 
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(requireContext(), "Failed to load child profile", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(),
+                            "Failed to load child profile", Toast.LENGTH_SHORT).show();
                     Log.e("ProviderChildProfile", "Error loading profile", e);
                 });
     }
