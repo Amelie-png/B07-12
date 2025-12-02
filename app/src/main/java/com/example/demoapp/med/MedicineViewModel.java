@@ -4,8 +4,10 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class MedicineViewModel extends ViewModel {
     private final MutableLiveData<String> childId = new MutableLiveData<>();
@@ -14,13 +16,13 @@ public class MedicineViewModel extends ViewModel {
     private final MutableLiveData<LocalDate> expiryDate = new MutableLiveData<>();
     private final MutableLiveData<LocalDate> startDate = new MutableLiveData<>();
 
-    private final MutableLiveData<Integer> remainingDoses = new MutableLiveData<>(0);
-    private final MutableLiveData<Integer> totalDoses = new MutableLiveData<>(0);
+    private final MutableLiveData<Integer> remainingDoses = new MutableLiveData<>();
+    private final MutableLiveData<Integer> totalDoses = new MutableLiveData<>();
 
-    private final MutableLiveData<Integer> dailyDose = new MutableLiveData<>(0);
+    private final MutableLiveData<Integer> dailyDose = new MutableLiveData<>();
     public final MutableLiveData<List<String>> scheduledDays = new MutableLiveData<>();
 
-    private final MutableLiveData<Boolean> lowStock = new MutableLiveData<>(false);
+    private final MutableLiveData<Boolean> lowStock = new MutableLiveData<>();
     private final MutableLiveData<String> flagAuthor = new MutableLiveData<>();
 
     //Setters

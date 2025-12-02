@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.example.demoapp.med.MedicineLogWizardActivity;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -76,15 +77,14 @@ public class ChildHomeFragment extends Fragment {
         childId = requireArguments().getString("uid");
         role = requireArguments().getString("role");
 
-        // Example medication button (currently disabled / TODO)
+        // Add medicine log from home
         Button btnLogDose = view.findViewById(R.id.btnLogDose);
 
         btnLogDose.setOnClickListener(v -> {
-            // TODO: Replace with real MedicationActivity when implemented
-            // Intent intent = new Intent(getContext(), MedicationActivity.class);
-            // intent.putExtra("uid", childId);
-            // intent.putExtra("role", role);
-            // startActivity(intent);
+             Intent intent = new Intent(getContext(), MedicineLogWizardActivity.class);
+             intent.putExtra("childId", childId); //same key as for activity
+             intent.putExtra("author", role); //don't change!
+             startActivity(intent);
         });
 
         return view;

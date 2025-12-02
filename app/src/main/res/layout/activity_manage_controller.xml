@@ -214,6 +214,7 @@
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_mon"
+                android:tag="Mon"
                 style="@style/Widget.MaterialComponents.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -222,6 +223,7 @@
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_tue"
+                android:tag="Tue"
                 style="@style/Widget.MaterialComponents.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -230,6 +232,7 @@
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_wed"
+                android:tag="Wed"
                 style="@style/Widget.MaterialComponents.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -238,6 +241,7 @@
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_thu"
+                android:tag="Thu"
                 style="@style/Widget.MaterialComponents.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -246,6 +250,7 @@
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_fri"
+                android:tag="Fri"
                 style="@style/Widget.MaterialComponents.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -254,6 +259,7 @@
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_sat"
+                android:tag="Sat"
                 style="@style/Widget.MaterialComponents.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -262,6 +268,7 @@
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_sun"
+                android:tag="Sun"
                 style="@style/Widget.MaterialComponents.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
