@@ -3,6 +3,7 @@ package com.example.demoapp.med;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -48,96 +49,85 @@ public class MedicineInventoryActivity extends AppCompatActivity {
         setupBackButton();
         setupEditController();
         setupEditRescue();
-
-        //Set up views
-        loadController();
-        loadRescue();
-
     }
 
-    private void loadController(){
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadController();
+        loadRescue();
+    }
+
+    private void loadController() {
         TextView cPurchaseDate = findViewById(R.id.tv_c_purchase_date);
         TextView cExpiryDate = findViewById(R.id.tv_c_expiry_date);
         TextView cAmount = findViewById(R.id.tv_c_amount);
         TextView dailyDose = findViewById(R.id.tv_c_planned_dose);
         TextView scheduleDays = findViewById(R.id.tv_c_schedule);
 
-        repo.loadControllerMed(childId, new MedicineRepository.OnResult<>() {
+        repo.loadControllerMed(childId, new MedicineRepository.OnResult<ControllerMed>() {
             @Override
-            public void onSuccess(Map<String, Object> result) {
-                if (result == null) return;
+            public void onSuccess(ControllerMed med) {
+                Log.d("DEBUG", "Med loaded: " + med);
+                if (med != null) {
+                    cPurchaseDate.setText(med.getPurchaseDate() != null ? med.getPurchaseDate() : null);
+                    cExpiryDate.setText(med.getExpiryDate() != null ? med.getExpiryDate() : null);
 
-                // Dates
-                Object purchase = result.get("purchaseDate");
-                Object expiry = result.get("expiryDate");
+                    cAmount.setText(med.getCurrentAmount() + " / " + med.getTotalAmount() + " Puffs");
+                    dailyDose.setText(med.getDosePerDay() + " Doses");
 
-                cPurchaseDate.setText(purchase != null ? purchase.toString() : "Set date");
-                cExpiryDate.setText(expiry != null ? expiry.toString() : "Set date");
+                    List<String> days = med.getScheduleDays();
+                    scheduleDays.setText(days != null && !days.isEmpty() ? String.join(", ", days) : "Set");
+                } else {
+                    cPurchaseDate.setText(null);
+                    cExpiryDate.setText(null);
 
-                // Numbers
-                Object daily = result.get("dosePerDay");
-                Object remaining = result.get("currentAmount");
-                Object total = result.get("totalAmount");
-
-                dailyDose.setText(daily != null ? daily + " Doses" : "Set");
-                cAmount.setText(remaining != null && total != null ? remaining + " / " + total + " Puffs" : "Set");
-
-                //Chip group
-                Object daysObj = result.get("scheduleDays");
-                if (daysObj instanceof List) {
-                    List<String> days = new ArrayList<>();
-                    for (Object o : (List<?>) daysObj) {
-                        if (o instanceof String) days.add((String) o);
-                    }
-                    scheduleDays.setText(String.join(", ", days));
+                    cAmount.setText("Set");
+                    dailyDose.setText("Set");
+                    scheduleDays.setText("Set");
                 }
             }
 
             @Override
             public void onFailure(Exception e) {
-                // show error dialog
-                new AlertDialog.Builder(MedicineInventoryActivity.this)
-                        .setTitle("Error")
-                        .setMessage("Could not load existing settings: " + e.getMessage())
-                        .setPositiveButton("OK", null)
-                        .show();
+                cPurchaseDate.setText(null);
+                cExpiryDate.setText(null);
+
+                cAmount.setText("Set");
+                dailyDose.setText("Set");
+                scheduleDays.setText("Set");
             }
         });
     }
 
-    private void loadRescue(){
-        TextView purchaseDate = findViewById(R.id.tv_r_purchase_date);
-        TextView expiryDate = findViewById(R.id.tv_r_expiry_date);
-        TextView amount = findViewById(R.id.tv_r_amount);
+    private void loadRescue() {
+        TextView rPurchaseDate = findViewById(R.id.tv_r_purchase_date);
+        TextView rExpiryDate = findViewById(R.id.tv_r_expiry_date);
+        TextView rAmount = findViewById(R.id.tv_r_amount);
 
-        repo.loadRescueMed(childId, new MedicineRepository.OnResult<>() {
+        repo.loadRescueMed(childId, new MedicineRepository.OnResult<RescueMed>() {
             @Override
-            public void onSuccess(Map<String, Object> result) {
-                if (result == null) return;
+            public void onSuccess(RescueMed med) {
+                Log.d("DEBUG", "Med loaded: " + med);
+                if (med != null) {
+                    rPurchaseDate.setText(med.getPurchaseDate() != null ? med.getPurchaseDate() : null);
+                    rExpiryDate.setText(med.getExpiryDate() != null ? med.getExpiryDate() : null);
 
-                // Dates
-                Object purchase = result.get("purchaseDate");
-                Object expiry = result.get("expiryDate");
+                    rAmount.setText(med.getCurrentAmount() + " / " + med.getTotalAmount() + " Puffs");
+                } else {
+                    rPurchaseDate.setText(null);
+                    rExpiryDate.setText(null);
 
-                purchaseDate.setText(purchase != null ? purchase.toString() : "Set date");
-                expiryDate.setText(expiry != null ? expiry.toString() : "Set date");
-
-                // Numbers
-                Object remaining = result.get("currentAmount");
-                Object total = result.get("totalAmount");
-
-                amount.setText(remaining != null && total != null ? remaining + " / " + total + " Puffs" : "Set");
-
+                    rAmount.setText("Set");
+                }
             }
 
             @Override
             public void onFailure(Exception e) {
-                // show error dialog
-                new AlertDialog.Builder(MedicineInventoryActivity.this)
-                        .setTitle("Error")
-                        .setMessage("Could not load existing settings: " + e.getMessage())
-                        .setPositiveButton("OK", null)
-                        .show();
+                rPurchaseDate.setText(null);
+                rExpiryDate.setText(null);
+
+                rAmount.setText("Set");
             }
         });
     }
