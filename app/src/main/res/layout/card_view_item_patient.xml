@@ -1,60 +1,65 @@
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:padding="16sp"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/cardroot"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-
-    <androidx.cardview.widget.CardView
-        android:id="@+id/card_root"
-        android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:cardCornerRadius="24sp"
-    android:clickable="true"
-    android:focusable="true"
-    android:layout_marginBottom="12dp"
-    android:scrollbarSize="100dip">
+    android:orientation="vertical"
+    android:padding="8dp"
+    android:layout_margin="8dp"
+    android:background="@drawable/bg_share_code_card">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:padding="4dp"
+    <!-- Username -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <ImageView
-            android:id="@+id/cardview_patient_background"
-            android:layout_width="0dp"
-            android:layout_height="100dp"
-            android:layout_marginTop="12dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
         <TextView
-            android:id="@+id/card_view_patient_name"
-            style="@style/TextAppearance.MaterialComponents.Headline3"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Name"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/cardview_patient_background" />
+            android:text="Username:"
+            android:textStyle="bold"
+            android:layout_marginEnd="8dp"/>
+        <TextView
+            android:id="@+id/tv_provider_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""/>
+    </LinearLayout>
 
-        <ImageView
-            android:id="@+id/card_view_patient_profile_pic"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_marginStart="12dp"
-            android:background="@drawable/circle_shape"
-            android:padding="2dp"
-            android:scaleType="centerCrop"
-            android:src="@drawable/profile_default_img"
-            app:layout_constraintBottom_toBottomOf="@id/cardview_patient_background"
-            app:layout_constraintStart_toStartOf="@id/card_view_patient_name"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.506" />
+    <!-- First Name -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="First Name:"
+            android:textStyle="bold"
+            android:layout_marginEnd="8dp"/>
+        <TextView
+            android:id="@+id/tvFirstName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""/>
+    </LinearLayout>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</androidx.cardview.widget.CardView>
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Last Name -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Last Name:"
+            android:textStyle="bold"
+            android:layout_marginEnd="8dp"/>
+        <TextView
+            android:id="@+id/tvLastName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""/>
+    </LinearLayout>
+
+</LinearLayout>
