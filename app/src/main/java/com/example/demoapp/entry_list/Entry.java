@@ -37,9 +37,20 @@ public class Entry {
         this.triggers = "<<ACCESS DENIED>>";
     }
 
+    public Entry() { } // 默认无参构造
+
     public String getEntryNumber() { return entryNumber; }
+    public void setEntryNumber(String entryNumber) { this.entryNumber = entryNumber; }
+
     public String getTimeRecorded() { return timeRecorded; }
+    public void setTimeRecorded(String timeRecorded) { this.timeRecorded = timeRecorded; }
+
     public String getPerson() { return person; }
+    public void setPerson(String person) { this.person = person; }
+
     public String getSymptoms() { return symptoms; }
+    public void setSymptoms(String symptoms) { this.symptoms = symptoms; }
+
     public String getTriggers() { return triggers; }
+    public void setTriggers(String triggers) { this.triggers = triggers; }
 }
