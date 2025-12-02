@@ -51,15 +51,18 @@ public class MedicineEntry {
     public void setTimestamp(long timestamp){ this.timestamp = timestamp; }
     public void setDoseCount(int doseCount) { this.doseCount = doseCount; }
     public void setFlaggedLowStock(boolean flaggedLowStock) { this.flaggedLowStock = flaggedLowStock; }
-    public void setTechniqueCompleted(List<Boolean> techniqueSteps){
-        techniqueCompleted = techniqueSteps != null;
+    public boolean isCompleted (List<Boolean> techniqueSteps) {
+        if (techniqueSteps == null) return false;
+        boolean result = true;
         for (boolean b : techniqueSteps) {
             if (!b) {
-                techniqueCompleted = false;
+                result = false;
                 break;
             }
         }
+        return result;
     }
+    public void setTechniqueCompleted(boolean value){ techniqueCompleted = value; }
     public void setPreBreathRating(int preBreathRating) { this.preBreathRating = preBreathRating; }
     public void setPostBreathRating(int postBreathRating) { this.postBreathRating = postBreathRating; }
     public void setConditionChange(String conditionChange) { this.conditionChange = conditionChange; }
@@ -76,10 +79,9 @@ public class MedicineEntry {
         return dateTimeFormat.format(new Date(timestamp));
     }
     public int getPreBreathRating() { return preBreathRating; }
-
     public int getPostBreathRating() { return postBreathRating; }
-
     public String getConditionChange() { return conditionChange; }
+    public boolean isTechniqueCompleted() { return techniqueCompleted; }
 
     //Utils
     @Override

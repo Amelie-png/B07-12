@@ -127,9 +127,9 @@ public class ManageRescueActivity extends AppCompatActivity {
     }
 
     private void loadExistingData() {
-        repo.loadControllerMed(childId, new MedicineRepository.OnResult<ControllerMed>() {
+        repo.loadRescueMed(childId, new MedicineRepository.OnResult<RescueMed>() {
             @Override
-            public void onSuccess(ControllerMed med) {
+            public void onSuccess(RescueMed med) {
                 if (med != null) {
                     // Convert stored Strings to LocalDate
                     vm.setPurchaseDate(med.getPurchaseDate() != null ? LocalDate.parse(med.getPurchaseDate()) : null);

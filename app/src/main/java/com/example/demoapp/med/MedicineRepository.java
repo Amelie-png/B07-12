@@ -2,12 +2,15 @@ package com.example.demoapp.med;
 
 import android.util.Log;
 
+import com.example.demoapp.Badge;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -150,5 +153,54 @@ public class MedicineRepository {
                     }
                     cb.onSuccess(list);
                 });
+    }
+
+    public void updateStreaksOnNewLog(String childId, boolean techniqueCompleted) {
+        DocumentReference childDoc = childRef.document(childId);
+        long today = System.currentTimeMillis();
+
+        childDoc.get().addOnSuccessListener(snapshot -> {
+            if (!snapshot.exists()) return;
+
+            // ---------- LOAD CURRENT BADGES ----------
+            Map<String, Object> badges = (Map<String, Object>) snapshot.get("badges");
+            if (badges == null) badges = new HashMap<>();
+
+            // Create a typed Badge object for easier handling
+            Badge badge = Badge.fromMap(badges);
+
+            // ---------- UPDATE CONTROLLER STREAK ----------
+            if (MedicineUtils.isSameDay(badge.getLastCheckedDate(), today)) {
+                badge.setControllerStreak(badge.getControllerStreak());
+            }
+            else if (MedicineUtils.isYesterday(badge.getLastCheckedDate(), today)) {
+                badge.setControllerStreak(badge.getControllerStreak() + 1);
+            }
+            else {
+                badge.setControllerStreak(1);
+            }
+
+            // ---------- UPDATE TECHNIQUE STREAK ----------
+            if (techniqueCompleted) {
+                if (MedicineUtils.isSameDay(badge.getLastTechniqueDate(), today)) {
+                    badge.setTechniqueStreak(badge.getTechniqueStreak());
+                }
+                else if (MedicineUtils.isYesterday(badge.getLastTechniqueDate(), today)) {
+                    badge.setTechniqueStreak(badge.getTechniqueStreak() + 1);
+                }
+                else {
+                    badge.setTechniqueStreak(1);
+                }
+
+                // update technique date only if used
+                badge.setLastTechniqueDate(today);
+            }
+
+            // Always update last checked date for controller streak
+            badge.setLastCheckedDate(today);
+
+            // ---------- SAVE BACK TO FIRESTORE ----------
+            childDoc.update("badges", Badge.toMap(badge));
+        });
     }
 }
