@@ -108,14 +108,21 @@ public class ChildHomeFragment extends Fragment {
         View btnEmergencyAction = view.findViewById(R.id.btnResultAction);
 
         btnEmergencyAction.setOnClickListener(v -> {
-            // Notify parent immediately
-            sendParentAlertTriageOpenedFromHome();
 
-            // Launch TriageActivity
-            Intent i = new Intent(getContext(), TriageActivity.class);
-            i.putExtra("uid", childId);
-            i.putExtra("role", role);
-            startActivity(i);
+            if (parentId == null) {
+                // force-load parentId, then send alert
+                db.collection("children")
+                        .document(childId)
+                        .get()
+                        .addOnSuccessListener(doc -> {
+                            parentId = doc.getString("parentId");
+                            sendParentAlertTriageOpenedFromHome();
+                            launchTriageActivity();
+                        });
+            } else {
+                sendParentAlertTriageOpenedFromHome();
+                launchTriageActivity();
+            }
         });
 
         // --------------------------------
@@ -217,6 +224,12 @@ public class ChildHomeFragment extends Fragment {
         alert.put("seen", false);
 
         db.collection("alerts").add(alert);
+    }
+    private void launchTriageActivity() {
+        Intent i = new Intent(getContext(), TriageActivity.class);
+        i.putExtra("uid", childId);
+        i.putExtra("role", role);
+        startActivity(i);
     }
 
 }

@@ -19,6 +19,9 @@ import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class ParentHomeFragment extends Fragment {
 
     private String childId;
@@ -31,15 +34,11 @@ public class ParentHomeFragment extends Fragment {
 
     private ListenerRegistration alertListener;
 
+    // 🔒 Prevent duplicate popups during this session
+    private final Set<String> shownAlerts = new HashSet<>();
+
     public ParentHomeFragment() {
         // Required empty constructor
-    }
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        if (alertListener != null) {
-            alertListener.remove();
-        }
     }
 
     public static ParentHomeFragment newInstance(String childId, String parentId) {
@@ -52,9 +51,16 @@ public class ParentHomeFragment extends Fragment {
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (alertListener != null) {
+            alertListener.remove();
+        }
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         return inflater.inflate(R.layout.fragment_parent_home, container, false);
     }
 
@@ -64,34 +70,46 @@ public class ParentHomeFragment extends Fragment {
 
         db = FirebaseFirestore.getInstance();
 
-        // ✅ FIRST: Read the arguments
         if (getArguments() != null) {
             childId = getArguments().getString("uid");
-            parentId = getArguments().getString("parentId");
+            parentId = getArguments().getString("parentId");  // optional, overwritten next
         }
 
-        // ❗ SAFETY CHECK — avoid crash
         if (childId == null) {
             Toast.makeText(requireContext(), "Child ID missing", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // 👍 Now childId is GUARANTEED non-null → safe to use
+        // 🔥 Load parentId from Firestore (source of truth)
         db.collection("children")
                 .document(childId)
                 .get()
                 .addOnSuccessListener(doc -> {
                     if (doc.exists()) {
+
                         parentId = doc.getString("parentId");
+
+                        if (parentId == null) {
+                            Toast.makeText(requireContext(), "Parent ID missing", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        // EVERYTHING depends on parentId — run AFTER loading it
+                        bindUI(view);
+                        loadLatestTriageState();
+                        loadZoneFragment();
                         startListeningForAlerts();
                     }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(requireContext(), "Failed to load child", Toast.LENGTH_SHORT).show();
                 });
-
-        bindUI(view);
-        loadLatestTriageState();
-        loadZoneFragment();
     }
 
+
+    // ---------------------------------------------------------
+    // UI Setup
+    // ---------------------------------------------------------
     private void bindUI(View view) {
         emergencyText = view.findViewById(R.id.emergencyText);
         btnViewTriageHistory = view.findViewById(R.id.btnViewTriageHistory);
@@ -105,7 +123,7 @@ public class ParentHomeFragment extends Fragment {
 
 
     // ---------------------------------------------------------
-    // Load last triage state from "children" doc
+    // Load last triage state
     // ---------------------------------------------------------
     private void loadLatestTriageState() {
         db.collection("children")
@@ -114,14 +132,18 @@ public class ParentHomeFragment extends Fragment {
                 .addOnSuccessListener(doc -> {
                     if (doc.exists()) {
                         String lastState = doc.getString("lastTriageState");
-                        if (lastState == null) lastState = "GREEN";
+
+                        if (lastState == null) {
+                            // ❗ No triage yet — show a neutral placeholder
+                            emergencyText.setText("Current Status: No Triage Data Yet");
+                            return;
+                        }
+
                         updateEmergencyCard(lastState);
                     }
-                })
-                .addOnFailureListener(e ->
-                        Toast.makeText(requireContext(), "Failed to load triage state", Toast.LENGTH_SHORT).show()
-                );
+                });
     }
+
 
     private void updateEmergencyCard(String state) {
         switch (state) {
@@ -138,14 +160,14 @@ public class ParentHomeFragment extends Fragment {
 
 
     // ---------------------------------------------------------
-    // Load ZoneFragment inside this fragment
+    // Load zone fragment
     // ---------------------------------------------------------
     private void loadZoneFragment() {
         ZoneFragment fragment = new ZoneFragment();
 
         Bundle args = new Bundle();
         args.putString("uid", childId);
-        args.putString("role", "parent"); // parent = hide streak, allow history view
+        args.putString("role", "parent");
         fragment.setArguments(args);
 
         requireActivity().getSupportFragmentManager()
@@ -154,36 +176,45 @@ public class ParentHomeFragment extends Fragment {
                 .commit();
     }
 
+
+    // ---------------------------------------------------------
+    // Alert listener (bullet-proof)
+    // ---------------------------------------------------------
     private void startListeningForAlerts() {
         if (parentId == null) return;
 
         alertListener = db.collection("alerts")
                 .whereEqualTo("parentId", parentId)
-                .whereEqualTo("seen", false)   // only unread alerts
+                .whereEqualTo("seen", false)
                 .addSnapshotListener((snap, e) -> {
-
 
                     if (e != null || snap == null) return;
 
-                    snap.getDocumentChanges().forEach(change -> {
+                    for (DocumentChange change : snap.getDocumentChanges()) {
 
                         if (change.getType() == DocumentChange.Type.ADDED) {
 
-                            String message = change.getDocument().getString("message");
                             String alertId = change.getDocument().getId();
+                            String message = change.getDocument().getString("message");
+
+                            // 🔒 Local duplicate guard (avoids race condition)
+                            if (shownAlerts.contains(alertId)) {
+                                continue;
+                            }
+                            shownAlerts.add(alertId);
 
                             // Show popup
                             showAlertPopup(message);
 
-                            // Mark alert as seen
+                            // Mark alert as seen in Firestore
                             db.collection("alerts")
                                     .document(alertId)
                                     .update("seen", true);
                         }
-                    });
-
+                    }
                 });
     }
+
 
     private void showAlertPopup(String message) {
         if (!isAdded()) return;
@@ -191,5 +222,4 @@ public class ParentHomeFragment extends Fragment {
         ParentAlertDialog dialog = new ParentAlertDialog(message);
         dialog.show(getChildFragmentManager(), "parentAlert");
     }
-
 }
