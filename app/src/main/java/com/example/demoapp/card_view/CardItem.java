@@ -4,15 +4,15 @@ import java.util.ArrayList;
 public class CardItem {
     public String childId;
     public String providerId;
-    String name;
-    int profilePic;
-    int profileBackground;
+    String firstName;
+    String lastName;
+    String childUsername;
     ArrayList<String> providerUserNames;
 
-    public CardItem(String name, int profilePic, int profileBackground, String childID, String providerId, ArrayList<String> providerIDs) {
-        this.name = name;
-        this.profilePic = profilePic;
-        this.profileBackground = profileBackground;
+    public CardItem(String firstName, String lastName, String childUsername, String childID, String providerId, ArrayList<String> providerIDs) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.childUsername = childUsername;
         this.childId = childID;
         this.providerId = providerId;
         this.providerUserNames = providerIDs;

@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,17 +25,17 @@ import java.util.Map;
 public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder> {
 
     public static class CardViewHolder extends RecyclerView.ViewHolder {
-        TextView name;
-        ImageView profilePic;
-        ImageView profileBackground;
-        CardView cardRoot;
+        TextView firstName;
+        TextView lastName;
+        TextView userName;
+        LinearLayout cardRoot;
 
         public CardViewHolder(@NonNull View itemView) {
             super(itemView);
-            cardRoot = itemView.findViewById(R.id.card_root);
-            name = itemView.findViewById(R.id.card_view_patient_name);
-            profilePic = itemView.findViewById(R.id.card_view_patient_profile_pic);
-            profileBackground = itemView.findViewById(R.id.cardview_patient_background);
+            cardRoot = itemView.findViewById(R.id.cardroot);
+            userName = itemView.findViewById(R.id.tv_provider_name);
+            firstName = itemView.findViewById(R.id.tvFirstName);
+            lastName = itemView.findViewById(R.id.tvLastName);
         }
     }
 
@@ -61,9 +62,9 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder
     public void onBindViewHolder(@NonNull CardViewHolder holder, int position) {
         CardItem item = list.get(position);
 
-        holder.name.setText(item.name);
-        holder.profilePic.setImageResource(item.profilePic);
-        holder.profileBackground.setImageResource(item.profileBackground);
+        holder.firstName.setText(item.firstName);
+        holder.lastName.setText(item.lastName);
+        holder.userName.setText(item.childUsername);
 
         holder.cardRoot.setOnClickListener(v -> {
             String childUid = item.childId;

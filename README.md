@@ -132,3 +132,18 @@ MVP presenter logic coverage
 ## 📝 Disclaimer
 Smart Air provides supportive tools for asthma management.
 It does not replace medical advice, diagnosis, or emergency care.
+
+
+## 📎 Reference
+
+Here are helpful resources related to the project:
+
+🔗 Inhaler cartoon Vector Images | DepositPhotos. (n.d.). DepositPhotos. https://depositphotos.com/vectors/inhaler-cartoon.html?qview=73505197
+
+🔗 [https://developer.android.com/guide/navigation](https://lh4.googleusercontent.com/WtjP_WzuKm23ef4bVzmIr43SezkB2iWxbDa0GU3sUBZcYV9YRVxnGdHvSmMcmTAd9023FlDEoOB4pBCfdAB2Y6kceLcUvW13Ptw9_zJoXnxeNYyYGmKYajyo7c-w-NdkS03o44OS)
+
+🔗 [https://material.io/components](https://www.wikihow.com/images/thumb/e/e4/Hold-Your-Breath-for-Long-Periods-of-Time-Step-1-Version-3.jpg/v4-460px-Hold-Your-Breath-for-Long-Periods-of-Time-Step-1-Version-3.jpg)
+
+🔗 [https://developer.android.com/training/data-storage](https://st4.depositphotos.com/1480527/40011/v/600/depositphotos_400119510-stock-illustration-health-care-desease-problem-asthma.jpg)
+
+🔗 <a href="https://www.vecteezy.com/video/8174667-countdown-one-minute-animation-from-60-to-0-seconds">countdown-one-minute-animation-from-60-to-0-seconds Stock Videos by Vecteezy</a>
