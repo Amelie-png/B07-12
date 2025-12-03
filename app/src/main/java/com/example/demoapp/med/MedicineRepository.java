@@ -77,6 +77,19 @@ public class MedicineRepository {
                 .addOnFailureListener(cb::onFailure);
     }
 
+    //Fetch badges from db
+    public void loadBadges(String childId, OnResult<Badge> cb) {
+        childRef.document(childId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    Map<String, Object> badges = (Map<String, Object>) doc.get("badges");
+                    if (badges == null) badges = new HashMap<>();
+                    Badge badge = Badge.fromMap(badges);
+                    cb.onSuccess(badge);
+                })
+                .addOnFailureListener(cb::onFailure);
+    }
+
     // Fetch share code info
     public void fetchShareCode(String childId, String providerId, OnResult<Map<String, Object>> cb){
         childRef.document(childId)

@@ -147,6 +147,49 @@
 
         </androidx.cardview.widget.CardView>
 
+        <!-- Controller Adherence Summary -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/controller_adherence"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="15dp"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="6dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="8dp"
+                    android:text="Controller adherence summary"
+                    android:textAlignment="center"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="8dp"
+                    android:text="Controller adherence is a percentage calculated by the actual doses of their controller medicine a child out of the expected doses." />
+
+                <TextView
+                    android:id="@+id/tv_controller_adherence"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:text="%"
+                    android:textSize="32sp" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -162,34 +205,27 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- 水平 LinearLayout：标题 + 按钮 -->
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <TextView
+                    android:id="@+id/tv_rescue_trend_title"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingBottom="12dp">
+                    android:layout_marginHorizontal="8dp"
+                    android:text="Rescue Count Trend"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
-                    <TextView
-                        android:id="@+id/titleTrendChart"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Trend (Rescue)"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                <Button
+                    android:id="@+id/btn_toggle_r_days"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:text="7 Days → Switch to 30 Days"
+                    android:textColor="@color/hyperlink_blue" />
 
-                    <Button
-                        android:id="@+id/btnToggleDays"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="7 Days → Switch to 30 Days" />
-
-                </LinearLayout>
 
                 <!-- 图表 -->
                 <com.example.demoapp.charts.TrendChartView
-                    android:id="@+id/trendChart"
+                    android:id="@+id/rescue_trend_chart"
                     android:layout_width="match_parent"
                     android:layout_height="250dp"
                     android:layout_marginBottom="12dp" />

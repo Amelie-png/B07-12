@@ -1,12 +1,15 @@
 package com.example.demoapp.med;
 
+import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MedicineUtils {
 
@@ -23,18 +26,23 @@ public class MedicineUtils {
 
         if (controllerConfig == null || controllerConfig.getDosePerDay() <= 0) return 0;
 
-        // Count entries in date range where type = controller
-        int taken = allEntries.size();
-//        for (MedicineEntry e : allEntries) {
-//            if ("controller".equals(e.getMedType())
-//                    && e.getTimestampValue() >= startEpoch
-//                    && e.getTimestampValue() <= endEpoch) {
-//                taken++;
-//            }
-//        }
-
         long days = calculateDaysBetween(startEpoch, endEpoch);
-        long expected = days * controllerConfig.getDosePerDay();
+
+        int multiple = (int) days / 7;
+
+        int totalScheduled = multiple * controllerConfig.getScheduleDays().size() + 1;
+
+        // Count entries in date range where type = controller
+        int taken = 0;
+        for (MedicineEntry e : allEntries) {
+            if ("controller".equals(e.getMedType())
+                    && e.getTimestampValue() >= startEpoch
+                    && e.getTimestampValue() <= endEpoch) {
+                taken++;
+            }
+        }
+
+        long expected = totalScheduled * controllerConfig.getDosePerDay();
 
         if (expected == 0) return 0;
 
@@ -93,6 +101,20 @@ public class MedicineUtils {
         long days = diff / (24L * 60L * 60L * 1000L);
 
         return Math.max(1, days + 1); // inclusive range
+    }
+
+    public static int toCalendarDay(String day) {
+        if (day == null) return -1;
+        switch (day.trim().toLowerCase()) {
+            case "sun":    return Calendar.SUNDAY;
+            case "mon":    return Calendar.MONDAY;
+            case "tue":   return Calendar.TUESDAY;
+            case "wed": return Calendar.WEDNESDAY;
+            case "thu":  return Calendar.THURSDAY;
+            case "fri":    return Calendar.FRIDAY;
+            case "sat":  return Calendar.SATURDAY;
+            default: return -1;
+        }
     }
 
     public static boolean isSameDay(long t1, long t2) {
