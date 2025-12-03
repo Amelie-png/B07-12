@@ -62,6 +62,8 @@ public class ChildHomeFragment extends Fragment {
                 i.putExtra("uid", childId);
                 i.putExtra("role", role);
                 i.putExtra("parentId", parentId);
+                i.putExtra("pef", parentId);
+
                 startActivity(i);
             });
 

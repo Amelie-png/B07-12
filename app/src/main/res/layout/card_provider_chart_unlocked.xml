@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="12dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Title + Toggle Button -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingBottom="12dp">
+
+            <TextView
+                android:id="@+id/titleTrendChart"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Trend (Rescue)"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnToggleDays"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="7 Days → Switch to 30 Days" />
+
+        </LinearLayout>
+
+        <!-- Chart -->
+        <com.example.demoapp.charts.TrendChartView
+            android:id="@+id/trendChart"
+            android:layout_width="match_parent"
+            android:layout_height="200dp" />
+
+        <!-- Last Rescue Time -->
+        <TextView
+            android:id="@+id/tv_last_rescue_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Last Rescue: --"
+            android:textSize="14sp"
+            android:layout_marginTop="8dp" />
+
+        <!-- Weekly Rescue Count -->
+        <TextView
+            android:id="@+id/tv_weekly_rescue_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Weekly Count: --"
+            android:textSize="14sp"
+            android:layout_marginTop="4dp" />
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

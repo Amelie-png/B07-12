@@ -88,9 +88,10 @@ public class ProviderProfileFragment extends Fragment {
         // ------------------------------------------------
         // Retrieve arguments passed by ProviderMain
         // ------------------------------------------------
-        if (getArguments() != null) {
-            childUid = getArguments().getString("uid");            // Child being viewed
-            providerUid = getArguments().getString("providerUid"); // Provider viewing the child
+        Bundle extras = getActivity().getIntent().getExtras();
+        if (extras != null) {
+            childUid = extras.getString("childUid");            // Child being viewed
+            providerUid = extras.getString("uid"); // Provider viewing the child
         }
 
         if (childUid == null) {

@@ -136,8 +136,15 @@ public class ZoneFragment extends Fragment {
                 // Providers cannot add or edit
                 btnAddZone.setVisibility(View.GONE);
                 btnEditZone.setVisibility(View.GONE);
-                btnZoneHistory.setVisibility(View.GONE);
+                btnZoneHistory.setVisibility(View.VISIBLE);
                 break;
+        }
+
+        // Force hide add/edit buttons for providers in ANY case
+        if ("provider".equalsIgnoreCase(role)) {
+            btnAddZone.setVisibility(View.GONE);
+            btnEditZone.setVisibility(View.GONE);
+            btnZoneHistory.setVisibility(View.VISIBLE); // Always show history for providers
         }
     }
 
@@ -157,7 +164,7 @@ public class ZoneFragment extends Fragment {
 
                     boolean pbMissing = (personalBest <= 0);
 
-                    if ("child".equalsIgnoreCase(role) && pbMissing) {
+                    if (pbMissing) {
                         showNoPBLayout();
                     } else {
                         loadTodayZone();
@@ -174,6 +181,15 @@ public class ZoneFragment extends Fragment {
 
         // Child cannot add/edit until PB exists
         if ("child".equalsIgnoreCase(role)) {
+            btnAddZone.setVisibility(View.GONE);
+            btnEditZone.setVisibility(View.GONE);
+        }
+        if ("parent".equalsIgnoreCase(role)) {
+            btnAddZone.setVisibility(View.GONE);
+        }
+
+        // Provider cannot add/edit in ANY case
+        if ("provider".equalsIgnoreCase(role)) {
             btnAddZone.setVisibility(View.GONE);
             btnEditZone.setVisibility(View.GONE);
         }
@@ -244,6 +260,12 @@ public class ZoneFragment extends Fragment {
             btnAddZone.setVisibility(View.VISIBLE);
             btnEditZone.setVisibility(View.GONE);
         }
+
+        // Provider cannot add/edit in ANY case
+        if ("provider".equalsIgnoreCase(role)) {
+            btnAddZone.setVisibility(View.GONE);
+            btnEditZone.setVisibility(View.GONE);
+        }
     }
 
 
@@ -259,11 +281,17 @@ public class ZoneFragment extends Fragment {
 
         int percent = (int)((pef * 100f) / personalBest);
 
-        // Show history for parents only
-        if ("parent".equalsIgnoreCase(role))
+        // Show history for parents and providers
+        if ("parent".equalsIgnoreCase(role) || "provider".equalsIgnoreCase(role))
             btnZoneHistory.setVisibility(View.VISIBLE);
         else
             btnZoneHistory.setVisibility(View.GONE);
+
+        // Provider cannot add/edit in ANY case
+        if ("provider".equalsIgnoreCase(role)) {
+            btnAddZone.setVisibility(View.GONE);
+            btnEditZone.setVisibility(View.GONE);
+        }
 
         textZonePercent.setText(percent + "%");
 
@@ -463,6 +491,7 @@ public class ZoneFragment extends Fragment {
                 .setPositiveButton("OK", null)
                 .show();
     }
+
     private void sendParentRedZoneAlert() {
 
         if (parentId == null) return;

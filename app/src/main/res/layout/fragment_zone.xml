@@ -115,7 +115,7 @@
                 android:id="@+id/textNoPBMessage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Your Personal Best (PB) is not set yet.\nPlease ask your parent to set it."
+                android:text="Your Personal Best (PB) is not set yet."
                 android:textAlignment="center"
                 android:textColor="@color/black"
                 android:textSize="16sp"

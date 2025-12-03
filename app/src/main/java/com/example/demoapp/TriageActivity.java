@@ -29,6 +29,7 @@ public class TriageActivity extends AppCompatActivity {
     private static final long RECHECK_DELAY = 10 * 60 * 1000; // 10 minutes
     private android.os.Handler recheckHandler = new android.os.Handler();
 
+    private int personalBest = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +41,7 @@ public class TriageActivity extends AppCompatActivity {
         childId = getIntent().getStringExtra("uid");
         parentId = getIntent().getStringExtra("parentId");
         role = getIntent().getStringExtra("role");
+        personalBest = getIntent().getIntExtra("pef", 0);
 
         bindUI();
         setupListeners();
@@ -79,9 +81,26 @@ public class TriageActivity extends AppCompatActivity {
                         (!inputRescue.getText().toString().trim().isEmpty()
                                 && Integer.parseInt(inputRescue.getText().toString().trim()) > 0);
 
+        // ---------- PEF LOGIC ----------
+        int pefValue = 0;
+        String pefText = inputPEF.getText().toString().trim();
+
+        if (!pefText.isEmpty()) {
+            pefValue = Integer.parseInt(pefText);
+        }
+
+        boolean hasPersonalBest = personalBest > 0;
+        boolean severeLowPEF = false;
+
+        if (hasPersonalBest && pefValue > 0) {
+            double percentage = (pefValue / (double) personalBest) * 100.0;
+            severeLowPEF = percentage < 50.0;
+        }
+
+        // ---------- FINAL SEVERITY ----------
         String severity;
 
-        if (isRed) {
+        if (severeLowPEF || isRed) {
             severity = "RED";
         } else if (isYellow) {
             severity = "YELLOW";
@@ -89,10 +108,11 @@ public class TriageActivity extends AppCompatActivity {
             severity = "GREEN";
         }
 
-        saveTriage(severity);
+        saveTriage(severity, pefValue);
     }
 
-    private void saveTriage(String severity) {
+
+    private void saveTriage(String severity, int pefValue) {
 
         long now = System.currentTimeMillis();
 
@@ -101,6 +121,7 @@ public class TriageActivity extends AppCompatActivity {
         triageEntry.put("parentId", parentId);
         triageEntry.put("severity", severity);
         triageEntry.put("timestamp", now);
+        triageEntry.put("pef", pefValue);   // ← ADD THIS
 
         db.collection("triage").add(triageEntry)
                 .addOnSuccessListener(unused -> {
