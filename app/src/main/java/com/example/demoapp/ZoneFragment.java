@@ -157,7 +157,7 @@ public class ZoneFragment extends Fragment {
 
                     boolean pbMissing = (personalBest <= 0);
 
-                    if ("child".equalsIgnoreCase(role) && pbMissing) {
+                    if (pbMissing) {
                         showNoPBLayout();
                     } else {
                         loadTodayZone();
@@ -176,6 +176,9 @@ public class ZoneFragment extends Fragment {
         if ("child".equalsIgnoreCase(role)) {
             btnAddZone.setVisibility(View.GONE);
             btnEditZone.setVisibility(View.GONE);
+        }
+        if ("parent".equalsIgnoreCase(role)) {
+            btnAddZone.setVisibility(View.GONE);
         }
     }
 
