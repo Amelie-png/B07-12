@@ -87,7 +87,7 @@ public class MainNavActivity extends AppCompatActivity {
         Bundle args = new Bundle();
         args.putString("uid", uid);
         args.putString("role", role);
-        args.putString("providerUid", getIntent().getStringExtra("providerUid"));  // ⭐ FIX
+        //args.putString("providerUid", getIntent().getStringExtra("providerUid"));  // ⭐ FIX
 
         navController.setGraph(graph, args);
 

@@ -87,7 +87,12 @@ public class ChildHomeFragment extends Fragment {
                 .addOnSuccessListener(doc -> {
                     if (doc.exists()) {
                         parentId = doc.getString("parentId");
+                        Boolean hasSeen = doc.getBoolean("hasSeenOnboardingChild");
 
+                        //  If first time — show onboarding
+                        if (hasSeen == null || !hasSeen) {
+                            showChildOnboardingDialog();
+                        }
                         // Now safely load ZoneFragment
                         loadZoneFragment();
                     }
@@ -191,5 +196,29 @@ public class ChildHomeFragment extends Fragment {
                 .replace(R.id.zoneFragmentContainer, fragment)
                 .commit();
     }
+    private void showChildOnboardingDialog() {
+
+        androidx.appcompat.app.AlertDialog.Builder builder =
+                new androidx.appcompat.app.AlertDialog.Builder(requireContext());
+
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_child_onboarding, null);
+        builder.setView(dialogView);
+
+        androidx.appcompat.app.AlertDialog dialog = builder.create();
+        dialog.setCanceledOnTouchOutside(false);  // prevent accidental dismiss
+        dialog.show();
+
+        Button btnGotIt = dialogView.findViewById(R.id.btnClose);
+
+        btnGotIt.setOnClickListener(v -> {
+            // Mark as seen in Firestore
+            db.collection("children")
+                    .document(childId)
+                    .update("hasSeenOnboardingChild", true);
+
+            dialog.dismiss();
+        });
+    }
+
 
 }

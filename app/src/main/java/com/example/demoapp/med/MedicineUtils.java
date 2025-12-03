@@ -24,14 +24,14 @@ public class MedicineUtils {
         if (controllerConfig == null || controllerConfig.getDosePerDay() <= 0) return 0;
 
         // Count entries in date range where type = controller
-        int taken = 0;
-        for (MedicineEntry e : allEntries) {
-            if ("controller".equals(e.getMedType())
-                    && e.getTimestampValue() >= startEpoch
-                    && e.getTimestampValue() <= endEpoch) {
-                taken++;
-            }
-        }
+        int taken = allEntries.size();
+//        for (MedicineEntry e : allEntries) {
+//            if ("controller".equals(e.getMedType())
+//                    && e.getTimestampValue() >= startEpoch
+//                    && e.getTimestampValue() <= endEpoch) {
+//                taken++;
+//            }
+//        }
 
         long days = calculateDaysBetween(startEpoch, endEpoch);
         long expected = days * controllerConfig.getDosePerDay();
