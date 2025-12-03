@@ -24,6 +24,7 @@ import com.google.firebase.firestore.ListenerRegistration;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -39,10 +40,10 @@ public class ParentHomeFragment extends Fragment {
     private FirebaseFirestore db;
     MedicineRepository repo;
 
-    private TextView emergencyText, lastRescueTime, weeklyRescueCount;
+    private TextView emergencyText, lastRescueTime, weeklyRescueCount, controllerAdherence;
     private Button btnViewTriageHistory;
-    private TrendChartView rescueTrendChart, controllerTrendChart;
-    private Button btnToggleRDays, btnToggleCDays;
+    private TrendChartView rescueTrendChart;
+    private Button btnToggleRDays;
 
     private ListenerRegistration alertListener;
     private List<MedicineEntry> allEntries = new ArrayList<>();
@@ -124,6 +125,7 @@ public class ParentHomeFragment extends Fragment {
         loadMedicineLogsAndShowTrend();
         getLastRescueTime();
         getWeeklyRescueCount();
+        getControllerAdherence();
     }
 
 
@@ -135,12 +137,9 @@ public class ParentHomeFragment extends Fragment {
         btnViewTriageHistory = view.findViewById(R.id.btnViewTriageHistory);
         rescueTrendChart = view.findViewById(R.id.rescue_trend_chart);
         btnToggleRDays = view.findViewById(R.id.btn_toggle_r_days);
-        controllerTrendChart = view.findViewById(R.id.controller_trend_chart);
-        btnToggleCDays = view.findViewById(R.id.btn_toggle_c_days);
 
         // 初始化按钮文字
         btnToggleRDays.setText("7 Days → Switch to 30 Days");
-        btnToggleCDays.setText("7 Days → Switch to 30 Days");
 
         btnViewTriageHistory.setOnClickListener(v -> {
             Intent i = new Intent(requireContext(), TriageHistoryActivity.class);
@@ -159,20 +158,10 @@ public class ParentHomeFragment extends Fragment {
             updateRTrendChart();
         });
 
-        btnToggleCDays.setOnClickListener(v -> {
-            if (trendDays == 7) {
-                trendDays = 30;
-                btnToggleCDays.setText("30 Days → Switch to 7 Days");
-            } else {
-                trendDays = 7;
-                btnToggleCDays.setText("7 Days → Switch to 30 Days");
-            }
-            updateRTrendChart();
-        });
-
         //Rescue data
         lastRescueTime = view.findViewById(R.id.tv_last_rescue_time);
         weeklyRescueCount = view.findViewById(R.id.tv_weekly_rescue_count);
+        controllerAdherence = view.findViewById(R.id.tv_controller_adherence);
     }
 
 
@@ -284,43 +273,9 @@ public class ParentHomeFragment extends Fragment {
             public void onSuccess(List<MedicineEntry> result) {
                 allEntries.clear();
                 allEntries.addAll(result);
-                updateCTrendChart(result);
                 updateRTrendChart();
             }
 
-            @Override
-            public void onFailure(Exception e) {
-                e.printStackTrace();
-            }
-        });
-    }
-
-    private void updateCTrendChart(List<MedicineEntry> result) {
-        repo.loadControllerMed(childId, new MedicineRepository.OnResult<ControllerMed>() {
-            @Override
-            public void onSuccess(ControllerMed med) {
-                ControllerMed config = (med != null) ? med : new ControllerMed();
-
-                List<Float> dailyCounts = new ArrayList<>();
-                for (int i = 0; i < trendDays; i++) dailyCounts.add(0f);
-
-                long now = System.currentTimeMillis();
-
-                for (int i = 0; i < trendDays; i++) {
-                    long dayStart = getStartOfDay(now - (long)(trendDays - 1 - i) * 24 * 60 * 60 * 1000);
-                    long dayEnd   = getEndOfDay(dayStart);
-
-                    double adherence = MedicineUtils.calculateControllerAdherence(
-                            result,
-                            config,
-                            dayStart,
-                            dayEnd
-                    );
-
-                    dailyCounts.set(i, (float) adherence);
-                }
-                controllerTrendChart.setTrendData(dailyCounts, "Controller Adherence", trendDays);
-            }
             @Override
             public void onFailure(Exception e) {
                 e.printStackTrace();
@@ -387,18 +342,38 @@ public class ParentHomeFragment extends Fragment {
         });
     }
 
-    public static long getStartOfDay(long time) {
-        Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(time);
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        return cal.getTimeInMillis();
-    }
+    private void getControllerAdherence() {
+        long now = System.currentTimeMillis();
+        repo.fetchLogs(childId, null, 0, Long.MAX_VALUE, new MedicineRepository.OnResult<List<MedicineEntry>>() {
+            @Override
+            public void onSuccess(List<MedicineEntry> result) {
+                repo.loadControllerMed(childId, new MedicineRepository.OnResult<ControllerMed>() {
+                    @Override
+                    public void onSuccess(ControllerMed med) {
+                        if (med == null || med.getStartDate() == null) {
+                            controllerAdherence.setText("--");
+                            return;
+                        }
+                        long epoch = LocalDate.parse(med.getStartDate())
+                                .atStartOfDay(ZoneId.systemDefault())
+                                .toInstant()
+                                .toEpochMilli();
+                        double adherence = MedicineUtils.calculateControllerAdherence(result, med, epoch, now);
+                        int percent = (int) Math.round(adherence * 100);
+                        controllerAdherence.setText(percent + "%");
+                    }
+                    @Override
+                    public void onFailure(Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
+            @Override
+            public void onFailure(Exception e) {
+                e.printStackTrace();
+            }
+        });
 
-    public static long getEndOfDay(long startOfDay) {
-        return startOfDay + 24L*60L*60L*1000L - 1L;
     }
 
 }

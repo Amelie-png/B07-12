@@ -104,7 +104,7 @@
             android:name=".AddSymptomsActivity"
             android:exported="false"/>
         <activity
-            android:name=".CreateAccountActivity"
+            android:name=".ParentChoosePDFDateRange"
             android:exported="false"/>
     </application>
 
