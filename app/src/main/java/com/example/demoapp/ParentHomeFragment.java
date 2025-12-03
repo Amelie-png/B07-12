@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.demoapp.charts.TrendChartView;
+import com.example.demoapp.med.ControllerMed;
 import com.example.demoapp.med.MedicineEntry;
 import com.example.demoapp.med.MedicineRepository;
 import com.example.demoapp.med.MedicineUtils;
@@ -22,7 +23,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.HashSet;
@@ -38,8 +41,8 @@ public class ParentHomeFragment extends Fragment {
 
     private TextView emergencyText, lastRescueTime, weeklyRescueCount;
     private Button btnViewTriageHistory;
-    private TrendChartView trendChart;
-    private Button btnToggleDays;
+    private TrendChartView rescueTrendChart, controllerTrendChart;
+    private Button btnToggleRDays, btnToggleCDays;
 
     private ListenerRegistration alertListener;
     private List<MedicineEntry> allEntries = new ArrayList<>();
@@ -130,11 +133,14 @@ public class ParentHomeFragment extends Fragment {
     private void bindUI(View view) {
         emergencyText = view.findViewById(R.id.emergencyText);
         btnViewTriageHistory = view.findViewById(R.id.btnViewTriageHistory);
-        trendChart = view.findViewById(R.id.trendChart);
-        btnToggleDays = view.findViewById(R.id.btnToggleDays);
+        rescueTrendChart = view.findViewById(R.id.rescue_trend_chart);
+        btnToggleRDays = view.findViewById(R.id.btn_toggle_r_days);
+        controllerTrendChart = view.findViewById(R.id.controller_trend_chart);
+        btnToggleCDays = view.findViewById(R.id.btn_toggle_c_days);
 
         // 初始化按钮文字
-        btnToggleDays.setText("7 Days → Switch to 30 Days");
+        btnToggleRDays.setText("7 Days → Switch to 30 Days");
+        btnToggleCDays.setText("7 Days → Switch to 30 Days");
 
         btnViewTriageHistory.setOnClickListener(v -> {
             Intent i = new Intent(requireContext(), TriageHistoryActivity.class);
@@ -142,15 +148,26 @@ public class ParentHomeFragment extends Fragment {
             startActivity(i);
         });
 
-        btnToggleDays.setOnClickListener(v -> {
+        btnToggleRDays.setOnClickListener(v -> {
             if (trendDays == 7) {
                 trendDays = 30;
-                btnToggleDays.setText("30 Days → Switch to 7 Days");
+                btnToggleRDays.setText("30 Days → Switch to 7 Days");
             } else {
                 trendDays = 7;
-                btnToggleDays.setText("7 Days → Switch to 30 Days");
+                btnToggleRDays.setText("7 Days → Switch to 30 Days");
             }
-            updateTrendChart();
+            updateRTrendChart();
+        });
+
+        btnToggleCDays.setOnClickListener(v -> {
+            if (trendDays == 7) {
+                trendDays = 30;
+                btnToggleCDays.setText("30 Days → Switch to 7 Days");
+            } else {
+                trendDays = 7;
+                btnToggleCDays.setText("7 Days → Switch to 30 Days");
+            }
+            updateRTrendChart();
         });
 
         //Rescue data
@@ -267,7 +284,8 @@ public class ParentHomeFragment extends Fragment {
             public void onSuccess(List<MedicineEntry> result) {
                 allEntries.clear();
                 allEntries.addAll(result);
-                updateTrendChart();
+                updateCTrendChart(result);
+                updateRTrendChart();
             }
 
             @Override
@@ -277,7 +295,40 @@ public class ParentHomeFragment extends Fragment {
         });
     }
 
-    private void updateTrendChart() {
+    private void updateCTrendChart(List<MedicineEntry> result) {
+        repo.loadControllerMed(childId, new MedicineRepository.OnResult<ControllerMed>() {
+            @Override
+            public void onSuccess(ControllerMed med) {
+                ControllerMed config = (med != null) ? med : new ControllerMed();
+
+                List<Float> dailyCounts = new ArrayList<>();
+                for (int i = 0; i < trendDays; i++) dailyCounts.add(0f);
+
+                long now = System.currentTimeMillis();
+
+                for (int i = 0; i < trendDays; i++) {
+                    long dayStart = getStartOfDay(now - (long)(trendDays - 1 - i) * 24 * 60 * 60 * 1000);
+                    long dayEnd   = getEndOfDay(dayStart);
+
+                    double adherence = MedicineUtils.calculateControllerAdherence(
+                            result,
+                            config,
+                            dayStart,
+                            dayEnd
+                    );
+
+                    dailyCounts.set(i, (float) adherence);
+                }
+                controllerTrendChart.setTrendData(dailyCounts, "Controller Adherence", trendDays);
+            }
+            @Override
+            public void onFailure(Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    private void updateRTrendChart() {
         // 生成 trend 数据
         List<Float> dailyCounts = new ArrayList<>();
         for (int i = 0; i < trendDays; i++) dailyCounts.add(0f);
@@ -295,7 +346,7 @@ public class ParentHomeFragment extends Fragment {
         }
 
         // 调用 TrendChartView 显示
-        trendChart.setTrendData(dailyCounts, "Rescue Medicine", trendDays);
+        rescueTrendChart.setTrendData(dailyCounts, "Rescue Medicine", trendDays);
     }
 
     private void getLastRescueTime() {
@@ -335,4 +386,19 @@ public class ParentHomeFragment extends Fragment {
             }
         });
     }
+
+    public static long getStartOfDay(long time) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(time);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal.getTimeInMillis();
+    }
+
+    public static long getEndOfDay(long startOfDay) {
+        return startOfDay + 24L*60L*60L*1000L - 1L;
+    }
+
 }
