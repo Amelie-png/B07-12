@@ -83,6 +83,43 @@ public class MedicineEntry {
     public String getConditionChange() { return conditionChange; }
     public boolean isTechniqueCompleted() { return techniqueCompleted; }
 
+    // ========== 新增方法用于 Provider Report ==========
+
+    /**
+     * 检查是否为 rescue 药物
+     * @return true 如果是 rescue 类型
+     */
+    public boolean isRescue() {
+        return medType != null && medType.equalsIgnoreCase("rescue");
+    }
+
+    /**
+     * 检查是否为 controller 药物
+     * @return true 如果是 controller 类型
+     */
+    public boolean isController() {
+        return medType != null && medType.equalsIgnoreCase("controller");
+    }
+
+    /**
+     * 获取药物类型（确保返回值不为 null）
+     * @return 药物类型，如果为 null 则返回空字符串
+     */
+    public String getMedTypeSafe() {
+        return medType != null ? medType : "";
+    }
+
+    /**
+     * 获取格式化的日期（仅日期部分）
+     * @return 格式化的日期字符串 "yyyy-MM-dd"
+     */
+    public String getDateOnly() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        return dateFormat.format(new Date(timestamp));
+    }
+
+    // =============================================================
+
     //Utils
     @Override
     public boolean equals(@Nullable Object obj) {

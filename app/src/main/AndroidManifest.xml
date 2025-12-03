@@ -3,6 +3,8 @@
     package="com.example.demoapp">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
     <application
         android:allowBackup="true"
@@ -104,8 +106,9 @@
             android:name=".AddSymptomsActivity"
             android:exported="false"/>
         <activity
-            android:name=".CreateAccountActivity"
+            android:name=".ParentChoosePDFDateRange"
             android:exported="false"/>
+
     </application>
 
 </manifest>
