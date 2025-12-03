@@ -21,7 +21,7 @@ public class ProviderBadgesFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_provider_badges, container, false);
+        return inflater.inflate(R.layout.fragment_parent_badges, container, false);
     }
 
     @Override
