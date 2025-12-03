@@ -21,6 +21,38 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
+        <!-- Title + Toggle Button -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingBottom="12dp">
+
+            <TextView
+                android:id="@+id/titleTrendChart"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Trend (Rescue)"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnToggleDays"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="7 Days → Switch to 30 Days" />
+
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/summaryChartContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+
+
     </LinearLayout>
 
 </ScrollView>
