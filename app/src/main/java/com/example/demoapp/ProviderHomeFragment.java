@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class ProviderHomeFragment extends Fragment {
@@ -48,8 +49,11 @@ public class ProviderHomeFragment extends Fragment {
         // -------------------------------------------
         // Read nav-graph arguments
         // -------------------------------------------
-        childId = requireArguments().getString("uid");
-        providerUid = requireArguments().getString("providerUid");
+        Bundle extras = getActivity().getIntent().getExtras();
+        if(extras != null){
+            childId = extras.getString("childUid");
+            providerUid = extras.getString("uid");
+        }
 
         Log.d("ProviderHomeFragment", "ARG uid = " + childId
                 + " | providerUid = " + providerUid
@@ -89,10 +93,8 @@ public class ProviderHomeFragment extends Fragment {
                     }
 
                     // This provider's binding info
-                    Map<String, Object> binding =
-                            (Map<String, Object>) providerBindings.get(providerUid);
-
-                    String shareCode = (String) binding.get("activeShareCode");
+                    String shareCode =
+                            (String) providerBindings.get(providerUid);
 
                     if (shareCode == null) {
                         showLockedTriage();
