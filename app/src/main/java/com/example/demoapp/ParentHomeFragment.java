@@ -40,6 +40,7 @@ public class ParentHomeFragment extends Fragment {
     private Button btnViewTriageHistory;
     private TrendChartView trendChart;
     private Button btnToggleDays;
+    private Button btnGeneratePdf;
 
     private ListenerRegistration alertListener;
     private List<MedicineEntry> allEntries = new ArrayList<>();
@@ -132,12 +133,19 @@ public class ParentHomeFragment extends Fragment {
         btnViewTriageHistory = view.findViewById(R.id.btnViewTriageHistory);
         trendChart = view.findViewById(R.id.trendChart);
         btnToggleDays = view.findViewById(R.id.btnToggleDays);
+        btnGeneratePdf = view.findViewById(R.id.btn_generate_pdf);
 
         // 初始化按钮文字
         btnToggleDays.setText("7 Days → Switch to 30 Days");
 
         btnViewTriageHistory.setOnClickListener(v -> {
             Intent i = new Intent(requireContext(), TriageHistoryActivity.class);
+            i.putExtra("uid", childId);
+            startActivity(i);
+        });
+
+        btnGeneratePdf.setOnClickListener(v -> {
+            Intent i = new Intent(requireContext(), ParentChoosePDFDateRange.class);
             i.putExtra("uid", childId);
             startActivity(i);
         });

@@ -58,6 +58,63 @@ public class EntryLogRepository {
                 .addOnFailureListener(listener::onError);
     }
 
+    public void getFilteredEntries(OnEntriesRetrievedListener listener,
+                                   String childUid, String selectedStartDate,
+                                   String selectedEndDate,
+                                   ArrayList<String> selectedSymptoms,
+                                   ArrayList<String> selectedTriggers){
+        entriesCollection
+                .whereEqualTo("childUid", childUid)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    ArrayList<EntryLog> entries = new ArrayList<>();
+                    List<DocumentSnapshot> docs =  querySnapshot.getDocuments();
+                    for (DocumentSnapshot doc : docs) {
+                        EntryLog entry = doc.toObject(EntryLog.class);
+                        String entryDateString = entry.getDate();
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                        LocalDate entryDate = LocalDate.parse(entryDateString, formatter);
+                        LocalDate startDate = LocalDate.parse(selectedStartDate, formatter);
+                        LocalDate endDate = LocalDate.parse(selectedEndDate, formatter);
+
+                        boolean afterStartDate = entryDate.isAfter(startDate) || entryDate.isEqual(startDate);
+                        boolean beforeEndDate = entryDate.isBefore(endDate) || entryDate.isEqual(endDate);
+                        if(entry != null && hasMatchingSymptomsTriggers(
+                                entry.getSymptoms(), entry.getTriggers(),
+                                selectedSymptoms, selectedTriggers)
+                                && afterStartDate
+                                && beforeEndDate) {
+                            entries.add(entry);
+                        }
+                    }
+                    listener.onEntriesRetrieved(entries);
+                })
+                .addOnFailureListener(listener::onError);
+    }
+
+    private boolean hasMatchingSymptomsTriggers(ArrayList<CategoryName> entrySymptoms,
+                                                ArrayList<CategoryName> entryTriggers,
+                                                ArrayList<String> selectedSymptoms,
+                                                ArrayList<String> selectedTriggers) {
+        return containEntryStrings(entrySymptoms, selectedSymptoms) && containEntryStrings(entryTriggers, selectedTriggers);
+    }
+
+    private boolean containEntryStrings(ArrayList<CategoryName> entryValues,
+                                        ArrayList<String> selectedValues){
+        for(String selectedSymptom : selectedValues){
+            for(int j = 0; j < entryValues.size(); j++){
+                CategoryName p = entryValues.get(j);
+                if(p.getCategory().equals(selectedSymptom)){
+                    break;
+                }
+                if(j == entryValues.size()-1){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     public void countProblemDaysByCategories(String childUid, LocalDate startDate, LocalDate endDate,
                                              ArrayList<String> categories,
                                              OnProblemDaysCountedByCategoryListener listener) {
