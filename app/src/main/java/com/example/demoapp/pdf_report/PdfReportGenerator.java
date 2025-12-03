@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.RectF;
 import android.graphics.pdf.PdfDocument;
 import android.os.Environment;
 import android.util.Log;
@@ -31,11 +30,41 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+// ⚠️ 注意: 请确保您的项目中有 TriageIncident, CategoryName, EntryLog 等类的定义，
+// 否则需要调整 import 语句。
+
 public class PdfReportGenerator {
     private static final String TAG = "PdfReportGenerator";
     private static final int PAGE_WIDTH = 595;
     private static final int PAGE_HEIGHT = 842;
     private static final int MARGIN = 40;
+
+    // --- ReportData 内部类 (包含分页计数器) ---
+    private static class ReportData {
+        LocalDate startDate;
+        LocalDate endDate;
+        String childUid;
+        long totalDays;
+
+        int rescueCount = 0;
+        double rescuePerWeek = 0;
+        Map<LocalDate, Integer> dailyRescueData = new LinkedHashMap<>();
+
+        int controllerDaysTaken = 0;
+        double controllerAdherence = 0;
+
+        Map<String, Integer> symptomCounts = new HashMap<>();
+        Map<LocalDate, String> dailyZoneData = new LinkedHashMap<>();
+        Map<String, Integer> zoneDistribution = new LinkedHashMap<>();
+
+        List<TriageIncident> triageIncidents = new ArrayList<>();
+
+        // 关键: 用于跟踪已绘制事件数量的计数器
+        int triageIncidentsDrawn = 0;
+    }
+    // ---------------------------------------------
+
+    // --- 1. 公共接口方法 ---
 
     public static void generateProviderReport(Context context, String childUid,
                                               LocalDate startDate, LocalDate endDate) {
@@ -68,9 +97,6 @@ public class PdfReportGenerator {
         );
     }
 
-    /**
-     * 从 medEntries collection 获取药物数据
-     */
     private static void fetchMedicineData(Context context, String childUid,
                                           LocalDate startDate, LocalDate endDate,
                                           ArrayList<EntryLog> entries) {
@@ -107,6 +133,8 @@ public class PdfReportGenerator {
                 }
         );
     }
+
+    // --- 2. 数据处理方法 ---
 
     private static ReportData processEntriesWithMedicine(ArrayList<EntryLog> entries,
                                                          List<MedicineEntry> medicineEntries,
@@ -147,6 +175,7 @@ public class PdfReportGenerator {
             }
         }
 
+        // --- 模拟 Zone Data ---
         LocalDate current = startDate;
         Random random = new Random();
         while (!current.isAfter(endDate)) {
@@ -190,6 +219,7 @@ public class PdfReportGenerator {
         data.zoneDistribution.put("Yellow", 0);
         data.zoneDistribution.put("Red", 0);
 
+        // --- 模拟 Zone Data ---
         LocalDate current = startDate;
         Random random = new Random();
         while (!current.isAfter(endDate)) {
@@ -342,10 +372,100 @@ public class PdfReportGenerator {
         return incidents;
     }
 
-    /**
-     * 新增: 绘制 Page 1 的摘要信息 (不包含 Triage Incidents 列表)
-     * @return Triage Incidents 列表开始绘制的 Y 坐标
-     */
+    // --- 3. 核心 PDF 生成和分页方法 ---
+
+    private static File createPDF(Context context, ReportData data,
+                                  ArrayList<EntryLog> entries) {
+
+        PdfDocument document = new PdfDocument();
+        int pageNum = 1;
+        float nextY;
+
+        try {
+            // --- 1. 绘制 Page 1: 摘要信息 + Triage 事件 (可能溢出) ---
+            PdfDocument.PageInfo pageInfo1 = new PdfDocument.PageInfo.Builder(
+                    PAGE_WIDTH, PAGE_HEIGHT, pageNum).create();
+            PdfDocument.Page page1 = document.startPage(pageInfo1);
+
+            int incidentStartY = drawPage1Summary(page1.getCanvas(), data);
+            nextY = drawTriageIncidents(incidentStartY, page1.getCanvas(), data);
+
+            // 第一次绘制时，使用占位符 0 作为总页数
+            drawPageFooter(page1.getCanvas(), 1, 0);
+            document.finishPage(page1);
+
+            // --- 2. 动态创建 Page 1b, 1c... 用于溢出的 Triage 事件 ---
+            while (nextY == -1) {
+                pageNum++;
+                PdfDocument.PageInfo overflowInfo = new PdfDocument.PageInfo.Builder(
+                        PAGE_WIDTH, PAGE_HEIGHT, pageNum).create();
+                PdfDocument.Page overflowPage = document.startPage(overflowInfo);
+
+                // 从 MARGIN 开始继续绘制事件
+                nextY = drawTriageIncidents(MARGIN, overflowPage.getCanvas(), data);
+
+                // 第一次绘制时，使用占位符 0 作为总页数
+                drawPageFooter(overflowPage.getCanvas(), pageNum, 0);
+                document.finishPage(overflowPage);
+            }
+
+            // --- 3. Page N+1 (原 Page 2): Symptom Frequency ---
+            pageNum++;
+            PdfDocument.PageInfo pageInfoSymptom = new PdfDocument.PageInfo.Builder(
+                    PAGE_WIDTH, PAGE_HEIGHT, pageNum).create();
+            PdfDocument.Page pageSymptom = document.startPage(pageInfoSymptom);
+            drawPage2Content(pageSymptom.getCanvas(), data);
+            drawPageFooter(pageSymptom.getCanvas(), pageNum, 0);
+            document.finishPage(pageSymptom);
+
+            // --- 4. Page N+2 (原 Page 3): Rescue Usage Over Time ---
+            pageNum++;
+            PdfDocument.PageInfo pageInfoRescue = new PdfDocument.PageInfo.Builder(
+                    PAGE_WIDTH, PAGE_HEIGHT, pageNum).create();
+            PdfDocument.Page pageRescue = document.startPage(pageInfoRescue);
+            drawPage3(pageRescue.getCanvas(), data);
+            drawPageFooter(pageRescue.getCanvas(), pageNum, 0);
+            document.finishPage(pageRescue);
+
+            // 最终总页数 (此时 document.getPages().size() 就是正确的总页数)
+            final int finalTotalPages = document.getPages().size();
+            Log.d(TAG, "Final total pages calculated: " + finalTotalPages);
+
+            // ----------------------------------------------------
+            // ⚠️ 关键修正: 移除所有第二次循环，避免重复添加空白页。
+            // ----------------------------------------------------
+
+            // --- 文件保存 ---
+            File dir = new File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS),
+                    "AsthmaReports");
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+
+            String fileName = "ProviderReport_" +
+                    data.startDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")) + "_to_" +
+                    data.endDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")) + ".pdf";
+            File file = new File(dir, fileName);
+
+            FileOutputStream fos = new FileOutputStream(file);
+            document.writeTo(fos);
+            document.close();
+            fos.close();
+
+            Log.d(TAG, "PDF created: " + file.getAbsolutePath());
+            return file;
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error creating PDF", e);
+            document.close();
+            return null;
+        }
+    }
+
+
+    // --- 4. 辅助绘制方法 (包含所有图表逻辑) ---
+
+    // 绘制 Page 1 的摘要信息
     private static int drawPage1Summary(Canvas canvas, ReportData data) {
         Paint paint = new Paint();
         paint.setAntiAlias(true);
@@ -413,30 +533,32 @@ public class PdfReportGenerator {
         canvas.drawText(adherenceNote, MARGIN + 20, y, paint);
         y += 50;
 
-        // 返回 Triage Incident 绘制的起始 Y 坐标
         return y;
     }
 
-    /**
-     * 新增: 绘制 Triage Incidents，并在达到页面底部时停止。
-     * @param startY 当前绘制起始的 Y 坐标 (如果是新页，应为 MARGIN)
-     * @param canvas 当前页面的 Canvas
-     * @param data 报告数据
-     * @return 绘制完成后下一个可用的 Y 坐标。如果达到页面底部，返回 -1 表示需要换页。
-     */
+    // 绘制 Triage Incidents (包含分页逻辑)
     private static float drawTriageIncidents(float startY, Canvas canvas, ReportData data) {
         Paint paint = new Paint();
         paint.setAntiAlias(true);
         float y = startY;
 
-        // --- Notable Triage Incidents 标题 ---
-        if (startY != MARGIN) {
+        // 标题只在第一页顶部或溢出页顶部绘制
+        if (data.triageIncidentsDrawn > 0) {
+            // 溢出页标题
+            paint.setTextSize(20);
+            paint.setFakeBoldText(true);
+            paint.setColor(Color.parseColor("#757575"));
+            canvas.drawText("Notable Triage Incidents (Continued)", MARGIN, y, paint);
+            y += 35;
+        } else if (startY != MARGIN) {
+            // Page 1 的标题
             paint.setTextSize(20);
             paint.setFakeBoldText(true);
             paint.setColor(Color.parseColor("#757575"));
             canvas.drawText("Notable Triage Incidents", MARGIN, y, paint);
             y += 35;
         }
+
 
         if (data.triageIncidents == null || data.triageIncidents.isEmpty() && data.triageIncidentsDrawn == 0) {
             paint.setTextSize(16);
@@ -449,7 +571,6 @@ public class PdfReportGenerator {
         paint.setTextSize(14);
         paint.setFakeBoldText(false);
 
-        // 预留页脚空间
         int maxIncidentHeight = PAGE_HEIGHT - 60;
 
         for (int i = data.triageIncidentsDrawn; i < data.triageIncidents.size(); i++) {
@@ -457,19 +578,16 @@ public class PdfReportGenerator {
 
             // 预估绘制下一个事件所需的空间 (标题 + 详情 + 间距 ≈ 50)
             if (y + 50 > maxIncidentHeight) {
-                // 达到页面底部，停止绘制，并更新已绘制数量
                 data.triageIncidentsDrawn = i;
                 return -1; // 返回 -1 表示需要换页
             }
 
             // --- 绘制事件 ---
-            // 日期和类型 (标题)
             String dateStr = incident.date.format(DateTimeFormatter.ofPattern("MMM dd"));
             paint.setColor(Color.BLACK);
             paint.setFakeBoldText(true);
             canvas.drawText(dateStr + ": " + incident.type, MARGIN + 20, y, paint);
 
-            // 详情
             y += 20;
             paint.setFakeBoldText(false);
             paint.setColor(Color.DKGRAY);
@@ -478,27 +596,23 @@ public class PdfReportGenerator {
             y += 30; // 增加行间距
         }
 
-        // 所有事件绘制完成
         data.triageIncidentsDrawn = data.triageIncidents.size();
         return y;
     }
 
-    /**
-     * 新增: 绘制页脚。
-     */
+    // 绘制页脚 (使用占位符)
     private static void drawPageFooter(Canvas canvas, int currentPage, int totalPages) {
         Paint paint = new Paint();
         paint.setAntiAlias(true);
         paint.setTextSize(12);
         paint.setColor(Color.GRAY);
+        // 如果 totalPages 为 0，使用占位符 'X'
         String totalStr = (totalPages > 0) ? String.valueOf(totalPages) : "X";
         canvas.drawText("Page " + currentPage + " of " + totalStr,
                 PAGE_WIDTH / 2 - 40, PAGE_HEIGHT - 30, paint);
     }
 
-    /**
-     * 重命名/修改: 绘制 Page 2 的内容。
-     */
+    // 绘制 Page 2 的内容
     private static void drawPage2Content(Canvas canvas, ReportData data) {
         Paint paint = new Paint();
         paint.setAntiAlias(true);
@@ -547,110 +661,7 @@ public class PdfReportGenerator {
         }
     }
 
-
-    private static File createPDF(Context context, ReportData data,
-                                  ArrayList<EntryLog> entries) {
-        // 创建一个文档集合来存储所有页面，方便后续遍历和修正页脚
-        List<PdfDocument.Page> pages = new ArrayList<>();
-        PdfDocument document = new PdfDocument();
-        int pageNum = 1;
-        float nextY;
-
-        try {
-            // --- Page 1: 摘要信息 + Triage 事件 (可能溢出) ---
-            PdfDocument.PageInfo pageInfo1 = new PdfDocument.PageInfo.Builder(
-                    PAGE_WIDTH, PAGE_HEIGHT, pageNum).create();
-            PdfDocument.Page page1 = document.startPage(pageInfo1);
-
-            int incidentStartY = drawPage1Summary(page1.getCanvas(), data);
-            nextY = drawTriageIncidents(incidentStartY, page1.getCanvas(), data);
-
-            document.finishPage(page1);
-            pages.add(page1);
-
-            // --- 动态创建 Page 1b, 1c... 用于溢出的 Triage 事件 ---
-            while (nextY == -1) {
-                pageNum++;
-                PdfDocument.PageInfo overflowInfo = new PdfDocument.PageInfo.Builder(
-                        PAGE_WIDTH, PAGE_HEIGHT, pageNum).create();
-                PdfDocument.Page overflowPage = document.startPage(overflowInfo);
-
-                // 从 MARGIN 开始继续绘制事件
-                nextY = drawTriageIncidents(MARGIN, overflowPage.getCanvas(), data);
-                document.finishPage(overflowPage);
-                pages.add(overflowPage);
-            }
-
-            // --- Page N+1 (原 Page 2): Symptom Frequency ---
-            pageNum++;
-            PdfDocument.PageInfo pageInfoSymptom = new PdfDocument.PageInfo.Builder(
-                    PAGE_WIDTH, PAGE_HEIGHT, pageNum).create();
-            PdfDocument.Page pageSymptom = document.startPage(pageInfoSymptom);
-            drawPage2Content(pageSymptom.getCanvas(), data);
-            document.finishPage(pageSymptom);
-            pages.add(pageSymptom);
-
-            // --- Page N+2 (原 Page 3): Rescue Usage Over Time ---
-            pageNum++;
-            PdfDocument.PageInfo pageInfoRescue = new PdfDocument.PageInfo.Builder(
-                    PAGE_WIDTH, PAGE_HEIGHT, pageNum).create();
-            PdfDocument.Page pageRescue = document.startPage(pageInfoRescue);
-            drawPage3(pageRescue.getCanvas(), data);
-            document.finishPage(pageRescue);
-            pages.add(pageRescue);
-
-            // 最终总页数
-            final int totalPages = pages.size();
-
-            // --- 第二次循环: 绘制修正后的页脚 ---
-            for (int i = 0; i < totalPages; i++) {
-                PdfDocument.Page page = pages.get(i);
-
-                // 重新开始页面，只为绘制页脚
-                PdfDocument.Page editedPage = document.startPage(page.getInfo());
-                // 绘制修正后的页脚
-                drawPageFooter(editedPage.getCanvas(), i + 1, totalPages);
-                document.finishPage(editedPage);
-            }
-
-            // --- 文件保存 ---
-            File dir = new File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS),
-                    "AsthmaReports");
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-
-            String fileName = "ProviderReport_" +
-                    data.startDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")) + "_to_" +
-                    data.endDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")) + ".pdf";
-            File file = new File(dir, fileName);
-
-            FileOutputStream fos = new FileOutputStream(file);
-            document.writeTo(fos);
-            document.close();
-            fos.close();
-
-            Log.d(TAG, "PDF created: " + file.getAbsolutePath());
-            return file;
-
-        } catch (Exception e) {
-            Log.e(TAG, "Error creating PDF", e);
-            document.close();
-            return null;
-        }
-    }
-
-
-    private static void drawPage1(Canvas canvas, ReportData data) {
-        // 废弃，逻辑已分离到 drawPage1Summary 和 drawTriageIncidents
-        // 保持此空方法以兼容旧代码，或直接删除。
-    }
-
-    private static void drawPage2(Canvas canvas, ReportData data) {
-        // 重定向到 drawPage2Content
-        drawPage2Content(canvas, data);
-    }
-
+    // 绘制 Page 3 的内容
     private static void drawPage3(Canvas canvas, ReportData data) {
         Paint paint = new Paint();
         paint.setAntiAlias(true);
@@ -666,6 +677,7 @@ public class PdfReportGenerator {
                 PAGE_WIDTH - 2 * MARGIN, 300);
     }
 
+    // 绘制 Adherence Bar Chart
     private static void drawAdherenceBar(Canvas canvas, int x, int y,
                                          int width, int height, double percentage) {
         Paint paint = new Paint();
@@ -693,6 +705,7 @@ public class PdfReportGenerator {
                 x + width + 15, y + height - 8, paint);
     }
 
+    // 绘制 Zone Distribution Chart
     private static void drawZoneDistribution(Canvas canvas, Map<String, Integer> data,
                                              int x, int y, int width, int height, long totalDays) {
         Paint paint = new Paint();
@@ -731,6 +744,7 @@ public class PdfReportGenerator {
         paint.setTextAlign(Paint.Align.LEFT);
     }
 
+    // 绘制 Symptom Bar Chart
     private static void drawBarChart(Canvas canvas, Map<String, Integer> data,
                                      int x, int y, int width, int height) {
         if (data.isEmpty()) return;
@@ -782,6 +796,7 @@ public class PdfReportGenerator {
         paint.setTextAlign(Paint.Align.LEFT);
     }
 
+    // 绘制 Time Series Chart
     private static void drawTimeSeriesChart(Canvas canvas, Map<LocalDate, Integer> data,
                                             int x, int y, int width, int height) {
         Paint paint = new Paint();
@@ -867,28 +882,7 @@ public class PdfReportGenerator {
         }
     }
 
-    private static class ReportData {
-        LocalDate startDate;
-        LocalDate endDate;
-        String childUid;
-        long totalDays;
-
-        int rescueCount = 0;
-        double rescuePerWeek = 0;
-        Map<LocalDate, Integer> dailyRescueData = new LinkedHashMap<>();
-
-        int controllerDaysTaken = 0;
-        double controllerAdherence = 0;
-
-        Map<String, Integer> symptomCounts = new HashMap<>();
-
-        Map<LocalDate, String> dailyZoneData = new LinkedHashMap<>();
-
-        Map<String, Integer> zoneDistribution = new LinkedHashMap<>();
-
-        List<TriageIncident> triageIncidents = new ArrayList<>();
-
-        // 新增：用于跟踪已绘制事件数量的计数器
-        int triageIncidentsDrawn = 0;
-    }
+    // --- 兼容旧代码的重定向方法 ---
+    private static void drawPage1(Canvas canvas, ReportData data) { /* 逻辑已分离 */ }
+    private static void drawPage2(Canvas canvas, ReportData data) { drawPage2Content(canvas, data); }
 }
