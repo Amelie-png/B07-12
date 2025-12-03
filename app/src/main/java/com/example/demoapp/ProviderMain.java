@@ -95,7 +95,7 @@ public class ProviderMain extends AppCompatActivity implements AddPatientPopup.O
     // ------------------------------------------------------------
     private void onProviderProfileClicked() {
         Intent intent = new Intent(ProviderMain.this, ProviderProfileActivity.class);
-        intent.putExtra("providerUid", providerUid);
+        intent.putExtra("uid", providerUid);
         startActivity(intent);
     }
 
@@ -115,14 +115,16 @@ public class ProviderMain extends AppCompatActivity implements AddPatientPopup.O
                     List<DocumentSnapshot> childrenDocs = childrenSnapshot.getDocuments();
                     for (DocumentSnapshot doc : childrenDocs) {
 
-                        String childName = doc.getString("username");
+                        String childFirstName = doc.getString("firstName");
+                        String childLastName = doc.getString("lastName");
+                        String childUsername = doc.getString("username");
                         String childId = doc.getString("uid");
                         String parentId = doc.getString("parentId");
 
                         childrenList.add(new CardItem(
-                                childName,
-                                R.drawable.profile_default_img,
-                                R.color.white,
+                                childFirstName,
+                                childLastName,
+                                childUsername,
                                 childId,
                                 parentId,
                                 new ArrayList<>()
