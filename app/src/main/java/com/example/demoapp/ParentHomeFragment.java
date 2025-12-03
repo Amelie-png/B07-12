@@ -1,5 +1,6 @@
 package com.example.demoapp;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.demoapp.charts.TrendChartView;
+import com.example.demoapp.med.ControllerMed;
 import com.example.demoapp.med.MedicineEntry;
 import com.example.demoapp.med.MedicineRepository;
 import com.example.demoapp.med.MedicineUtils;
@@ -22,7 +24,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.HashSet;
@@ -37,11 +42,10 @@ public class ParentHomeFragment extends Fragment {
     private FirebaseFirestore db;
     MedicineRepository repo;
 
-    private TextView emergencyText, lastRescueTime, weeklyRescueCount;
+    private TextView emergencyText, lastRescueTime, weeklyRescueCount, controllerAdherence;
     private Button btnViewTriageHistory;
-    private TrendChartView trendChart;
-    private Button btnToggleDays;
-    private Button btnGeneratePdf;
+    private TrendChartView rescueTrendChart;
+    private Button btnToggleRDays;
 
     private ListenerRegistration alertListener;
     private List<MedicineEntry> allEntries = new ArrayList<>();
@@ -123,6 +127,7 @@ public class ParentHomeFragment extends Fragment {
         loadMedicineLogsAndShowTrend();
         getLastRescueTime();
         getWeeklyRescueCount();
+        getControllerAdherence();
     }
 
 
@@ -132,12 +137,11 @@ public class ParentHomeFragment extends Fragment {
     private void bindUI(View view) {
         emergencyText = view.findViewById(R.id.emergencyText);
         btnViewTriageHistory = view.findViewById(R.id.btnViewTriageHistory);
-        trendChart = view.findViewById(R.id.trendChart);
-        btnToggleDays = view.findViewById(R.id.btnToggleDays);
-        btnGeneratePdf = view.findViewById(R.id.btn_generate_pdf);
+        rescueTrendChart = view.findViewById(R.id.rescue_trend_chart);
+        btnToggleRDays = view.findViewById(R.id.btn_toggle_r_days);
 
         // 初始化按钮文字
-        btnToggleDays.setText("7 Days → Switch to 30 Days");
+        btnToggleRDays.setText("7 Days → Switch to 30 Days");
 
         btnViewTriageHistory.setOnClickListener(v -> {
             Intent i = new Intent(requireContext(), TriageHistoryActivity.class);
@@ -145,26 +149,21 @@ public class ParentHomeFragment extends Fragment {
             startActivity(i);
         });
 
-        btnGeneratePdf.setOnClickListener(v -> {
-            Intent i = new Intent(requireContext(), ParentChoosePDFDateRange.class);
-            i.putExtra("uid", childId);
-            startActivity(i);
-        });
-
-        btnToggleDays.setOnClickListener(v -> {
+        btnToggleRDays.setOnClickListener(v -> {
             if (trendDays == 7) {
                 trendDays = 30;
-                btnToggleDays.setText("30 Days → Switch to 7 Days");
+                btnToggleRDays.setText("30 Days → Switch to 7 Days");
             } else {
                 trendDays = 7;
-                btnToggleDays.setText("7 Days → Switch to 30 Days");
+                btnToggleRDays.setText("7 Days → Switch to 30 Days");
             }
-            updateTrendChart();
+            updateRTrendChart();
         });
 
         //Rescue data
         lastRescueTime = view.findViewById(R.id.tv_last_rescue_time);
         weeklyRescueCount = view.findViewById(R.id.tv_weekly_rescue_count);
+        controllerAdherence = view.findViewById(R.id.tv_controller_adherence);
     }
 
 
@@ -276,7 +275,7 @@ public class ParentHomeFragment extends Fragment {
             public void onSuccess(List<MedicineEntry> result) {
                 allEntries.clear();
                 allEntries.addAll(result);
-                updateTrendChart();
+                updateRTrendChart();
             }
 
             @Override
@@ -286,7 +285,7 @@ public class ParentHomeFragment extends Fragment {
         });
     }
 
-    private void updateTrendChart() {
+    private void updateRTrendChart() {
         // 生成 trend 数据
         List<Float> dailyCounts = new ArrayList<>();
         for (int i = 0; i < trendDays; i++) dailyCounts.add(0f);
@@ -304,7 +303,7 @@ public class ParentHomeFragment extends Fragment {
         }
 
         // 调用 TrendChartView 显示
-        trendChart.setTrendData(dailyCounts, "Rescue Medicine", trendDays);
+        rescueTrendChart.setTrendData(dailyCounts, "Rescue Medicine", trendDays);
     }
 
     private void getLastRescueTime() {
@@ -344,4 +343,39 @@ public class ParentHomeFragment extends Fragment {
             }
         });
     }
+
+    private void getControllerAdherence() {
+        long now = System.currentTimeMillis();
+        repo.fetchLogs(childId, null, 0, Long.MAX_VALUE, new MedicineRepository.OnResult<List<MedicineEntry>>() {
+            @Override
+            public void onSuccess(List<MedicineEntry> result) {
+                repo.loadControllerMed(childId, new MedicineRepository.OnResult<ControllerMed>() {
+                    @Override
+                    public void onSuccess(ControllerMed med) {
+                        if (med == null || med.getStartDate() == null) {
+                            controllerAdherence.setText("--");
+                            return;
+                        }
+                        long epoch = LocalDate.parse(med.getStartDate())
+                                .atStartOfDay(ZoneId.systemDefault())
+                                .toInstant()
+                                .toEpochMilli();
+                        double adherence = MedicineUtils.calculateControllerAdherence(result, med, epoch, now);
+                        int percent = (int) Math.round(adherence * 100);
+                        controllerAdherence.setText(percent + "%");
+                    }
+                    @Override
+                    public void onFailure(Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
+            @Override
+            public void onFailure(Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+    }
+
 }

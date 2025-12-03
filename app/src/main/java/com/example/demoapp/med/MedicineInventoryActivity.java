@@ -4,8 +4,10 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -15,6 +17,8 @@ import com.example.demoapp.R;
 
 import org.w3c.dom.Text;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +30,9 @@ public class MedicineInventoryActivity extends AppCompatActivity {
     private Button btnBack;
     private ImageButton btnEditController;
     private ImageButton btnEditRescue;
+    private LinearLayout expiredC, lowC, replaceC;
+    private LinearLayout expiredR, lowR, replaceR;
+    private TextView flagAuthorC, flagAuthorR;
     //ID
     private String childId;
 
@@ -42,6 +49,15 @@ public class MedicineInventoryActivity extends AppCompatActivity {
         btnEditController = findViewById(R.id.btn_c_edit);
         btnEditRescue = findViewById(R.id.btn_r_edit);
 
+        expiredC = findViewById(R.id.alert_c_expired);
+        lowC = findViewById(R.id.alert_c_low);
+        replaceC = findViewById(R.id.alert_c_replace);;
+        expiredR = findViewById(R.id.alert_r_expired);
+        lowR = findViewById(R.id.alert_r_low);
+        replaceR = findViewById(R.id.alert_r_replace);
+        flagAuthorC = findViewById(R.id.tv_c_flag_author);
+        flagAuthorR = findViewById(R.id.tv_r_flag_author);
+
         //Set up repo
         repo = new MedicineRepository();
 
@@ -56,6 +72,8 @@ public class MedicineInventoryActivity extends AppCompatActivity {
         super.onResume();
         loadController();
         loadRescue();
+        setCAlerts();
+        setRAlerts();
     }
 
     private void loadController() {
@@ -154,5 +172,94 @@ public class MedicineInventoryActivity extends AppCompatActivity {
             editRescue.putExtra("author", "parent"); //parent is flagging
             startActivity(editRescue);
         });
+    }
+
+    private void setCAlerts() {
+        long now = System.currentTimeMillis();
+        lowC.setVisibility(View.GONE);
+        replaceC.setVisibility(View.GONE);
+        expiredC.setVisibility(View.GONE);
+        flagAuthorC.setText("");
+        repo.loadControllerMed(childId, new MedicineRepository.OnResult<ControllerMed>() {
+            @Override
+            public void onSuccess(ControllerMed med) {
+                if (med != null) {
+                    if (med.isLowStockFlag()) {
+                        lowC.setVisibility(View.VISIBLE);
+                        replaceC.setVisibility(View.VISIBLE);
+                        flagAuthorC.setText(med.getFlagAuthor());
+                    }
+                    if ((double) med.getCurrentAmount() / med.getTotalAmount() <= 0.2) {
+                        lowC.setVisibility(View.VISIBLE);
+                        replaceC.setVisibility(View.VISIBLE);
+                        flagAuthorC.setText("system");
+                    }
+                    if (med.getExpiryDate() != null && !med.getExpiryDate().isEmpty()) {
+                        if (stringDateToEpoch(med.getExpiryDate()) < now) {
+                            expiredC.setVisibility(View.VISIBLE);
+                        }
+                    }
+                } else {
+                    lowC.setVisibility(View.GONE);
+                    replaceC.setVisibility(View.GONE);
+                    expiredC.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                lowC.setVisibility(View.GONE);
+                replaceC.setVisibility(View.GONE);
+                expiredC.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    private void setRAlerts() {
+        long now = System.currentTimeMillis();
+        lowR.setVisibility(View.GONE);
+        replaceR.setVisibility(View.GONE);
+        expiredR.setVisibility(View.GONE);
+        flagAuthorR.setText("");
+        repo.loadRescueMed(childId, new MedicineRepository.OnResult<RescueMed>() {
+            @Override
+            public void onSuccess(RescueMed med) {
+                if (med != null) {
+                    if (med.isLowStockFlag()) {
+                        lowR.setVisibility(View.VISIBLE);
+                        replaceR.setVisibility(View.VISIBLE);
+                        flagAuthorR.setText(med.getFlagAuthor());
+                    }
+                    if ((double) med.getCurrentAmount() / med.getTotalAmount() <= 0.2) {
+                        lowR.setVisibility(View.VISIBLE);
+                        replaceR.setVisibility(View.VISIBLE);
+                        flagAuthorR.setText("system");
+                    }
+                    if (med.getExpiryDate() != null && !med.getExpiryDate().isEmpty()) {
+                        if (stringDateToEpoch(med.getExpiryDate()) < now) {
+                            expiredR.setVisibility(View.VISIBLE);
+                        }
+                    }
+                } else {
+                    lowR.setVisibility(View.GONE);
+                    replaceR.setVisibility(View.GONE);
+                    expiredR.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                lowR.setVisibility(View.GONE);
+                replaceR.setVisibility(View.GONE);
+                expiredR.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    public static long stringDateToEpoch(String dateStr) {
+        return LocalDate.parse(dateStr)
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli();
     }
 }

@@ -6,16 +6,25 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.demoapp.med.MedicineEntry;
+import com.example.demoapp.med.MedicineLogWizardActivity;
+import com.example.demoapp.med.MedicineRepository;
+import com.example.demoapp.med.MedicineUtils;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class ChildHomeFragment extends Fragment {
@@ -23,6 +32,9 @@ public class ChildHomeFragment extends Fragment {
     private String childId;
     private String parentId;
     private String role;
+
+    TextView controllerStreak;
+    TextView techniqueStreak;
 
     private FirebaseFirestore db;
 
@@ -87,9 +99,45 @@ public class ChildHomeFragment extends Fragment {
                         loadZoneFragment();
                     }
                 });
+
+        // Add medicine log from home
+        Button btnLogDose = view.findViewById(R.id.btnLogDose);
+
+        btnLogDose.setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), MedicineLogWizardActivity.class);
+            intent.putExtra("childId", childId); //same key as for activity
+            intent.putExtra("author", role); //don't change!
+            startActivity(intent);
+        });
+
+        //Bind streak views
+        controllerStreak = view.findViewById(R.id.textChipMed);
+        techniqueStreak = view.findViewById(R.id.textChipTech);
+
+        setStreaks();
     }
 
-
+    private void setStreaks() {
+        MedicineRepository repo = new MedicineRepository();
+        repo.loadBadges(childId, new MedicineRepository.OnResult<Badge>() {
+            @Override
+            public void onSuccess(Badge badge) {
+                if (badge != null) {
+                    controllerStreak.setText(String.valueOf((int) badge.getControllerStreak()));
+                    techniqueStreak.setText(String.valueOf((int) badge.getTechniqueStreak()));
+                }
+                else {
+                    controllerStreak.setText("0");
+                    techniqueStreak.setText("0");
+                }
+            }
+            @Override
+            public void onFailure(Exception e) {
+                controllerStreak.setText("0");
+                techniqueStreak.setText("0");
+            }
+        });
+    }
 
     private void handleCheckNow() {
 
