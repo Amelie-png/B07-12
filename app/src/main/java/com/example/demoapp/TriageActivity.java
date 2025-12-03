@@ -26,6 +26,9 @@ public class TriageActivity extends AppCompatActivity {
     private EditText inputRescue, inputPEF;
 
     private Button btnCheckTriage, btnBack;
+    private static final long RECHECK_DELAY = 10 * 60 * 1000; // 10 minutes
+    private android.os.Handler recheckHandler = new android.os.Handler();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,8 +146,10 @@ public class TriageActivity extends AppCompatActivity {
                 break;
 
             case "YELLOW":
+                scheduleYellowRecheck();   // <-- ADD THIS
                 i = new Intent(this, HomeStepsCardActivity.class);
                 break;
+
 
             default:
                 i = new Intent(this, GreenAdviceCardActivity.class);
@@ -156,4 +161,44 @@ public class TriageActivity extends AppCompatActivity {
         startActivity(i);
         finish(); // close triage screen
     }
+    private void scheduleYellowRecheck() {
+
+        // Cancel any previous timers for safety
+        recheckHandler.removeCallbacksAndMessages(null);
+
+        recheckHandler.postDelayed(() -> {
+
+            // Re-check child state from Firestore BEFORE restarting triage
+            db.collection("children")
+                    .document(childId)
+                    .get()
+                    .addOnSuccessListener(snapshot -> {
+
+                        if (!snapshot.exists()) return;
+
+                        String state = snapshot.getString("lastTriageState");
+
+                        if (state == null) return;
+
+                        // Only re-open triage if still yellow
+                        if (state.equals("YELLOW")) {
+
+                            Intent i = new Intent(this, TriageActivity.class);
+                            i.putExtra("uid", childId);
+                            i.putExtra("parentId", parentId);
+                            i.putExtra("role", role);
+                            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+                            startActivity(i);
+
+                        } else {
+                            // If RED or GREEN, stop rechecking
+                            recheckHandler.removeCallbacksAndMessages(null);
+                        }
+
+                    });
+
+        }, RECHECK_DELAY);
+    }
+
 }
